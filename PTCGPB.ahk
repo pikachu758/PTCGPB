@@ -2179,7 +2179,7 @@ NextStep:
             IniRead, useBackgroundImage, Settings.ini, UserSettings, useBackgroundImage, 1
             
             ; Validate numeric values
-            if (!IsNumeric(Instances) || Instances < 1)
+            if (!IsNumeric(Instances))
                 Instances := 1
             if (!IsNumeric(Columns) || Columns < 1)
                 Columns := 5
