@@ -2145,9 +2145,9 @@ NextStep:
             IniRead, s4tSendAccountXml, Settings.ini, UserSettings, s4tSendAccountXml, 1
             
             ;discord settings
-            IniRead, DiscordWebhookURL, %A_ScriptDir%\..\..\Settings.ini, UserSettings, DiscordWebhookURL, ""
-            IniRead, DiscordUserId, %A_ScriptDir%\..\..\Settings.ini, UserSettings, DiscordUserId, ""
-            IniRead, SendAccountXml, %A_ScriptDir%\..\..\Settings.ini, UserSettings, SendAccountXml, 1
+            IniRead, DiscordWebhookURL, Settings.ini, UserSettings, DiscordWebhookURL, ""
+            IniRead, DiscordUserId, Settings.ini, UserSettings, DiscordUserId, ""
+            IniRead, SendAccountXml, Settings.ini, UserSettings, SendAccountXml, 1
             IniRead, heartBeat, Settings.ini, UserSettings, heartBeat, 0
             IniRead, heartBeatWebhookURL, Settings.ini, UserSettings, heartBeatWebhookURL, ""
             IniRead, heartBeatName, Settings.ini, UserSettings, heartBeatName, ""
