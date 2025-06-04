@@ -993,9 +993,18 @@ RemoveFriends() {
 }
 
 TradeTutorial() {
+    
+    failSafe := A_TickCount
+    failSafeTime := 0
+
     if(FindOrLoseImage(100, 120, 175, 145, , "Trade", 0)) {
-        FindImageAndClick(15, 455, 40, 475, , "Add2", 188, 449,,2)
-        Sleep, 1000
+        Loop{
+            adbClick_wbb(167,437)
+            Delay(1)
+            if(FindOrLoseImage(15, 455, 40, 475, ,"Add2", 0, failSafeTime))          
+            break
+        }
+
         FindImageAndClick(226, 100, 270, 135, , "Add", 38, 460, 500,,2)
     }
     Delay(1)
