@@ -352,7 +352,7 @@
         Lang["Txt_CheckShiningPackOnly"] := "色違いのみ"
         Lang["Txt_CrownCheck"] := "クラウン保存"
         Lang["Txt_ShinyCheck"] := "色違い保存"
-        Lang["Txt_ImmersiveCheck"] := "演出型保存"
+        Lang["Txt_ImmersiveCheck"] := "イマーシブ保存"
         Lang["Txt_InvalidCheck"] := "無効パック無視"
 
         Lang["Txt_s4tEnabled"] := "交換保存を有効化"
@@ -366,7 +366,7 @@
 
         Lang["HeartbeatSettingsSubHeading"] := "ハートビート設定"
         Lang["Txt_heartBeat"] := "Discord ハートビート"
-        Lang["hbName"] := "名稱："
+        Lang["hbName"] := "名称："
         Lang["hbDelay"] := "ハートビート間隔（分）："
 
         Lang["Txt_showcaseEnabled"] := "showcase_ids.txt を使用"
@@ -634,7 +634,7 @@ CreateSetUpByLanguage(Language) {
         SetUpLang["Confirm_Double2Star"] := "• 2枚2★"
         SetUpLang["Confirm_SaveCrowns"] := "• クラウンを保存"
         SetUpLang["Confirm_SaveShiny"] := "• 色違い保存"
-        SetUpLang["Confirm_SaveImmersives"] := "• 演出型保存"
+        SetUpLang["Confirm_SaveImmersives"] := "• イマーシブ保存"
         SetUpLang["Confirm_OnlyShinyPacks"] := "• 色違いのみ"
         SetUpLang["Confirm_IgnoreInvalid"] := "• 無効パック無視"
         SetUpLang["Confirm_RowGap"] := "行間隔："

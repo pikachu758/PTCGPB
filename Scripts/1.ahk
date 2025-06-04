@@ -993,9 +993,18 @@ RemoveFriends() {
 }
 
 TradeTutorial() {
+    
+    failSafe := A_TickCount
+    failSafeTime := 0
+
     if(FindOrLoseImage(100, 120, 175, 145, , "Trade", 0)) {
-        FindImageAndClick(15, 455, 40, 475, , "Add2", 188, 449,,2)
-        Sleep, 1000
+        Loop{
+            adbClick_wbb(167,437)
+            Delay(1)
+            if(FindOrLoseImage(15, 455, 40, 475, ,"Add2", 0, failSafeTime))          
+            break
+        }
+
         FindImageAndClick(226, 100, 270, 135, , "Add", 38, 460, 500,,2)
     }
     Delay(1)
@@ -3461,7 +3470,7 @@ DoTutorial() {
             adbClick_wbb(41, 296)
         }
     FindImageAndClick(190, 241, 225, 270, , "Name", 189, 438) ;wait for name input screen
-    ;choose any
+    /* ; Picks Erika at creation - disabled
     Delay(1)
     if(FindOrLoseImage(147, 160, 157, 169, , "Erika", 1)) {
         adbClick_wbb(143, 207)
@@ -3470,6 +3479,7 @@ DoTutorial() {
         FindImageAndClick(165, 294, 173, 301, , "ChooseErika", 143, 306)
         FindImageAndClick(190, 241, 225, 270, , "Name", 143, 462) ;wait for name input screen
     }
+    */
     FindImageAndClick(0, 476, 40, 502, , "OK", 139, 257) ;wait for name input screen
 
     failSafe := A_TickCount
