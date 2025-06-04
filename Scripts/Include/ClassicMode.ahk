@@ -1,5 +1,9 @@
-﻿﻿#Include %A_ScriptDir%\Dictionary.ahk
+﻿#Include %A_ScriptDir%\Dictionary.ahk
 #SingleInstance Force
+
+; GUI dimensions constants
+global GUI_WIDTH := 1250 ; Adjusted from 510 to 480
+global GUI_HEIGHT := 600 ; Adjusted from 850 to 750
 
 if not A_IsAdmin
 {
@@ -327,6 +331,8 @@ SaveAllSettings() {
     FileAppend, % A_Now . " - Settings saved. DeleteMethod: " . deleteMethod . "`n", %A_ScriptDir%\..\..\debug_settings.log
   }
 }
+global saveSignalFile
+saveSignalFile := A_ScriptDir "\save.signal"
 global currentDictionary
 LoadSettingsFromIni()
 IniRead, IsLanguageSet, %A_ScriptDir%\..\..\Settings.ini, UserSettings, IsLanguageSet, 0
@@ -631,19 +637,7 @@ Gui, Add, Text, x770 y465 %sectionColor%, vip_ids.txt (GP Test Mode) API:
 Gui, Add, Edit, vvipIdsURL w460 x770 y485 h20 -E0x200 Background2A2A2A cWhite, %vipIdsURL%
 Gui, Add, Checkbox, % (showcaseEnabled ? "Checked" : "") " vshowcaseEnabled x770 y510 " . sectionColor, % currentDictionary.Txt_showcaseEnabled
 
-; Force Window Sizing
-SysGet, MonitorWorkArea, MonitorWorkArea, %SelectedMonitorIndex%
-AvailableWidth := MonitorWorkAreaRight - MonitorWorkAreaLeft
-AvailableHeight := MonitorWorkAreaBottom - MonitorWorkAreaTop
-
-WindowWidth := 1250
-WindowHeight := 600 
-
-; Center the window
-WinX := (AvailableWidth - WindowWidth) / 2 + MonitorWorkAreaLeft
-WinY := (AvailableHeight - WindowHeight) / 2 + MonitorWorkAreaTop
-
-Gui, Show, x%WinX% y%WinY% w%WindowWidth% h%WindowHeight%, Fast Setting Panel
+Gui, Show, w%GUI_WIDTH% h%GUI_HEIGHT%, Classic Mode
 Return
 
 mainSettings:
@@ -792,6 +786,7 @@ Save:
   Gui, Submit
   SaveAllSettings()
   Gui, Destroy
+  FileAppend,, %saveSignalFile%
   Run, %A_ScriptDir%\..\..\PTCGPB.ahk
 ExitApp
 Return
@@ -802,6 +797,7 @@ GuiClose:
     
     ; Kill all related scripts
     KillAllScripts()
+    FileAppend,, %saveSignalFile%
     Run, %A_ScriptDir%\..\..\PTCGPB.ahk
 ExitApp
 Return
