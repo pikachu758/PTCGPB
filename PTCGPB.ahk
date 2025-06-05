@@ -605,7 +605,7 @@ NextStep:
         controlList .= "Txt_Buzzwole,Txt_Solgaleo,Txt_Lunala,Txt_Shining,Txt_Arceus,Txt_Palkia,Txt_Dialga,Txt_Pikachu,Txt_Charizard,Txt_Mewtwo,Txt_Mew,"
         controlList .= "AllPackSelection,Txt_PackHeading,Txt_PageBuzzwole,Txt_PageSolgaleo,Txt_PageLunala,Txt_PageShining,"
         controlList .= "Txt_FullArtCheck,Txt_TrainerCheck,Txt_RainbowCheck,Txt_PseudoGodPack,"
-        controlList .= "Txt_CrownCheck,Txt_ShinyCheck,Txt_ImmersiveCheck,Txt_CheckShiningPackOnly,Txt_InvalidCheck,"
+        controlList .= "Txt_CrownCheck,Txt_ShinyCheck,Txt_ImmersiveCheck,Txt_CheckShinyPackOnly,Txt_InvalidCheck,"
         controlList .= "Txt_s4tEnabled,Txt_s4tSilent,Txt_s4t3Dmnd,Txt_s4t4Dmnd,Txt_s4t1Star,Txt_s4tWP,"
         controlList .= "s4tWPMinCardsLabel,s4tGholdengoArrow,"
         controlList .= "Txt_DiscordID,Txt_DiscordWebhook,Txt_sendAccountXml,"
@@ -1173,8 +1173,8 @@ NextStep:
         packControls .= "AllPackSelection,Txt_PackHeading,Page_Buzzwole,Page_Solgaleo,Page_Lunala,Page_Shining,"
         packControls .= "Txt_PageBuzzwole,Txt_PageSolgaleo,Txt_PageLunala,Txt_PageShining,Btn_returnPack,Txt_Btn_returnPack,"
         packControls .= "FullArtCheck,TrainerCheck,RainbowCheck,PseudoGodPack,InvalidCheck,"
-        packControls .= "Txt_FullArtCheck,Txt_TrainerCheck,Txt_RainbowCheck,Txt_PseudoGodPack,Txt_CrownCheck,Txt_ShinyCheck,Txt_ImmersiveCheck,Txt_CheckShiningPackOnly,Txt_InvalidCheck,"
-        packControls .= "CheckShiningPackOnly,CrownCheck,ImmersiveCheck,Pack_Divider3,"
+        packControls .= "Txt_FullArtCheck,Txt_TrainerCheck,Txt_RainbowCheck,Txt_PseudoGodPack,Txt_CrownCheck,Txt_ShinyCheck,Txt_ImmersiveCheck,Txt_CheckShinyPackOnly,Txt_InvalidCheck,"
+        packControls .= "CheckShinyPackOnly,CrownCheck,ImmersiveCheck,Pack_Divider3,"
         packControls .= "spendHourGlass,Txt_spendHourGlass"
         s4tControls := "s4tEnabled,s4tSilent,s4t3Dmnd,s4t4Dmnd,s4t1Star,"
         s4tControls .= "Txt_s4tEnabled,Txt_s4tSilent,Txt_s4t3Dmnd,Txt_s4t4Dmnd,Txt_s4t1Star,Txt_s4tWP,Txt_s4tSendAccountXml,"
@@ -1573,8 +1573,8 @@ NextStep:
         cardDetectionControls := "FullArtCheck,TrainerCheck,RainbowCheck,"
         cardDetectionControls .= "PseudoGodPack,CrownCheck,ShinyCheck,ImmersiveCheck,"
         cardDetectionControls .= "Txt_FullArtCheck,Txt_TrainerCheck,Txt_RainbowCheck,Txt_PseudoGodPack,"
-        cardDetectionControls .= "Txt_CrownCheck,Txt_ShinyCheck,Txt_ImmersiveCheck,Txt_CheckShiningPackOnly,Txt_InvalidCheck,"
-        cardDetectionControls .= "InvalidCheck,CheckShiningPackOnly,Pack_Divider3"
+        cardDetectionControls .= "Txt_CrownCheck,Txt_ShinyCheck,Txt_ImmersiveCheck,Txt_CheckShinyPackOnly,Txt_InvalidCheck,"
+        cardDetectionControls .= "InvalidCheck,CheckShinyPackOnly,Pack_Divider3"
         
         ; Show controls by subsection
         ShowControls(godPackControls)
@@ -1633,7 +1633,7 @@ NextStep:
         
         ; Card Detection text controls
         cardDetectionTextControls := "Txt_FullArtCheck,Txt_TrainerCheck,Txt_RainbowCheck,Txt_PseudoGodPack,"
-        cardDetectionTextControls .= "Txt_CrownCheck,Txt_ShinyCheck,Txt_ImmersiveCheck,Txt_CheckShiningPackOnly,Txt_InvalidCheck,"
+        cardDetectionTextControls .= "Txt_CrownCheck,Txt_ShinyCheck,Txt_ImmersiveCheck,Txt_CheckShinyPackOnly,Txt_InvalidCheck,"
         
         ; Input controls
         inputControls := "minStars,minStarsShiny"
@@ -2602,7 +2602,7 @@ NextStep:
     global Txt_autoLaunchMonitor, Txt_applyRoleFilters, Txt_debugMode, Txt_tesseractOption, Txt_statusMessage
     global Txt_packMethod, Txt_nukeAccount, Txt_spendHourGlass, Txt_claimSpecialMissions
     global Txt_Buzzwole, Txt_Solgaleo, Txt_Lunala, Txt_Shining, Txt_Arceus, Txt_Palkia, Txt_Dialga, Txt_Pikachu, Txt_Charizard, Txt_Mewtwo, Txt_Mew
-    global Txt_FullArtCheck, Txt_TrainerCheck, Txt_RainbowCheck, Txt_PseudoGodPack, Txt_CrownCheck, Txt_ShinyCheck, Txt_ImmersiveCheck, Txt_CheckShiningPackOnly, Txt_InvalidCheck
+    global Txt_FullArtCheck, Txt_TrainerCheck, Txt_RainbowCheck, Txt_PseudoGodPack, Txt_CrownCheck, Txt_ShinyCheck, Txt_ImmersiveCheck, Txt_CheckShinyPackOnly, Txt_InvalidCheck
     global Txt_s4tEnabled, Txt_s4tSilent
     global Txt_s4t3Dmnd, Txt_s4t4Dmnd, Txt_s4t1Star, s4tGholdengoArrow, Txt_s4tWP, Txt_s4tSendAccountXml
     global Txt_sendAccountXml, Txt_heartBeat
@@ -2863,7 +2863,7 @@ NextStep:
     AddCheckBox(45, 411, 28, 13, "TrainerCheck", "", checkedPath, uncheckedPath, TrainerCheck, "Txt_TrainerCheck", currentDictionary.Txt_TrainerCheck, 80, 410)
     AddCheckBox(45, 436, 28, 13, "RainbowCheck", "", checkedPath, uncheckedPath, RainbowCheck, "Txt_RainbowCheck", currentDictionary.Txt_RainbowCheck, 80, 435)
     AddCheckBox(45, 461, 28, 13, "PseudoGodPack", "", checkedPath, uncheckedPath, PseudoGodPack, "Txt_PseudoGodPack", currentDictionary.Txt_PseudoGodPack, 80, 460)
-    AddCheckBox(45, 486, 28, 13, "CheckShiningPackOnly", "", checkedPath, uncheckedPath, CheckShiningPackOnly, "Txt_CheckShiningPackOnly", currentDictionary.Txt_CheckShiningPackOnly, 80, 485)
+    AddCheckBox(45, 486, 28, 13, "CheckShinyPackOnly", "", checkedPath, uncheckedPath, CheckShinyPackOnly, "Txt_CheckShinyPackOnly", currentDictionary.Txt_CheckShinyPackOnly, 80, 485)
     
     AddCheckBox((190+xs_SaveCrown), 386, 28, 13, "CrownCheck", "", checkedPath, uncheckedPath, CrownCheck, "Txt_CrownCheck", currentDictionary.Txt_CrownCheck, (225+xs_SaveCrown), 385)
     AddCheckBox((190+xs_SaveShing), 411, 28, 13, "ShinyCheck", "", checkedPath, uncheckedPath, ShinyCheck, "Txt_ShinyCheck", currentDictionary.Txt_ShinyCheck, (225+xs_SaveShing), 410)

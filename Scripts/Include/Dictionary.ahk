@@ -103,7 +103,7 @@
         Lang["Txt_TrainerCheck"] := "Single Trainer"
         Lang["Txt_RainbowCheck"] := "Single Rainbow"
         Lang["Txt_PseudoGodPack"] := "Double 2 ★"
-        Lang["Txt_CheckShiningPackOnly"] := "Only Shining Boost"
+        Lang["Txt_CheckShinyPackOnly"] := "Only Shining Boost"
         Lang["Txt_CrownCheck"] := "Save Crowns"
         Lang["Txt_ShinyCheck"] := "Save Shiny"
         Lang["Txt_ImmersiveCheck"] := "Save Immersives"
