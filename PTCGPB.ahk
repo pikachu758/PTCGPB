@@ -14,19 +14,19 @@ global STATIC_BRUSH := 0
 
 githubUser := "mixman208"
 repoName := "PTCGPB"
-localVersion := "v6.4.14"
+localVersion := "v6.4.15"
 scriptFolder := A_ScriptDir
 zipPath := A_Temp . "\update.zip"
 extractPath := A_Temp . "\update"
-intro := "Classic GUI!"
+intro := "Classic Mode!"
 
-; GUI dimensions constants
-global GUI_WIDTH := 377 ; Adjusted from 510 to 480
-global GUI_HEIGHT := 677 ; Adjusted from 850 to 750
+; GUI dimensions
+global GUI_WIDTH := 377 
+global GUI_HEIGHT := 677
 
-; Image scaling and ratio constants for 720p compatibility
-global IMG_SCALE_RATIO := 0.5625 ; 720/1280 for aspect ratio preservation
-global UI_ELEMENT_SCALE := 0.85 ; Scale UI elements to fit smaller dimensions
+; Image scaling and ratio constants for 1280x720
+global IMG_SCALE_RATIO := 0.5625
+global UI_ELEMENT_SCALE := 0.85
 
 ; Added new global variable for background image toggle
 global useBackgroundImage := true

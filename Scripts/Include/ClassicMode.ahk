@@ -1,9 +1,9 @@
 ﻿#Include %A_ScriptDir%\Dictionary.ahk
 #SingleInstance Force
 
-; GUI dimensions constants
-global GUI_WIDTH := 1250 ; Adjusted from 510 to 480
-global GUI_HEIGHT := 600 ; Adjusted from 850 to 750
+; GUI dimensions
+global GUI_WIDTH := 1250
+global GUI_HEIGHT := 600
 
 if not A_IsAdmin
 {
