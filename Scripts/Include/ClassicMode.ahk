@@ -543,8 +543,8 @@ if(s4tEnabled) {
   Gui, Add, Checkbox, % (s4t1Star ? "Checked" : "") " vs4t1Star x775 y105 " . sectionColor, 1 ★
   Gui, Add, Text, x775 y130 w210 h2 vs4tLine_1 +0x10 ; Creates a horizontal line
   Gui, Add, Checkbox, % (s4tWP ? "Checked" : "") " vs4tWP gs4tWPSettings x775 y145 cWhite", % currentDictionary.Txt_s4tWP
-  Gui, Add, Text, "x775 y170 vTxt_s4tWPMinCards " . sectionColor . (s4tWP ? "" : " Hidden"), % currentDictionary.Txt_s4tWPMinCards
-  Gui, Add, Edit, "cFDFDFD w50 x870 y170 h20 vs4tWPMinCards -E0x200 Background2A2A2A Center cWhite" . (s4tWP ? "" : " Hidden"), %s4tWPMinCards%
+  Gui, Add, Text, % "x775 y170 vTxt_s4tWPMinCards " . sectionColor . (s4tWP ? "" : " Hidden"), % currentDictionary.Txt_s4tWPMinCards
+  Gui, Add, Edit, % "cFDFDFD w50 x870 y170 h20 vs4tWPMinCards -E0x200 Background2A2A2A Center cWhite" . (s4tWP ? "" : " Hidden"), %s4tWPMinCards%
   Gui, Add, Text, x775 y205 w210 h2 vs4tLine_2 +0x10 ; Creates a horizontal line
   Gui, Add, Text, x775 y230 vS4TDiscordSettingsSubHeading %sectionColor%, % currentDictionary.S4TDiscordSettingsSubHeading
   if(StrLen(s4tDiscordUserId) < 3)

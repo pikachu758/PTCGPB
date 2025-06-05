@@ -1505,7 +1505,7 @@ FindImageAndClick(X1, Y1, X2, Y2, searchVariation := "", imageName := "DEFAULT",
                 failSafe := A_TickCount
             }
         }
-Path = %imagePath%Error.png
+        Path = %imagePath%Error.png ; Search for communication error
         pNeedle := GetNeedle(Path)
         ; ImageSearch within the region
         vRet := Gdip_ImageSearch_wbb(pBitmap, pNeedle, vPosXY, 120, 187, 155, 210, searchVariation)
