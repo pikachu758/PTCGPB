@@ -101,12 +101,11 @@ LoadSettingsFromIni() {
     IniRead, s4tWPMinCards, %A_ScriptDir%\..\..\Settings.ini, UserSettings, s4tWPMinCards, 1
     IniRead, s4tDiscordWebhookURL, %A_ScriptDir%\..\..\Settings.ini, UserSettings, s4tDiscordWebhookURL, ""
     IniRead, s4tDiscordUserId, %A_ScriptDir%\..\..\Settings.ini, UserSettings, s4tDiscordUserId, ""
-    IniRead, s4tSendAccountXml, %A_ScriptDir%\..\..\Settings.ini, UserSettings, s4tSendAccountXml, 1
+    IniRead, s4tSendAccountXml, %A_ScriptDir%\..\..\Settings.ini, UserSettings, s4tSendAccountXml, 0
     
     ;discord settings
     IniRead, DiscordWebhookURL, %A_ScriptDir%\..\..\Settings.ini, UserSettings, DiscordWebhookURL, ""
     IniRead, DiscordUserId, %A_ScriptDir%\..\..\Settings.ini, UserSettings, DiscordUserId, ""
-    IniRead, SendAccountXml, %A_ScriptDir%\..\..\Settings.ini, UserSettings, SendAccountXml, 1
     IniRead, heartBeat, %A_ScriptDir%\..\..\Settings.ini, UserSettings, heartBeat, 0
     IniRead, heartBeatWebhookURL, %A_ScriptDir%\..\..\Settings.ini, UserSettings, heartBeatWebhookURL, ""
     IniRead, heartBeatName, %A_ScriptDir%\..\..\Settings.ini, UserSettings, heartBeatName, ""

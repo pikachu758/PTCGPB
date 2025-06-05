@@ -2142,12 +2142,11 @@ NextStep:
             IniRead, s4tWPMinCards, Settings.ini, UserSettings, s4tWPMinCards, 1
             IniRead, s4tDiscordWebhookURL, Settings.ini, UserSettings, s4tDiscordWebhookURL, ""
             IniRead, s4tDiscordUserId, Settings.ini, UserSettings, s4tDiscordUserId, ""
-            IniRead, s4tSendAccountXml, Settings.ini, UserSettings, s4tSendAccountXml, 1
+            IniRead, s4tSendAccountXml, Settings.ini, UserSettings, s4tSendAccountXml, 0
             
             ;discord settings
             IniRead, DiscordWebhookURL, Settings.ini, UserSettings, DiscordWebhookURL, ""
             IniRead, DiscordUserId, Settings.ini, UserSettings, DiscordUserId, ""
-            IniRead, SendAccountXml, Settings.ini, UserSettings, SendAccountXml, 1
             IniRead, heartBeat, Settings.ini, UserSettings, heartBeat, 0
             IniRead, heartBeatWebhookURL, Settings.ini, UserSettings, heartBeatWebhookURL, ""
             IniRead, heartBeatName, Settings.ini, UserSettings, heartBeatName, ""
@@ -4012,6 +4011,10 @@ StartBot:
     
     if (!cardDetectionFound)
         confirmMsg .= "`n" . SetUpDictionary.Confirm_None
+
+    if (sendAccountXml || s4tSendAccountXml) {
+        confirmMsg .= "`n`n⚠️ WARNING: Send Account XML is enabled. This setting is only recommended to be used solo. Do not use it in groups as your accounts will be shared to other members of your group.`n"
+    }
     
     confirmMsg .= "`n`n" . SetUpDictionary.Confirm_RowGap . rowGap . " pixels"
     confirmMsg .= "`n`n" . SetUpDictionary.Confirm_StartBot
