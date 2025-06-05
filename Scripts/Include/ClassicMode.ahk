@@ -66,7 +66,6 @@ LoadSettingsFromIni() {
     IniRead, nukeAccount, %A_ScriptDir%\..\..\Settings.ini, UserSettings, nukeAccount, 0
     IniRead, spendHourGlass, %A_ScriptDir%\..\..\Settings.ini, UserSettings, spendHourGlass, 0
     IniRead, injectSortMethod, %A_ScriptDir%\..\..\Settings.ini, UserSettings, injectSortMethod, ModifiedAsc
-    IniRead, godPack, %A_ScriptDir%\..\..\Settings.ini, UserSettings, godPack, Continue
     
     IniRead, Palkia, %A_ScriptDir%\..\..\Settings.ini, UserSettings, Palkia, 0
     IniRead, Dialga, %A_ScriptDir%\..\..\Settings.ini, UserSettings, Dialga, 0
@@ -111,30 +110,6 @@ LoadSettingsFromIni() {
     IniRead, heartBeatName, %A_ScriptDir%\..\..\Settings.ini, UserSettings, heartBeatName, ""
     IniRead, heartBeatDelay, %A_ScriptDir%\..\..\Settings.ini, UserSettings, heartBeatDelay, 30
     IniRead, sendAccountXml, %A_ScriptDir%\..\..\Settings.ini, UserSettings, sendAccountXml, 0
-    
-    ;download settings
-    IniRead, mainIdsURL, %A_ScriptDir%\..\..\Settings.ini, UserSettings, mainIdsURL, ""
-    IniRead, vipIdsURL, %A_ScriptDir%\..\..\Settings.ini, UserSettings, vipIdsURL, ""
-    IniRead, showcaseEnabled, %A_ScriptDir%\..\..\Settings.ini, UserSettings, showcaseEnabled, 0
-    IniRead, showcaseLikes, %A_ScriptDir%\..\..\Settings.ini, UserSettings, showcaseLikes, 5
-    
-    ; Advanced settings
-    IniRead, minStarsA1Charizard, %A_ScriptDir%\..\..\Settings.ini, UserSettings, minStarsA1Charizard, 0
-    IniRead, minStarsA1Mewtwo, %A_ScriptDir%\..\..\Settings.ini, UserSettings, minStarsA1Mewtwo, 0
-    IniRead, minStarsA1Pikachu, %A_ScriptDir%\..\..\Settings.ini, UserSettings, minStarsA1Pikachu, 0
-    IniRead, minStarsA1a, %A_ScriptDir%\..\..\Settings.ini, UserSettings, minStarsA1a, 0
-    IniRead, minStarsA2Dialga, %A_ScriptDir%\..\..\Settings.ini, UserSettings, minStarsA2Dialga, 0
-    IniRead, minStarsA2Palkia, %A_ScriptDir%\..\..\Settings.ini, UserSettings, minStarsA2Palkia, 0
-    IniRead, minStarsA2a, %A_ScriptDir%\..\..\Settings.ini, UserSettings, minStarsA2a, 0
-    IniRead, minStarsA3Solgaleo, %A_ScriptDir%\..\..\Settings.ini, UserSettings, minStarsA3Solgaleo, 0
-    IniRead, minStarsA3Lunala, %A_ScriptDir%\..\..\Settings.ini, UserSettings, minStarsA3Lunala, 0
-    IniRead, minStarsA3a, %A_ScriptDir%\..\..\Settings.ini, UserSettings, minStarA3aBuzzwole, 0
-    
-    IniRead, waitForEligibleAccounts, %A_ScriptDir%\..\..\Settings.ini, UserSettings, waitForEligibleAccounts, 1
-    IniRead, maxWaitHours, %A_ScriptDir%\..\..\Settings.ini, UserSettings, maxWaitHours, 24
-    
-    IniRead, isDarkTheme, %A_ScriptDir%\..\..\Settings.ini, UserSettings, isDarkTheme, 1
-    IniRead, useBackgroundImage, %A_ScriptDir%\..\..\Settings.ini, UserSettings, useBackgroundImage, 1
     
     ; Validate numeric values
     if (!IsNumeric(Instances))
@@ -220,6 +195,41 @@ SaveAllSettings() {
     mainIdsURL := ""
     FriendID := ""
   }
+  ; Save Reroll settings
+  IniWrite, %Instances%, %A_ScriptDir%\..\..\Settings.ini, UserSettings, Instances
+  IniWrite, %instanceStartDelay%, %A_ScriptDir%\..\..\Settings.ini, UserSettings, instanceStartDelay
+  IniWrite, %Columns%, %A_ScriptDir%\..\..\Settings.ini, UserSettings, Columns
+  IniWrite, %runMain%, %A_ScriptDir%\..\..\Settings.ini, UserSettings, runMain
+  IniWrite, %Mains%, %A_ScriptDir%\..\..\Settings.ini, UserSettings, Mains
+  IniWrite, %autoUseGPTest%, %A_ScriptDir%\..\..\Settings.ini, UserSettings, autoUseGPTest
+  IniWrite, %TestTime%, %A_ScriptDir%\..\..\Settings.ini, UserSettings, TestTime
+  IniWrite, %AccountName%, %A_ScriptDir%\..\..\Settings.ini, UserSettings, AccountName  
+  IniWrite, %Delay%, %A_ScriptDir%\..\..\Settings.ini, UserSettings, Delay
+  IniWrite, %waitTime%, %A_ScriptDir%\..\..\Settings.ini, UserSettings, waitTime
+  IniWrite, %swipeSpeed%, %A_ScriptDir%\..\..\Settings.ini, UserSettings, swipeSpeed
+  IniWrite, %slowMotion%, %A_ScriptDir%\..\..\Settings.ini, UserSettings, slowMotion
+  ; System Settings
+  IniWrite, %SelectedMonitorIndex%, %A_ScriptDir%\..\..\Settings.ini, UserSettings, SelectedMonitorIndex
+  IniWrite, %defaultLanguage%, %A_ScriptDir%\..\..\Settings.ini, UserSettings, defaultLanguage
+  IniWrite, %rowGap%, %A_ScriptDir%\..\..\Settings.ini, UserSettings, rowGap
+  IniWrite, %folderPath%, %A_ScriptDir%\..\..\Settings.ini, UserSettings, folderPath
+  IniWrite, %ocrLanguage%, %A_ScriptDir%\..\..\Settings.ini, UserSettings, ocrLanguage
+  IniWrite, %clientLanguage%, %A_ScriptDir%\..\..\Settings.ini, UserSettings, clientLanguage
+  IniWrite, %autoLaunchMonitor%, %A_ScriptDir%\..\..\Settings.ini, UserSettings, autoLaunchMonitor
+  IniWrite, %instanceLaunchDelay%, %A_ScriptDir%\..\..\Settings.ini, UserSettings, instanceLaunchDelay
+  ; Save extra settings
+  IniWrite, %tesseractPath%, %A_ScriptDir%\..\..\Settings.ini, UserSettings, tesseractPath
+  IniWrite, %applyRoleFilters%, %A_ScriptDir%\..\..\Settings.ini, UserSettings, applyRoleFilters
+  IniWrite, %debugMode%, %A_ScriptDir%\..\..\Settings.ini, UserSettings, debugMode
+  IniWrite, %tesseractOption%, %A_ScriptDir%\..\..\Settings.ini, UserSettings, tesseractOption
+  IniWrite, %statusMessage%, %A_ScriptDir%\..\..\Settings.ini, UserSettings, statusMessage
+  ; Save Pack Settings
+  IniWrite, %minStars%, %A_ScriptDir%\..\..\Settings.ini, UserSettings, minStars
+  IniWrite, %minStarsShiny%, %A_ScriptDir%\..\..\Settings.ini, UserSettings, minStarsShiny
+  IniWrite, %nukeAccount%, %A_ScriptDir%\..\..\Settings.ini, UserSettings, nukeAccount
+  IniWrite, %packMethod%, %A_ScriptDir%\..\..\Settings.ini, UserSettings, packMethod
+  IniWrite, %spendHourGlass%, %A_ScriptDir%\..\..\Settings.ini, UserSettings, spendHourGlass
+  IniWrite, %injectSortMethod%, %A_ScriptDir%\..\..\Settings.ini, UserSettings, injectSortMethod
   ; Save pack selections directly without resetting them
   IniWrite, %Palkia%, %A_ScriptDir%\..\..\Settings.ini, UserSettings, Palkia
   IniWrite, %Dialga%, %A_ScriptDir%\..\..\Settings.ini, UserSettings, Dialga
@@ -232,31 +242,7 @@ SaveAllSettings() {
   IniWrite, %Solgaleo%, %A_ScriptDir%\..\..\Settings.ini, UserSettings, Solgaleo
   IniWrite, %Lunala%, %A_ScriptDir%\..\..\Settings.ini, UserSettings, Lunala
   IniWrite, %Buzzwole%, %A_ScriptDir%\..\..\Settings.ini, UserSettings, Buzzwole
-  ; Save basic settings
-  IniWrite, %AccountName%, %A_ScriptDir%\..\..\Settings.ini, UserSettings, AccountName
-  IniWrite, %waitTime%, %A_ScriptDir%\..\..\Settings.ini, UserSettings, waitTime
-  IniWrite, %Delay%, %A_ScriptDir%\..\..\Settings.ini, UserSettings, Delay
-  IniWrite, %folderPath%, %A_ScriptDir%\..\..\Settings.ini, UserSettings, folderPath
-  IniWrite, %discordWebhookURL%, %A_ScriptDir%\..\..\Settings.ini, UserSettings, discordWebhookURL
-  IniWrite, %discordUserId%, %A_ScriptDir%\..\..\Settings.ini, UserSettings, discordUserId
-  IniWrite, %Columns%, %A_ScriptDir%\..\..\Settings.ini, UserSettings, Columns
-  IniWrite, %godPack%, %A_ScriptDir%\..\..\Settings.ini, UserSettings, godPack
-  IniWrite, %Instances%, %A_ScriptDir%\..\..\Settings.ini, UserSettings, Instances
-  IniWrite, %instanceStartDelay%, %A_ScriptDir%\..\..\Settings.ini, UserSettings, instanceStartDelay
-  IniWrite, %defaultLanguage%, %A_ScriptDir%\..\..\Settings.ini, UserSettings, defaultLanguage
-  IniWrite, %rowGap%, %A_ScriptDir%\..\..\Settings.ini, UserSettings, rowGap
-  IniWrite, %SelectedMonitorIndex%, %A_ScriptDir%\..\..\Settings.ini, UserSettings, SelectedMonitorIndex
-  IniWrite, %swipeSpeed%, %A_ScriptDir%\..\..\Settings.ini, UserSettings, swipeSpeed
-  IniWrite, %runMain%, %A_ScriptDir%\..\..\Settings.ini, UserSettings, runMain
-  IniWrite, %Mains%, %A_ScriptDir%\..\..\Settings.ini, UserSettings, Mains
-  IniWrite, %autoUseGPTest%, %A_ScriptDir%\..\..\Settings.ini, UserSettings, autoUseGPTest
-  IniWrite, %TestTime%, %A_ScriptDir%\..\..\Settings.ini, UserSettings, TestTime
-  IniWrite, %heartBeat%, %A_ScriptDir%\..\..\Settings.ini, UserSettings, heartBeat
-  IniWrite, %heartBeatWebhookURL%, %A_ScriptDir%\..\..\Settings.ini, UserSettings, heartBeatWebhookURL
-  IniWrite, %heartBeatName%, %A_ScriptDir%\..\..\Settings.ini, UserSettings, heartBeatName
-  IniWrite, %heartBeatDelay%, %A_ScriptDir%\..\..\Settings.ini, UserSettings, heartBeatDelay
-  IniWrite, %nukeAccount%, %A_ScriptDir%\..\..\Settings.ini, UserSettings, nukeAccount
-  IniWrite, %packMethod%, %A_ScriptDir%\..\..\Settings.ini, UserSettings, packMethod
+  ; Card Detection
   IniWrite, %CheckShinyPackOnly%, %A_ScriptDir%\..\..\Settings.ini, UserSettings, CheckShinyPackOnly
   IniWrite, %TrainerCheck%, %A_ScriptDir%\..\..\Settings.ini, UserSettings, TrainerCheck
   IniWrite, %FullArtCheck%, %A_ScriptDir%\..\..\Settings.ini, UserSettings, FullArtCheck
@@ -266,40 +252,6 @@ SaveAllSettings() {
   IniWrite, %InvalidCheck%, %A_ScriptDir%\..\..\Settings.ini, UserSettings, InvalidCheck
   IniWrite, %ImmersiveCheck%, %A_ScriptDir%\..\..\Settings.ini, UserSettings, ImmersiveCheck
   IniWrite, %PseudoGodPack%, %A_ScriptDir%\..\..\Settings.ini, UserSettings, PseudoGodPack
-  IniWrite, %minStars%, %A_ScriptDir%\..\..\Settings.ini, UserSettings, minStars
-  IniWrite, %slowMotion%, %A_ScriptDir%\..\..\Settings.ini, UserSettings, slowMotion
-  IniWrite, %ocrLanguage%, %A_ScriptDir%\..\..\Settings.ini, UserSettings, ocrLanguage
-  IniWrite, %clientLanguage%, %A_ScriptDir%\..\..\Settings.ini, UserSettings, clientLanguage
-  IniWrite, %mainIdsURL%, %A_ScriptDir%\..\..\Settings.ini, UserSettings, mainIdsURL
-  IniWrite, %vipIdsURL%, %A_ScriptDir%\..\..\Settings.ini, UserSettings, vipIdsURL
-  IniWrite, %autoLaunchMonitor%, %A_ScriptDir%\..\..\Settings.ini, UserSettings, autoLaunchMonitor
-  IniWrite, %instanceLaunchDelay%, %A_ScriptDir%\..\..\Settings.ini, UserSettings, instanceLaunchDelay
-  IniWrite, %spendHourGlass%, %A_ScriptDir%\..\..\Settings.ini, UserSettings, spendHourGlass
-  IniWrite, %injectSortMethod%, %A_ScriptDir%\..\..\Settings.ini, UserSettings, injectSortMethod
-  IniWrite, %waitForEligibleAccounts%, %A_ScriptDir%\..\..\Settings.ini, UserSettings, waitForEligibleAccounts
-  IniWrite, %maxWaitHours%, %A_ScriptDir%\..\..\Settings.ini, UserSettings, maxWaitHours
-  
-  IniWrite, %showcaseURL%, %A_ScriptDir%\..\..\Settings.ini, UserSettings, showcaseURL
-  IniWrite, %skipMissionsInjectMissions%, %A_ScriptDir%\..\..\Settings.ini, UserSettings, skipMissionsInjectMissions
-  
-  ; Save showcase settings
-  IniWrite, %showcaseEnabled%, %A_ScriptDir%\..\..\Settings.ini, UserSettings, showcaseEnabled
-  IniWrite, 5, %A_ScriptDir%\..\..\Settings.ini, UserSettings, showcaseLikes
-  
-  IniWrite, %minStarsA1Mewtwo%, %A_ScriptDir%\..\..\Settings.ini, UserSettings, minStarsA1Mewtwo
-  IniWrite, %minStarsA1Charizard%, %A_ScriptDir%\..\..\Settings.ini, UserSettings, minStarsA1Charizard
-  IniWrite, %minStarsA1Pikachu%, %A_ScriptDir%\..\..\Settings.ini, UserSettings, minStarsA1Pikachu
-  IniWrite, %minStarsA1a%, %A_ScriptDir%\..\..\Settings.ini, UserSettings, minStarsA1a
-  IniWrite, %minStarsA2Dialga%, %A_ScriptDir%\..\..\Settings.ini, UserSettings, minStarsA2Dialga
-  IniWrite, %minStarsA2Palkia%, %A_ScriptDir%\..\..\Settings.ini, UserSettings, minStarsA2Palkia
-  IniWrite, %minStarsA2a%, %A_ScriptDir%\..\..\Settings.ini, UserSettings, minStarsA2a
-  IniWrite, %minStarsA2b%, %A_ScriptDir%\..\..\Settings.ini, UserSettings, minStarsA2b
-  IniWrite, %minStarsA3Solgaleo%, %A_ScriptDir%\..\..\Settings.ini, UserSettings, minStarsA3Solgaleo
-  IniWrite, %minStarsA3Lunala%, %A_ScriptDir%\..\..\Settings.ini, UserSettings, minStarsA3Lunala
-  IniWrite, %minStarsA3a%, %A_ScriptDir%\..\..\Settings.ini, UserSettings, minStarsA3a
-  
-  IniWrite, %sendAccountXml%, %A_ScriptDir%\..\..\Settings.ini, UserSettings, sendAccountXml
-  
   ; Save S4T settings
   IniWrite, %s4tEnabled%, %A_ScriptDir%\..\..\Settings.ini, UserSettings, s4tEnabled
   IniWrite, %s4tSilent%, %A_ScriptDir%\..\..\Settings.ini, UserSettings, s4tSilent
@@ -312,19 +264,20 @@ SaveAllSettings() {
   IniWrite, %s4tDiscordUserId%, %A_ScriptDir%\..\..\Settings.ini, UserSettings, s4tDiscordUserId
   IniWrite, %s4tDiscordWebhookURL%, %A_ScriptDir%\..\..\Settings.ini, UserSettings, s4tDiscordWebhookURL
   IniWrite, %s4tSendAccountXml%, %A_ScriptDir%\..\..\Settings.ini, UserSettings, s4tSendAccountXml
-  IniWrite, %minStarsShiny%, %A_ScriptDir%\..\..\Settings.ini, UserSettings, minStarsShiny
-  
-  ; Save extra settings
-  IniWrite, %tesseractPath%, %A_ScriptDir%\..\..\Settings.ini, UserSettings, tesseractPath
-  IniWrite, %applyRoleFilters%, %A_ScriptDir%\..\..\Settings.ini, UserSettings, applyRoleFilters
-  IniWrite, %debugMode%, %A_ScriptDir%\..\..\Settings.ini, UserSettings, debugMode
-  IniWrite, %tesseractOption%, %A_ScriptDir%\..\..\Settings.ini, UserSettings, tesseractOption
-  IniWrite, %statusMessage%, %A_ScriptDir%\..\..\Settings.ini, UserSettings, statusMessage
-  
-  ; Save theme settings
-  IniWrite, %isDarkTheme%, %A_ScriptDir%\..\..\Settings.ini, UserSettings, isDarkTheme
-  IniWrite, %useBackgroundImage%, %A_ScriptDir%\..\..\Settings.ini, UserSettings, useBackgroundImage
-  
+  ; Save Discord Settings
+  IniWrite, %discordWebhookURL%, %A_ScriptDir%\..\..\Settings.ini, UserSettings, discordWebhookURL
+  IniWrite, %discordUserId%, %A_ScriptDir%\..\..\Settings.ini, UserSettings, discordUserId
+  IniWrite, %sendAccountXml%, %A_ScriptDir%\..\..\Settings.ini, UserSettings, sendAccountXml
+  ; HeartBeat Settings
+  IniWrite, %heartBeat%, %A_ScriptDir%\..\..\Settings.ini, UserSettings, heartBeat
+  IniWrite, %heartBeatWebhookURL%, %A_ScriptDir%\..\..\Settings.ini, UserSettings, heartBeatWebhookURL
+  IniWrite, %heartBeatName%, %A_ScriptDir%\..\..\Settings.ini, UserSettings, heartBeatName
+  IniWrite, %heartBeatDelay%, %A_ScriptDir%\..\..\Settings.ini, UserSettings, heartBeatDelay
+  ; Save Download Settings
+  IniWrite, %mainIdsURL%, %A_ScriptDir%\..\..\Settings.ini, UserSettings, mainIdsURL
+  IniWrite, %vipIdsURL%, %A_ScriptDir%\..\..\Settings.ini, UserSettings, vipIdsURL
+  ; Save showcase settings
+  IniWrite, %showcaseEnabled%, %A_ScriptDir%\..\..\Settings.ini, UserSettings, showcaseEnabled  
   ; FIXED: Debug logging if enabled
   if (debugMode) {
     FileAppend, % A_Now . " - Settings saved. DeleteMethod: " . deleteMethod . "`n", %A_ScriptDir%\..\..\debug_settings.log
