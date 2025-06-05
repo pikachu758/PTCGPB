@@ -110,6 +110,11 @@ LoadSettingsFromIni() {
     IniRead, heartBeatName, %A_ScriptDir%\..\..\Settings.ini, UserSettings, heartBeatName, ""
     IniRead, heartBeatDelay, %A_ScriptDir%\..\..\Settings.ini, UserSettings, heartBeatDelay, 30
     IniRead, sendAccountXml, %A_ScriptDir%\..\..\Settings.ini, UserSettings, sendAccountXml, 0
+
+    ;download settings
+    IniRead, mainIdsURL, %A_ScriptDir%\..\..\Settings.ini, UserSettings, mainIdsURL, ""
+    IniRead, vipIdsURL, %A_ScriptDir%\..\..\Settings.ini, UserSettings, vipIdsURL, ""
+    IniRead, showcaseEnabled, %A_ScriptDir%\..\..\Settings.ini, UserSettings, showcaseEnabled, 0
     
     ; Validate numeric values
     if (!IsNumeric(Instances))
