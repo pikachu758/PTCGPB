@@ -3905,8 +3905,6 @@ ResetAccountLists() {
 }
 
 StartBot:
-    ; === FAST PRE-CONFIRMATION CHECKS ===
-    ; Only do lightweight operations before showing popup
     Gui, Submit, NoHide
     
     ; Quick path validation (no file I/O)
@@ -4012,13 +4010,37 @@ StartBot:
     if (!cardDetectionFound)
         confirmMsg .= "`n" . SetUpDictionary.Confirm_None
 
-    if (sendAccountXml || s4tSendAccountXml) {
-        confirmMsg .= "`n`n⚠️ WARNING: Send Account XML is enabled. This setting is only recommended to be used solo. Do not use it in groups as your accounts will be shared to other members of your group.`n"
+    confirmMsg .= "`n`n" . SetUpDictionary.Confirm_SaveForTrade
+    
+    if (!s4tEnabled) {
+        confirmMsg .= ": " . SetUpDictionary.Confirm_Disabled
+    } else {
+        confirmMsg .= ": " . SetUpDictionary.Confirm_Enabled . "`n"
+        confirmMsg .= "• " . SetUpDictionary.Confirm_SilentPings . ": " . (s4tSilent ? SetUpDictionary.Confirm_Enabled : SetUpDictionary.Confirm_Disabled) . "`n"
+        
+        ; Add enabled filters
+        if (s4t3Dmnd)
+            confirmMsg .= "• 3 ◆◆◆`n"
+        if (s4t4Dmnd)
+            confirmMsg .= "• 4 ◆◆◆◆`n"
+        if (s4t1Star)
+            confirmMsg .= "• 1 ★`n"
+        if (s4tGholdengo && Shining)
+            confirmMsg .= "• " . SetUpDictionary.Confirm_Gholdengo . "`n"
+        
+        ; Add Wonder Pick status
+        if (s4tWP)
+            confirmMsg .= "• " . SetUpDictionary.Confirm_WonderPick . ": " . s4tWPMinCards . " " . SetUpDictionary.Confirm_MinCards . "`n"
+        else
+            confirmMsg .= "• " . SetUpDictionary.Confirm_WonderPick . ": " . SetUpDictionary.Confirm_Disabled . "`n"
     }
-    
-    confirmMsg .= "`n`n" . SetUpDictionary.Confirm_RowGap . rowGap . " pixels"
+
+    if (sendAccountXml || s4tSendAccountXml) {
+        confirmMsg .= "`n`n" . SetUpDictionary.Confirm_XMLWarning . "`n"
+    }
+
     confirmMsg .= "`n`n" . SetUpDictionary.Confirm_StartBot
-    
+
     ; === SHOW CONFIRMATION DIALOG IMMEDIATELY ===
     MsgBox, 4, Confirm Bot Settings, %confirmMsg%
     IfMsgBox, No
@@ -4026,9 +4048,7 @@ StartBot:
         return ; Return to GUI for user to modify settings
     }
     
-    ; === HEAVY OPERATIONS AFTER USER CONFIRMATION ===
     
-    ; Reset account lists (this was causing the delay)
     ResetAccountLists()
     
     ; Update dropdown settings if needed
