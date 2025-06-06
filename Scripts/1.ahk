@@ -120,8 +120,9 @@ IniRead, injectSortMethod, %A_ScriptDir%\..\Settings.ini, UserSettings, injectSo
 IniRead, waitForEligibleAccounts, %A_ScriptDir%\..\Settings.ini, UserSettings, waitForEligibleAccounts, 1
 IniRead, maxWaitHours, %A_ScriptDir%\..\Settings.ini, UserSettings, maxWaitHours, 24
 IniRead, skipMissionsInjectMissions, %A_ScriptDir%\..\Settings.ini, UserSettings, skipMissionsInjectMissions, 0
-IniRead, claimSpecialMissions, %A_ScriptDir%\..\Settings.ini, UserSettings, claimSpecialMissions, 1
+IniRead, claimSpecialMissions, %A_ScriptDir%\..\Settings.ini, UserSettings, claimSpecialMissions, 0
 IniRead, spendHourGlass, %A_ScriptDir%\..\Settings.ini, UserSettings, spendHourGlass, 1
+IniRead, openExtraPack, %A_ScriptDir%\..\Settings.ini, UserSettings, openExtraPack, 0
 
 IniRead, minStarsA1Mewtwo, %A_ScriptDir%\..\Settings.ini, UserSettings, minStarsA1Mewtwo, 0
 IniRead, minStarsA1Charizard, %A_ScriptDir%\..\Settings.ini, UserSettings, minStarsA1Charizard, 0
@@ -409,10 +410,6 @@ if(DeadCheck = 1 && deleteMethod != "13 Pack") {
         if(!injectMethod || !loadedAccount) {
             DoTutorial()
             accountOpenPacks := 0 ;tutorial packs don't count
-        } else {
-            ; For injection methods, we should always have a loaded account at this point
-            ; No tutorial needed - account is already set up
-            LogToFile("Skipping tutorial - using injected account with " . accountOpenPacks . " packs")
         }
         
         if(deleteMethod = "5 Pack" || deleteMethod = "5 Pack (Fast)" || deleteMethod = "13 Pack")
@@ -468,8 +465,15 @@ if(DeadCheck = 1 && deleteMethod != "13 Pack") {
 		
         if(deleteMethod = "Inject" || deleteMethod = "Inject Missions" && accountOpenPacks >= maxAccountPackNum)
             Goto, EndOfRun
-			
-			
+
+        if(deleteMethod = "Inject for Reroll" && openExtraPack && packMethod) {
+            friendsAdded := AddFriends(true)
+            SelectPack("HGPack")
+            HourglassOpening(true)
+        } else if(deleteMethod = "Inject for Reroll" && openExtraPack && !packMethod) {
+            HourglassOpening(true)
+            Goto, EndOfRun
+        }
         if (checkShouldDoMissions()) {
             LogToFile("Starting mission sequence - Current pack count: " . accountOpenPacks)
             
