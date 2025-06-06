@@ -14,11 +14,11 @@ global STATIC_BRUSH := 0
 
 githubUser := "mixman208"
 repoName := "PTCGPB"
-localVersion := "v6.4.15"
+localVersion := "v6.5.1"
 scriptFolder := A_ScriptDir
 zipPath := A_Temp . "\update.zip"
 extractPath := A_Temp . "\update"
-intro := "Classic Mode!"
+intro := "Reroll an Extra Pack!"
 
 ; GUI dimensions
 global GUI_WIDTH := 377 
@@ -66,7 +66,7 @@ if not A_IsAdmin
 ; ========== language Selection ==========
 global IsLanguageSet, defaultBotLanguage
 IniRead, IsLanguageSet, Settings.ini, UserSettings, IsLanguageSet, 0
-IniRead, defaultBotLanguage, Settings.ini, UserSettings, defaultBotLanguage, 0
+IniRead, defaultBotLanguage, Settings.ini, UserSettings, defaultBotLanguage, 1
 IniRead, BotLanguage, Settings.ini, UserSettings, BotLanguage, English
 
 if (!IsLanguageSet) {
@@ -430,7 +430,7 @@ NextStep:
         global useBackgroundImage, tesseractPath, applyRoleFilters, debugMode, tesseractOption, statusMessage
         global s4tEnabled, s4tSilent, s4t3Dmnd, s4t4Dmnd, s4t1Star, s4tGholdengo, s4tWP, s4tWPMinCards
         global s4tDiscordUserId, s4tDiscordWebhookURL, s4tSendAccountXml, minStarsShiny, instanceLaunchDelay, mainIdsURL, vipIdsURL
-        global spendHourGlass, injectSortMethod, rowGap, SortByDropdown
+        global spendHourGlass, openExtraPack, injectSortMethod, rowGap, SortByDropdown
         global waitForEligibleAccounts, maxWaitHours, skipMissionsInjectMissions
         
         ; === MISSING ADVANCED SETTINGS VARIABLES ===
@@ -537,6 +537,7 @@ NextStep:
         IniWrite, %autoLaunchMonitor%, Settings.ini, UserSettings, autoLaunchMonitor
         IniWrite, %instanceLaunchDelay%, Settings.ini, UserSettings, instanceLaunchDelay
         IniWrite, %spendHourGlass%, Settings.ini, UserSettings, spendHourGlass
+        IniWrite, %openExtraPack%, Settings.ini, UserSettings, openExtraPack
         IniWrite, %injectSortMethod%, Settings.ini, UserSettings, injectSortMethod
         IniWrite, %waitForEligibleAccounts%, Settings.ini, UserSettings, waitForEligibleAccounts
         IniWrite, %maxWaitHours%, Settings.ini, UserSettings, maxWaitHours
@@ -601,7 +602,7 @@ NextStep:
         controlList .= "Txt_Monitor,Txt_Scale,Txt_FolderPath,Txt_OcrLanguage,Txt_ClientLanguage,"
         controlList .= "Txt_RowGap,Txt_InstanceLaunchDelay,Txt_autoLaunchMonitor,"
         controlList .= "Txt_MinStars,Txt_ShinyMinStars,Txt_DeleteMethod,Txt_packMethod,Txt_nukeAccount,"
-        controlList .= "Txt_VariablePackCount,Txt_spendHourGlass,SortByText,"
+        controlList .= "Txt_VariablePackCount,Txt_spendHourGlass,Txt_openExtraPack,SortByText,"
         controlList .= "Txt_Buzzwole,Txt_Solgaleo,Txt_Lunala,Txt_Shining,Txt_Arceus,Txt_Palkia,Txt_Dialga,Txt_Pikachu,Txt_Charizard,Txt_Mewtwo,Txt_Mew,"
         controlList .= "AllPackSelection,Txt_PackHeading,Txt_PageBuzzwole,Txt_PageSolgaleo,Txt_PageLunala,Txt_PageShining,"
         controlList .= "Txt_FullArtCheck,Txt_TrainerCheck,Txt_RainbowCheck,Txt_PseudoGodPack,"
@@ -1175,7 +1176,7 @@ NextStep:
         packControls .= "FullArtCheck,TrainerCheck,RainbowCheck,PseudoGodPack,InvalidCheck,"
         packControls .= "Txt_FullArtCheck,Txt_TrainerCheck,Txt_RainbowCheck,Txt_PseudoGodPack,Txt_CrownCheck,Txt_ShinyCheck,Txt_ImmersiveCheck,Txt_CheckShinyPackOnly,Txt_InvalidCheck,"
         packControls .= "CheckShinyPackOnly,CrownCheck,ImmersiveCheck,Pack_Divider3,"
-        packControls .= "spendHourGlass,Txt_spendHourGlass"
+        packControls .= "spendHourGlass,Txt_spendHourGlass,openExtraPack,Txt_openExtraPack"
         s4tControls := "s4tEnabled,s4tSilent,s4t3Dmnd,s4t4Dmnd,s4t1Star,"
         s4tControls .= "Txt_s4tEnabled,Txt_s4tSilent,Txt_s4t3Dmnd,Txt_s4t4Dmnd,Txt_s4t1Star,Txt_s4tWP,Txt_s4tSendAccountXml,"
         s4tControls .= "s4tGholdengo,s4tGholdengoEmblem,s4tGholdengoArrow,Txt_S4TSeparator,s4tWP,"
@@ -1205,10 +1206,7 @@ NextStep:
         
         ; Explicitly hide these checkboxes to ensure they don't appear in wrong sections
         GuiControl, Hide, spendHourGlass
-        GuiControl, Hide, claimSpecialMissions
-        GuiControl, Hide, Txt_spendHourGlass
-        GuiControl, Hide, Txt_claimSpecialMissions
-        
+        GuiControl, Hide, Txt_spendHourGlass        
         ; Hide separators
         GuiControl, Hide, RerollSettingsSeparator
         
@@ -1564,7 +1562,7 @@ NextStep:
         ; === God Pack Settings Subsection ===
         ; Define control lists for each subsection
         godPackControls := "title_pack,Txt_MinStars,minStars,Txt_ShinyMinStars,minStarsShiny,"
-        godPackControls .= "packMethod,Txt_packMethod,Txt_DeleteMethod,deleteMethod,Pack_Divider1"
+        godPackControls .= "Txt_DeleteMethod,deleteMethod,Pack_Divider1"
         
         packSelectionControls := "Buzzwole,Solgaleo,Lunala,Shining,"
         packSelectionControls .= "Txt_Buzzwole,Txt_Solgaleo,Txt_Lunala,Txt_Shining,"
@@ -1602,10 +1600,23 @@ NextStep:
             GuiControl, Show, SortByText
             GuiControl, Show, SortByDropdown
             ApplyTextColor("SortByText")
+            if (deleteMethod = "Inject for Reroll") {
+                GuiControl, Show, openExtraPack
+                GuiControl, Show, Txt_openExtraPack
+                GuiControl, Show, packMethod
+                GuiControl, Show, Txt_packMethod
+                ApplyTextColor(Txt_openExtraPack)
+                ApplyTextColor(Txt_packMethod)
+            } else {
+                GuiControl, Hide, openExtraPack
+                GuiControl, Hide, Txt_openExtraPack
+                GuiControl, Hide, packMethod
+                GuiControl, Hide, Txt_packMethod
+            }
         } else {
             ; Always show spendHourGlass
-            GuiControl, Hide, spendHourGlass
-            GuiControl, Hide, Txt_spendHourGlass
+            HideNotInInject := "spendHourGlass,Txt_spendHourGlass,openExtraPack,Txt_openExtraPack,packMethod,Txt_packMethods"
+            HideControls(HideNotInInject)
             GuiControl,, spendHourGlass, 0
             
             ; Non-Inject method selected
@@ -1623,7 +1634,7 @@ NextStep:
         inputTextColor := isDarkTheme ? DARK_INPUT_TEXT : LIGHT_INPUT_TEXT
         
         ; God Pack Settings text controls
-        godPackTextControls := "Txt_MinStars,Txt_ShinyMinStars,Txt_DeleteMethod,Txt_packMethod,Txt_spendHourGlass"
+        godPackTextControls := "Txt_MinStars,Txt_ShinyMinStars,Txt_DeleteMethod,Txt_packMethod,Txt_spendHourGlass,Txt_openExtraPack"
         if (!InStr(deleteMethod, "Inject")) {
             godPackTextControls .= ",Txt_nukeAccount"
         }
@@ -2106,6 +2117,7 @@ NextStep:
             IniRead, packMethod, Settings.ini, UserSettings, packMethod, 0
             IniRead, nukeAccount, Settings.ini, UserSettings, nukeAccount, 0
             IniRead, spendHourGlass, Settings.ini, UserSettings, spendHourGlass, 0
+            IniRead, openExtraPack, Settings.ini, UserSettings, openExtraPack, 0
             IniRead, injectSortMethod, Settings.ini, UserSettings, injectSortMethod, ModifiedAsc
             IniRead, godPack, Settings.ini, UserSettings, godPack, Continue
             
@@ -2445,10 +2457,10 @@ NextStep:
         LoadSettingsFromIni()
     }    
     if FileExist(saveSignalFile) {
-        KillADBProcesses()
+        ; KillADBProcesses()
         FileDelete, %saveSignalFile%
     } else {
-        KillADBProcesses()
+        ; KillADBProcesses()
         CheckForUpdate()
     }
     scriptName := StrReplace(A_ScriptName, ".ahk")
@@ -2600,7 +2612,7 @@ NextStep:
     
     global Txt_runMain, Txt_autoUseGPTest, Txt_slowMotion,
     global Txt_autoLaunchMonitor, Txt_applyRoleFilters, Txt_debugMode, Txt_tesseractOption, Txt_statusMessage
-    global Txt_packMethod, Txt_nukeAccount, Txt_spendHourGlass, Txt_claimSpecialMissions
+    global Txt_packMethod, Txt_nukeAccount, Txt_spendHourGlass, Txt_openExtraPack
     global Txt_Buzzwole, Txt_Solgaleo, Txt_Lunala, Txt_Shining, Txt_Arceus, Txt_Palkia, Txt_Dialga, Txt_Pikachu, Txt_Charizard, Txt_Mewtwo, Txt_Mew
     global Txt_FullArtCheck, Txt_TrainerCheck, Txt_RainbowCheck, Txt_PseudoGodPack, Txt_CrownCheck, Txt_ShinyCheck, Txt_ImmersiveCheck, Txt_CheckShinyPackOnly, Txt_InvalidCheck
     global Txt_s4tEnabled, Txt_s4tSilent
@@ -2781,7 +2793,8 @@ NextStep:
     
     AddCheckBox(45, 201, 28, 13, "packMethod", "", checkedPath, uncheckedPath, packMethod, "Txt_packMethod", currentDictionary.Txt_packMethod, 80, 200)
     AddCheckBox(185, 201, 28, 13, "nukeAccount", "", checkedPath, uncheckedPath, nukeAccount, "Txt_nukeAccount", currentDictionary.Txt_nukeAccount, 220, 200)
-    AddCheckBox(45, 226, 28, 13, "spendHourGlass", "", checkedPath, uncheckedPath, spendHourGlass, "Txt_spendHourGlass", currentDictionary.Txt_spendHourGlass, 80, 225)
+    AddCheckBox(45, 226, 28, 13, "spendHourGlass", "spendHourGlassSettings", checkedPath, uncheckedPath, spendHourGlass, "Txt_spendHourGlass", currentDictionary.Txt_spendHourGlass, 80, 225)
+    AddCheckBox(185, 226, 28, 13, "openExtraPack", "openExtraPackSettings", checkedPath, uncheckedPath, openExtraPack, "Txt_openExtraPack", currentDictionary.Txt_openExtraPack, 220, 225)
     ;AddCheckBox((185+xs_SpecialCheck), 226, 28, 13, "claimSpecialMissions", "", checkedPath, uncheckedPath, claimSpecialMissions, "Txt_claimSpecialMissions", currentDictionary.Txt_claimSpecialMissions, (220+xs_SpecialCheck), 225)
     
     ; Create Sort By label and dropdown
@@ -3328,6 +3341,24 @@ autoUseGPTestSettings:
     }
 return
 
+spendHourGlassSettings:
+    Gui, Submit, NoHide
+    spendHourGlass := !spendHourGlass
+    ifEqual, spendHourGlass, 1, GuiControl,, spendHourGlass, %checkedPath%
+    else GuiControl,, spendHourGlass, %uncheckedPath%
+    openExtraPack := 0
+    GuiControl,, openExtraPack, %uncheckedPath%
+return
+
+openExtraPackSettings:
+    Gui, Submit, NoHide
+    openExtraPack := !openExtraPack
+    ifEqual, openExtraPack, 1, GuiControl,, openExtraPack, %checkedPath%
+    else GuiControl,, openExtraPack, %uncheckedPath%
+    spendHourGlass := 0
+    GuiControl,, spendHourGlass, %uncheckedPath%
+return
+
 discordSettings:
     Gui, Submit, NoHide
     global isDarkTheme, DARK_TEXT, LIGHT_TEXT, DARK_INPUT_BG, DARK_INPUT_TEXT, LIGHT_INPUT_BG, LIGHT_INPUT_TEXT
@@ -3490,9 +3521,6 @@ deleteSettings:
     deleteMethod := currentMethod
     ; Immediately save to prevent loss
     IniWrite, %deleteMethod%, Settings.ini, UserSettings, deleteMethod
-    
-    claimSpecialMissions := 0
-    IniWrite, %claimSpecialMissions%, settings.ini, UserSettings, claimSpecialMissions
     if(InStr(currentMethod, "Inject")) {
         ; Hide nukeAccount checkbox
         GuiControl, Hide, nukeAccount
@@ -3502,7 +3530,7 @@ deleteSettings:
         
         ifEqual, spendHourGlass, 1, GuiControl,, spendHourGlass, %checkedPath%
         else GuiControl,, spendHourGlass, %uncheckedPath%
-            GuiControl, Show, spendHourGlass
+        GuiControl, Show, spendHourGlass
         GuiControl, Show, Txt_spendHourGlass
         ApplyTextColor("Txt_spendHourGlass")
         
@@ -3510,18 +3538,43 @@ deleteSettings:
         GuiControl, Show, SortByText
         GuiControl, Show, SortByDropdown
         ApplyTextColor("SortByText")
+        if (currentMethod = "Inject for Reroll") {
+            ifEqual, openExtraPack, 1, GuiControl,, openExtraPack, %checkedPath%
+            else GuiControl,, openExtraPack, %uncheckedPath%
+            GuiControl, Show, openExtraPack
+            GuiControl, Show, Txt_openExtraPack
+            ifEqual, packMethod, 1, GuiControl,, packMethod, %checkedPath%
+            else GuiControl,, packMethod, %uncheckedPath%
+            GuiControl, Show, packMethod
+            GuiControl, Show, Txt_packMethod
+        } else {
+            GuiControl, Hide, openExtraPack
+            GuiControl, Hide, Txt_openExtraPack
+            GuiControl, Hide, packMethod
+            GuiControl, Hide, Txt_packMethod
+            openExtraPack := 0
+            packMethod := 0
+            IniWrite, %openExtraPack%, Settings.ini, UserSettings, openExtraPack 
+            IniWrite, %packMethod%, Settings.ini, UserSettings, packMethod 
+        }
     }
     else {
         ifEqual, nukeAccount, 1, GuiControl,, nukeAccount, %checkedPath%
         else GuiControl,, nukeAccount, %uncheckedPath%
-            GuiControl, Show, nukeAccount
+        GuiControl, Show, nukeAccount
         GuiControl, Show, Txt_nukeAccount
         ApplyTextColor("Txt_nukeAccount")
         
         GuiControl, Hide, spendHourGlass
         GuiControl, Hide, Txt_spendHourGlass
+        GuiControl, Hide, openExtraPack
+        GuiControl, Hide, Txt_openExtraPack
+        GuiControl, Hide, packMethod
+        GuiControl, Hide, Txt_packMethod
         spendHourGlass := 0
+        openExtraPack := 0
         IniWrite, %spendHourGlass%, Settings.ini, UserSettings, spendHourGlass
+        IniWrite, %openExtraPack%, Settings.ini, UserSettings, openExtraPack
         
         ; Hide Sort By controls if they exist
         GuiControl, Hide, SortByText

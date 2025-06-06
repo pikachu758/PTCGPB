@@ -26,7 +26,7 @@ CreateStatusMessage(Message, GuiName := "StatusMessage", X := 0, Y := 565, debug
     if (Debug && Message != DEFAULT_STATUS_MESSAGE)
         LogToFile(GuiName . ": " . Message)
 
-	if(GuiName = "AvgRuns")
+	if(GuiName = "AvgRuns" || GuiName = "AutoGPTest")
 		guiheight := 20
 	else
 		guiheight := 40

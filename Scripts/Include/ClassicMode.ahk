@@ -65,6 +65,7 @@ LoadSettingsFromIni() {
     IniRead, packMethod, %A_ScriptDir%\..\..\Settings.ini, UserSettings, packMethod, 0
     IniRead, nukeAccount, %A_ScriptDir%\..\..\Settings.ini, UserSettings, nukeAccount, 0
     IniRead, spendHourGlass, %A_ScriptDir%\..\..\Settings.ini, UserSettings, spendHourGlass, 0
+    IniRead, openExtraPack, %A_ScriptDir%\..\..\Settings.ini, UserSettings, openExtraPack, 0
     IniRead, injectSortMethod, %A_ScriptDir%\..\..\Settings.ini, UserSettings, injectSortMethod, ModifiedAsc
     
     IniRead, Palkia, %A_ScriptDir%\..\..\Settings.ini, UserSettings, Palkia, 0
@@ -112,9 +113,10 @@ LoadSettingsFromIni() {
     IniRead, sendAccountXml, %A_ScriptDir%\..\..\Settings.ini, UserSettings, sendAccountXml, 0
 
     ;download settings
-    IniRead, mainIdsURL, %A_ScriptDir%\..\..\Settings.ini, UserSettings, mainIdsURL, ""
-    IniRead, vipIdsURL, %A_ScriptDir%\..\..\Settings.ini, UserSettings, vipIdsURL, ""
-    IniRead, showcaseEnabled, %A_ScriptDir%\..\..\Settings.ini, UserSettings, showcaseEnabled, 0
+    IniRead, mainIdsURL, %A_ScriptDir%\..\..\Settings.ini, UserSettings, mainIdsURL
+    IniRead, vipIdsURL, %A_ScriptDir%\..\..\Settings.ini, UserSettings, vipIdsURL
+    ; Save showcase settings
+    IniRead, showcaseEnabled, %A_ScriptDir%\..\..\Settings.ini, UserSettings, showcaseEnabled
     
     ; Validate numeric values
     if (!IsNumeric(Instances))
@@ -147,7 +149,7 @@ SaveAllSettings() {
   global useBackgroundImage, tesseractPath, applyRoleFilters, debugMode, tesseractOption, statusMessage
   global s4tEnabled, s4tSilent, s4t3Dmnd, s4t4Dmnd, s4t1Star, s4tGholdengo, s4tWP, s4tWPMinCards
   global s4tDiscordUserId, s4tDiscordWebhookURL, s4tSendAccountXml, minStarsShiny, instanceLaunchDelay, mainIdsURL, vipIdsURL
-  global spendHourGlass, injectSortMethod, rowGap, SortByDropdown
+  global spendHourGlass, openExtraPack, injectSortMethod, rowGap, SortByDropdown
   global waitForEligibleAccounts, maxWaitHours, skipMissionsInjectMissions
   
   ; === MISSING ADVANCED SETTINGS VARIABLES ===
@@ -234,6 +236,7 @@ SaveAllSettings() {
   IniWrite, %nukeAccount%, %A_ScriptDir%\..\..\Settings.ini, UserSettings, nukeAccount
   IniWrite, %packMethod%, %A_ScriptDir%\..\..\Settings.ini, UserSettings, packMethod
   IniWrite, %spendHourGlass%, %A_ScriptDir%\..\..\Settings.ini, UserSettings, spendHourGlass
+  IniWrite, %openExtraPack%, %A_ScriptDir%\..\..\Settings.ini, UserSettings, openExtraPack
   IniWrite, %injectSortMethod%, %A_ScriptDir%\..\..\Settings.ini, UserSettings, injectSortMethod
   ; Save pack selections directly without resetting them
   IniWrite, %Palkia%, %A_ScriptDir%\..\..\Settings.ini, UserSettings, Palkia
@@ -439,9 +442,10 @@ else if (deleteMethod = "Inject for Reroll")
   defaultDelete := 4
 ;	SquallTCGP 2025.03.12 - 	Adding the delete method 5 Pack (Fast) to the delete method dropdown list.
 Gui, Add, DropDownList, vdeleteMethod gdeleteSettings choose%defaultDelete% x350 y203 w100 Background2A2A2A cWhite, 13 Pack|Inject|Inject Missions|Inject for Reroll
-Gui, Add, Checkbox, % (packMethod ? "Checked" : "") " vpackMethod x270 y235 " . sectionColor, % currentDictionary.Txt_packMethod
+Gui, Add, Checkbox, % (packMethod ? "Checked" : "") " vpackMethod x270 y235 " . sectionColor . ((deleteMethod = "Inject for Reroll") ? "" : " Hidden"), % currentDictionary.Txt_packMethod
 Gui, Add, Checkbox, % (nukeAccount ? "Checked" : "") " vnukeAccount x270 y255 " . sectionColor . ((deleteMethod = "13 Pack")? "": " Hidden"), % currentDictionary.Txt_nukeAccount
-Gui, Add, Checkbox, % (spendHourGlass ? "Checked" : "") " vspendHourGlass x270 y275 " . sectionColor . ((deleteMethod = "13 Pack")? " Hidden":""), % currentDictionary.Txt_spendHourGlass
+Gui, Add, Checkbox, % (openExtraPack ? "Checked" : "") " vopenExtraPack gopenExtraPackSettings x270 y255 " . sectionColor . ((deleteMethod = "Inject for Reroll") ? "" : " Hidden"), % currentDictionary.Txt_openExtraPack
+Gui, Add, Checkbox, % (spendHourGlass ? "Checked" : "") " vspendHourGlass gspendHourGlassSettings x270 y275 " . sectionColor . ((deleteMethod = "13 Pack")? " Hidden":""), % currentDictionary.Txt_spendHourGlass
 
 Gui, Add, Text, x270 y300 %sectionColor%, % currentDictionary.SortByText
 ; Determine which option to pre-select
@@ -664,21 +668,39 @@ return
 
 deleteSettings:
   Gui, Submit, NoHide
-  ;GuiControlGet, deleteMethod,, deleteMethod
-  if(deleteMethod = "13 Pack") {
+  if (deleteMethod = "13 Pack") {
     GuiControl, Hide, spendHourGlass
-    nukeAccount := spendHourGlass
+    GuiControl, Hide, packMethod
+    GuiControl, Hide, openExtraPack
+    GuiControl, Show, nukeAccount
+  } else if (deleteMethod = "Inject for Reroll") {
+    GuiControl, Show, spendHourGlass
+    GuiControl, Show, packMethod
+    GuiControl, Show, openExtraPack
+    GuiControl, Hide, nukeAccount
+    nukeAccount := false
   } else {
     GuiControl, Show, spendHourGlass
-  }
-  
-  if(InStr(deleteMethod, "Inject")) {
+    GuiControl, Hide, packMethod
+    GuiControl, Hide, openExtraPack
     GuiControl, Hide, nukeAccount
     nukeAccount := false
   }
-  else
-    GuiControl, Show, nukeAccount
 return
+
+openExtraPackSettings:
+  Gui, Submit, NoHide
+  if (openExtraPack) {
+    GuiControl,, spendHourGlass, 0
+  }
+Return
+
+spendHourGlassSettings:
+  Gui, Submit, NoHide
+  if (SpendHourGlass) {
+    GuiControl,, openExtraPack, 0
+  }
+Return
 
 s4tSettings:
   Gui, Submit, NoHide
