@@ -332,7 +332,7 @@ if(DeadCheck = 1 && deleteMethod != "13 Pack") {
 
         while (StartCurrentTimeDiff > 0 && EndCurrentTimeDiff < 0) {
             FormatTime, formattedEndTime, %EndTime%, HH:mm:ss
-            CreateStatusMessage("I need a break... Sleeping until " . EndTime ,,,, false)
+            CreateStatusMessage("I need a break... Sleeping until " . formattedEndTime ,,,, false)
             dateChange := true
             Sleep, 5000
 
@@ -1041,7 +1041,7 @@ AddFriends(renew := false, getFC := false) {
                     break
                 }
                 else if(!renew && !getFC) {
-                    clickButton := FindOrLoseImage(75, 340, 195, 530, 80, "Button", 0)
+                    clickButton := FindOrLoseImage(75, 360, 195, 410, 75, "Button", 0)
                     if(clickButton) {
                         StringSplit, pos, clickButton, `,  ; Split at ", "
                         if (scaleParam = 287) {
@@ -2633,6 +2633,12 @@ saveAccount(file := "Valid", ByRef filePath := "", packDetails := "") {
         }
         count++
     }
+
+    ;Add metrics tracking whenever desired card is found
+    now := A_NowUTC
+    IniWrite, %now%, %A_ScriptDir%\%scriptName%.ini, Metrics, LastEndTimeUTC
+    EnvSub, now, 1970, seconds
+    IniWrite, %now%, %A_ScriptDir%\%scriptName%.ini, Metrics, LastEndEpoch    
 
     return xmlFile
 }
