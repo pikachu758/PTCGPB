@@ -1174,13 +1174,8 @@ NextStep:
         packControls .= "AllPackSelection,Txt_PackHeading,Page_Buzzwole,Page_Solgaleo,Page_Lunala,Page_Shining,"
         packControls .= "Txt_PageBuzzwole,Txt_PageSolgaleo,Txt_PageLunala,Txt_PageShining,Btn_returnPack,Txt_Btn_returnPack,"
         packControls .= "FullArtCheck,TrainerCheck,RainbowCheck,PseudoGodPack,InvalidCheck,"
-<<<<<<< HEAD
         packControls .= "Txt_FullArtCheck,Txt_TrainerCheck,Txt_RainbowCheck,Txt_PseudoGodPack,Txt_CrownCheck,Txt_ShinyCheck,Txt_ImmersiveCheck,Txt_CheckShinyPackOnly,Txt_InvalidCheck,"
         packControls .= "CheckShinyPackOnly,CrownCheck,ImmersiveCheck,Pack_Divider3,"
-=======
-        packControls .= "Txt_FullArtCheck,Txt_TrainerCheck,Txt_RainbowCheck,Txt_PseudoGodPack,Txt_CrownCheck,Txt_ShinyCheck,Txt_ImmersiveCheck,Txt_CheckShiningPackOnly,Txt_InvalidCheck,"
-        packControls .= "CheckShiningPackOnly,CrownCheck,ImmersiveCheck,Pack_Divider3,"
->>>>>>> 3901859116ea14287c0f257b84e08bb1a7240593
         packControls .= "spendHourGlass,Txt_spendHourGlass,openExtraPack,Txt_openExtraPack"
         s4tControls := "s4tEnabled,s4tSilent,s4t3Dmnd,s4t4Dmnd,s4t1Star,"
         s4tControls .= "Txt_s4tEnabled,Txt_s4tSilent,Txt_s4t3Dmnd,Txt_s4t4Dmnd,Txt_s4t1Star,Txt_s4tWP,Txt_s4tSendAccountXml,"
