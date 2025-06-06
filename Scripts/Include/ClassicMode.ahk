@@ -111,6 +111,11 @@ LoadSettingsFromIni() {
     IniRead, heartBeatName, %A_ScriptDir%\..\..\Settings.ini, UserSettings, heartBeatName, ""
     IniRead, heartBeatDelay, %A_ScriptDir%\..\..\Settings.ini, UserSettings, heartBeatDelay, 30
     IniRead, sendAccountXml, %A_ScriptDir%\..\..\Settings.ini, UserSettings, sendAccountXml, 0
+
+    ;download settings
+    IniRead, mainIdsURL, %A_ScriptDir%\..\..\Settings.ini, UserSettings, mainIdsURL, ""
+    IniRead, vipIdsURL, %A_ScriptDir%\..\..\Settings.ini, UserSettings, vipIdsURL, ""
+    IniRead, showcaseEnabled, %A_ScriptDir%\..\..\Settings.ini, UserSettings, showcaseEnabled, 0
     
     ; Validate numeric values
     if (!IsNumeric(Instances))
@@ -460,7 +465,7 @@ Gui, Add, Checkbox, % (TrainerCheck ? "Checked" : "") " vTrainerCheck x270 y385 
 Gui, Add, Checkbox, % (RainbowCheck ? "Checked" : "") " vRainbowCheck x270 y405 " . sectionColor, % currentDictionary.Txt_RainbowCheck
 Gui, Add, Checkbox, % (PseudoGodPack ? "Checked" : "") " vPseudoGodPack x270 y425 " . sectionColor, % currentDictionary.Txt_PseudoGodPack
 
-Gui, Add, Checkbox, % (CheckShiningPackOnly ? "Checked" : "") " vCheckShiningPackOnly x270 y445 " . sectionColor, % currentDictionary.Txt_CheckShiningPackOnly
+Gui, Add, Checkbox, % (CheckShinyPackOnly ? "Checked" : "") " vCheckShinyPackOnly x270 y445 " . sectionColor, % currentDictionary.Txt_CheckShinyPackOnly
 Gui, Add, Checkbox, % (InvalidCheck ? "Checked" : "") " vInvalidCheck x270 y465 " . sectionColor, % currentDictionary.Txt_InvalidCheck
 
 Gui, Add, Text, x270 y495 w210 h2 +0x10 ; Creates a horizontal line
