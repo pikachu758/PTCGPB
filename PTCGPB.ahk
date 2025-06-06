@@ -4008,6 +4008,10 @@ StartBot:
         confirmMsg .= "`n" . SetUpDictionary.Confirm_SpendHourGlass
         additionalSettingsFound := true
     }
+    if (openExtraPack) {
+        confirmMsg .= "`n" . SetUpDictionary.Confirm_OpenExtraPack
+        additionalSettingsFound := true
+    }
     if (claimSpecialMissions && InStr(deleteMethod, "Inject")) {
         confirmMsg .= "`n" . SetUpDictionary.Confirm_ClaimMissions
         additionalSettingsFound := true
