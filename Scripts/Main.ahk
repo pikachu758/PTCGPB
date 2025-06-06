@@ -80,24 +80,24 @@ Loop {
         ;Winset, Alwaysontop, On, %winTitle%
         OwnerWND := WinExist(winTitle)
         x4 := x + 5
-        y4 := y + 535
+        y4 := y + 536
         buttonWidth := 45
         if (scaleParam = 287)
             buttonWidth := buttonWidth + 5
 
-        Gui, New, +Owner%OwnerWND% -AlwaysOnTop +ToolWindow -Caption +LastFound -DPIScale 
-        Gui, Default
-        Gui, Margin, 4, 4  ; Set margin for the GUI
-        Gui, Font, s5 cGray Norm Bold, Segoe UI  ; Normal font for input labels
-        Gui, Add, Button, % "x" . (buttonWidth * 0) . " y0 w" . buttonWidth . " h25 gReloadScript", Reload  (Shift+F5)
-        Gui, Add, Button, % "x" . (buttonWidth * 1) . " y0 w" . buttonWidth . " h25 gPauseScript", Pause (Shift+F6)
-        Gui, Add, Button, % "x" . (buttonWidth * 2) . " y0 w" . buttonWidth . " h25 gResumeScript", Resume (Shift+F6)
-        Gui, Add, Button, % "x" . (buttonWidth * 3) . " y0 w" . buttonWidth . " h25 gStopScript", Stop (Shift+F7)
-        Gui, Add, Button, % "x" . (buttonWidth * 4) . " y0 w" . buttonWidth . " h25 gShowStatusMessages", Status (Shift+F8)
-        Gui, Add, Button, % "x" . (buttonWidth * 5) . " y0 w" . buttonWidth . " h25 gTestScript", GP Test (Shift+F9)
+        Gui, ToolBar:New, +Owner%OwnerWND% -AlwaysOnTop +ToolWindow -Caption +LastFound -DPIScale 
+        Gui, ToolBar:Default
+        Gui, ToolBar:Margin, 4, 4  ; Set margin for the GUI
+        Gui, ToolBar:Font, s5 cGray Norm Bold, Segoe UI  ; Normal font for input labels
+        Gui, ToolBar:Add, Button, % "x" . (buttonWidth * 0) . " y0 w" . buttonWidth . " h25 gReloadScript", Reload  (Shift+F5)
+        Gui, ToolBar:Add, Button, % "x" . (buttonWidth * 1) . " y0 w" . buttonWidth . " h25 gPauseScript", Pause (Shift+F6)
+        Gui, ToolBar:Add, Button, % "x" . (buttonWidth * 2) . " y0 w" . buttonWidth . " h25 gResumeScript", Resume (Shift+F6)
+        Gui, ToolBar:Add, Button, % "x" . (buttonWidth * 3) . " y0 w" . buttonWidth . " h25 gStopScript", Stop (Shift+F7)
+        Gui, ToolBar:Add, Button, % "x" . (buttonWidth * 4) . " y0 w" . buttonWidth . " h25 gShowStatusMessages", Status (Shift+F8)
+        Gui, ToolBar:Add, Button, % "x" . (buttonWidth * 5) . " y0 w" . buttonWidth . " h25 gTestScript", GP Test (Shift+F9)
         DllCall("SetWindowPos", "Ptr", WinExist(), "Ptr", 1  ; HWND_BOTTOM
                 , "Int", 0, "Int", 0, "Int", 0, "Int", 0, "UInt", 0x13)  ; SWP_NOSIZE, SWP_NOMOVE, SWP_NOACTIVATE
-        Gui, Show, NoActivate x%x4% y%y4%  w275 h30
+        Gui, ToolBar:Show, NoActivate x%x4% y%y4%  w275 h30
         break
     }
     catch {
@@ -155,7 +155,7 @@ if (scaleParam = 287) {
 Loop {
     if (autoUseGPTest) {
         autotest_time := (A_TickCount - autotest) // 1000
-        CreateStatusMessage("gp_test_on" . autotest_time .  "/" . TestTime . " seconds")
+        CreateStatusMessage("Auto GP Test Timer : " . autotest_time .  "/ " . TestTime . " seconds", "AutoGPTest", 0, 605, false, true)
         if (autotest_time >= TestTime) {
             A_gptest := 1
             ToggleTestScript()
@@ -896,9 +896,9 @@ RemoveNonVipFriends() {
                 Sleep, 1500 ; Time to read
                 FindImageAndClick(135, 355, 160, 385, , "Remove", 145, 407, 500)
                 FindImageAndClick(70, 395, 100, 420, , "Send2", 200, 372, 500)
-                Delay(1)
-                FindImageAndClick(226, 100, 270, 135, , "Add", 143, 507, 500)
                 Delay(3)
+                FindImageAndClick(226, 100, 270, 135, , "Add", 143, 507, 500)
+                Delay(4)
 				scrolledWithoutFriend := 0
             }
         }
