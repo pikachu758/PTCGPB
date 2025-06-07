@@ -997,15 +997,11 @@ RemoveFriends() {
 }
 
 TradeTutorial() {
-    
-    failSafe := A_TickCount
-    failSafeTime := 0
-
     if(FindOrLoseImage(100, 120, 175, 145, , "Trade", 0)) {
         Loop{
             adbClick_wbb(167,437)
             Delay(1)
-            if(FindOrLoseImage(15, 455, 40, 475, ,"Add2", 0, failSafeTime))          
+            if(FindOrLoseImage(15, 455, 40, 475, ,"Add2", 0))          
             break
         }
 
@@ -1040,6 +1036,7 @@ AddFriends(renew := false, getFC := false) {
                     break
                 }
                 else if(!renew && !getFC) {
+                    Delay(3)
                     clickButton := FindOrLoseImage(75, 360, 195, 410, 75, "Button", 0)
                     if(clickButton) {
                         StringSplit, pos, clickButton, `,  ; Split at ", "
@@ -1275,6 +1272,8 @@ EraseInput(num := 0, total := 0) {
 
 FindOrLoseImage(X1, Y1, X2, Y2, searchVariation := "", imageName := "DEFAULT", EL := 1, safeTime := 0) {
     global winTitle, failSafe
+    static lastStatusTime := 0
+
     if(slowMotion) {
         if(imageName = "Platin" || imageName = "One" || imageName = "Two" || imageName = "Three")
             return true
@@ -1284,7 +1283,12 @@ FindOrLoseImage(X1, Y1, X2, Y2, searchVariation := "", imageName := "DEFAULT", E
     imagePath := A_ScriptDir . "\" . defaultLanguage . "\"
     confirmed := false
 
-    CreateStatusMessage("Finding " . imageName . "...")
+    if(A_TickCount - lastStatusTime > 500) {
+        lastStatusTime := A_TickCount
+        CreateStatusMessage("Finding " . imageName . "...")
+    }
+
+
     pBitmap := from_window(WinExist(winTitle))
     Path = %imagePath%%imageName%.png
     pNeedle := GetNeedle(Path)
