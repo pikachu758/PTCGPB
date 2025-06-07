@@ -694,11 +694,6 @@ if(DeadCheck = 1 && deleteMethod != "13 Pack") {
                 restartGameInstance("New Run", false)
             }
         }
-
-        if (stopToggle) {
-            CreateStatusMessage("Stopping...",,,, false)
-            ExitApp
-        }
     }
 }
 
@@ -994,6 +989,11 @@ RemoveFriends() {
     friended := false
     LogToFile("Friend removal process completed successfully")
     CreateStatusMessage("Friends removed successfully!",,,, false)
+
+    if(stopToggle) {
+        CreateStatusMessage("Stopping...",,,, false)
+        ExitApp
+    }
 }
 
 TradeTutorial() {
@@ -2573,7 +2573,7 @@ saveAccount(file := "Valid", ByRef filePath := "", packDetails := "") {
     } else if (file = "Tradeable") {
         saveDir := A_ScriptDir "\..\Accounts\Trades\"
 		;packsInPool doesn't make sense but nothing does, really.
-        xmlFile := A_Now . "_" . winTitle . "_" . file . (packDetails ? "_" . packDetails : "") . "_" . packsInPool . "_packs.xml"
+        xmlFile := A_Now . "_" . winTitle . (packDetails ? "_" . packDetails : "") . "_" . packsInPool . "_packs.xml"
         filePath := saveDir . xmlFile
     } else {
         saveDir := A_ScriptDir "\..\Accounts\SpecificCards\"
@@ -5011,15 +5011,15 @@ FindPackStats() {
 	Sleep, 100
     
     packValue := 0
-	ocrText := ""
+	trophyOCR := ""
     
 	;214, 438, 111x30
 	;214, 434, 111x38
 	;214, 441, 111x24
 	ocrSuccess := 0 
-    if(RefinedOCRText(fullScreenshotFile, 214, 438, 111, 30, "0123456789,/", "^\d{1,3}(,\d{3})?\/\d{1,3}(,\d{3})?$", ocrText)) {
-		;MsgBox, %ocrText%
-		ocrParts := StrSplit(ocrText, "/")
+    if(RefinedOCRText(fullScreenshotFile, 214, 438, 111, 30, "0123456789,/", "^\d{1,3}(,\d{3})?\/\d{1,3}(,\d{3})?$", trophyOCR)) {
+		;MsgBox, %trophyOCR%
+		ocrParts := StrSplit(trophyOCR, "/")
 		accountOpenPacks := ocrParts[1]
 		;MsgBox, %accountOpenPacks%
 		ocrSuccess := 1
@@ -5052,8 +5052,12 @@ FindPackStats() {
 ; Attempts to extract and validate text from a specified region of a screenshot using OCR.
 RefinedOCRText(screenshotFile, x, y, w, h, allowedChars, validPattern, ByRef output) {
     success := False
-    ;blowUp := [200, 500, 1000, 2000, 100, 250, 300, 350, 400, 450, 550, 600, 700, 800, 900]
-    blowUp := [500, 1000, 2000, 100, 200, 250, 300, 350, 400, 450, 550, 600, 700, 800, 900]
+    ; Pack count gets bigger blowup
+    if(output = "trophyOCR"){
+        blowUp := [500, 1000, 2000, 100, 200, 250, 300, 350, 400, 450, 550, 600, 700, 800, 900]
+    } else {
+        blowUp := [200, 500, 1000, 2000, 100, 250, 300, 350, 400, 450, 550, 600, 700, 800, 900]
+    }
     Loop, % blowUp.Length() {
         ; Get the formatted pBitmap
         pBitmap := CropAndFormatForOcr(screenshotFile, x, y, w, h, blowUp[A_Index])

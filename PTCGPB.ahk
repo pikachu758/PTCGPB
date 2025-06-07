@@ -14,11 +14,11 @@ global STATIC_BRUSH := 0
 
 githubUser := "mixman208"
 repoName := "PTCGPB"
-localVersion := "v6.5.1"
+localVersion := "v6.4.16"
 scriptFolder := A_ScriptDir
 zipPath := A_Temp . "\update.zip"
 extractPath := A_Temp . "\update"
-intro := "Reroll an Extra Pack!"
+intro := "Reroll 1 Extra Pack!"
 
 ; GUI dimensions
 global GUI_WIDTH := 377 
