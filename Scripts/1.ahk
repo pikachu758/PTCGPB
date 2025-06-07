@@ -1262,13 +1262,10 @@ EraseInput(num := 0, total := 0) {
     failSafeTime := 0
     Loop {
         FindImageAndClick(0, 475, 25, 495, , "OK2", 138, 454)
-        adbClick_wbb(50, 500)
-        Sleep, 10
-        adbInputEvent("29")  ; Press Ctrl
-        adbInputEvent("41")  ; Press A
-        adbInputEvent("29+41") ; Release both
-        Sleep, 10
-        adbInputEvent("67") ; Press Backspace
+	    adbClick_wbb(50, 500)
+	    adbClick_wbb(50, 500)
+		Sleep,10
+            adbInputEvent("67")
         if(FindOrLoseImage(15, 500, 68, 520, , "Erase", 0, failSafeTime))
             break
     }
