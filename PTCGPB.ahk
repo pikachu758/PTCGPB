@@ -4092,7 +4092,7 @@ StartBot:
             confirmMsg .= "• " . SetUpDictionary.Confirm_WonderPick . ": " . SetUpDictionary.Confirm_Disabled . "`n"
     }
 
-    if (sendAccountXml || s4tSendAccountXml) {
+    if (sendAccountXml || s4tEnabled && s4tSendAccountXml) {
         confirmMsg .= "`n`n" . SetUpDictionary.Confirm_XMLWarning . "`n"
     }
 
