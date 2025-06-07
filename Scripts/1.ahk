@@ -1036,7 +1036,6 @@ AddFriends(renew := false, getFC := false) {
             failSafeTime := 0
             Loop {
                 adbClick_wbb(143, 518)
-                Delay(1)
                 if(FindOrLoseImage(120, 500, 155, 530, , "Social", 0, failSafeTime)) {
                     break
                 }
@@ -2123,14 +2122,10 @@ FoundTradeable(found3Dmnd := 0, found4Dmnd := 0, found1Star := 0, foundGimmighou
     ; If we're doing the inject method, try to OCR our Username
     try {
         if (injectMethod && IsFunc("ocr")) {
-            ocrText := Func("ocr").Call(fcScreenshot, ocrLanguage)
-            ocrLines := StrSplit(ocrText, "`n")
-            len := ocrLines.MaxIndex()
-            if(len > 1) {
-                playerName := ocrLines[1]
-                playerID := RegExReplace(ocrLines[2], "[^0-9]", "")
-                ; playerID := SubStr(ocrLines[2], 1, 19)
-                username := playerName
+            ; Region: x32, y120, 175x26
+            playerName := ""
+            if(RefinedOCRText(fcScreenshot, 32, 120, 175, 26, "", "", playerName)) {
+            username := playerName
             }
         }
     } catch e {
@@ -2140,8 +2135,6 @@ FoundTradeable(found3Dmnd := 0, found4Dmnd := 0, found1Star := 0, foundGimmighou
     statusMessage := "Tradeable cards found"
     if (username)
         statusMessage .= " by " . username
-    if (friendCode)
-        statusMessage .= " (" . friendCode . ")"
 
     logMessage := statusMessage . " in instance: " . scriptName . " (" . packsInPool . " packs, " . openPack . ")\nFile name: " . accountFile . "\nScreenshot file: " . screenShotFileName . "\nBacking up to the Accounts\\Trades folder and continuing..."
     LogToFile(StrReplace(logMessage, "\n", " "), "S4T.txt")
@@ -2177,14 +2170,10 @@ FoundStars(star) {
         ; If we're doing the inject method, try to OCR our Username
         try {
             if (injectMethod && IsFunc("ocr")) {
-                ocrText := Func("ocr").Call(fcScreenshot, ocrLanguage)
-                ocrLines := StrSplit(ocrText, "`n")
-                len := ocrLines.MaxIndex()
-                if(len > 1) {
-                    playerName := ocrLines[1]
-                    playerID := RegExReplace(ocrLines[2], "[^0-9]", "")
-                    ; playerID := SubStr(ocrLines[2], 1, 19)
-                    username := playerName
+                ; Region: x32, y120, 175x26
+                playerName := ""
+               if(RefinedOCRText(fcScreenshot, 32, 120, 175, 26, "", "", playerName)) {
+                username := playerName
                 }
             }
         } catch e {
@@ -2197,8 +2186,6 @@ FoundStars(star) {
     statusMessage := star . " found"
     if (username)
         statusMessage .= " by " . username
-    if (friendCode)
-        statusMessage .= " (" . friendCode . ")"
 
     logMessage := statusMessage . " in instance: " . scriptName . " (" . packsInPool . " packs, " . openPack . ")\nFile name: " . accountFile . "\nBacking up to the Accounts\\SpecificCards folder and continuing..."
     LogToDiscord(logMessage, screenShot, true, (sendAccountXml ? accountFullPath : ""), fcScreenshot)
@@ -2373,14 +2360,10 @@ GodPackFound(validity) {
     ; If we're doing the inject method, try to OCR our Username
     try {
         if (injectMethod && IsFunc("ocr")) {
-            ocrText := Func("ocr").Call(fcScreenshot, ocrLanguage)
-            ocrLines := StrSplit(ocrText, "`n")
-            len := ocrLines.MaxIndex()
-            if(len > 1) {
-                playerName := ocrLines[1]
-                playerID := RegExReplace(ocrLines[2], "[^0-9]", "")
-                ; playerID := SubStr(ocrLines[2], 1, 19)
-                username := playerName
+            ; Region: x32, y120, 175x26
+            playerName := ""
+            if(RefinedOCRText(fcScreenshot, 32, 120, 175, 26, "", "", playerName)) {
+            username := playerName
             }
         }
     } catch e {
@@ -4971,10 +4954,9 @@ GoToMain(){
     Screenshot_dev()
 return
 
-; ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-; Find Card Count and Relevant Functions
-; ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
+; ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+; Find Card Count and OCR Helper Functions
+; ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 FindPackStats() {
     global adbShell, scriptName, ocrLanguage, loadDir
@@ -5035,7 +5017,7 @@ FindPackStats() {
 	;214, 434, 111x38
 	;214, 441, 111x24
 	ocrSuccess := 0 
-    if(ParseCardCount(fullScreenshotFile, 214, 438, 111, 30, "0123456789,/", "^\d{1,3}(,\d{3})?\/\d{1,3}(,\d{3})?$", ocrText)) {
+    if(RefinedOCRText(fullScreenshotFile, 214, 438, 111, 30, "0123456789,/", "^\d{1,3}(,\d{3})?\/\d{1,3}(,\d{3})?$", ocrText)) {
 		;MsgBox, %ocrText%
 		ocrParts := StrSplit(ocrText, "/")
 		accountOpenPacks := ocrParts[1]
@@ -5068,7 +5050,7 @@ FindPackStats() {
 }
 
 ; Attempts to extract and validate text from a specified region of a screenshot using OCR.
-ParseCardCount(screenshotFile, x, y, w, h, allowedChars, validPattern, ByRef output) {
+RefinedOCRText(screenshotFile, x, y, w, h, allowedChars, validPattern, ByRef output) {
     success := False
     ;blowUp := [200, 500, 1000, 2000, 100, 250, 300, 350, 400, 450, 550, 600, 700, 800, 900]
     blowUp := [500, 1000, 2000, 100, 200, 250, 300, 350, 400, 450, 550, 600, 700, 800, 900]
