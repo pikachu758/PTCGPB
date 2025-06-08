@@ -401,7 +401,7 @@ if(DeadCheck = 1 && deleteMethod != "13 Pack") {
         packsThisRun := 0
         keepAccount := false
 
-        ; BallCity 2025.02.21 - Keep track of additional metrics
+        ; BallCity 2025.02.21 - Track monitor
         now := A_NowUTC
         IniWrite, %now%, %A_ScriptDir%\%scriptName%.ini, Metrics, LastStartTimeUTC
         EnvSub, now, 1970, seconds
@@ -564,34 +564,13 @@ if(DeadCheck = 1 && deleteMethod != "13 Pack") {
 
         EndOfRun:
 
-        /*        ; DISABLED
-        ; ===== DAILY MISSIONS - GET 4 HOURGLASSES =====
-        ; Collect daily mission rewards (always run this)
-        GoToMain()
-        FindImageAndClick(2, 85, 34, 120, , "Missions", 261, 478, 500)
-        Delay(4)
-        adbClick_wbb(120, 465)   ;click daily mission
-        Delay(4)
-        FindImageAndClick(244, 406, 273, 449, , "GotAllMissions", 172, 427) 
-        ;adbClick_wbb(172, 427)
-        Delay(4)
-        adbClick_wbb(250, 120)
-        Delay(4)
-        adbClick_wbb(250, 120)
-        Delay(4)
-        adbClick_wbb(250, 120)
-        Delay(4)
-        adbClick_wbb(250, 120)
-        adbClick_wbb(250, 120)
-        Delay(4)
-        adbClick_wbb(250, 120)
-        GoToMain()
-        */
+        ; Collect Daily Hourglasses - either separate setting? or will be currently part of openExtraPack
+        if(deleteMethod = "Inject for Reroll" && openExtraPack) {
+            GoToMain()
+            GetAllRewards(true, true)
+        }
         
-                
-        ; ===== USER-CONTROLLED SPECIAL FEATURES =====
-        
-        ; Special missions - user controlled
+        ; Special missions
         IniRead, claimSpecialMissions, %A_ScriptDir%\..\Settings.ini, UserSettings, claimSpecialMissions, 0
         if (claimSpecialMissions = 1 && !specialMissionsDone && !(deleteMethod = "Inject" && accountOpenPacks >= maxAccountPackNum || deleteMethod = "Inject Missions" && accountOpenPacks >= maxAccountPackNum)) {
             GoToMain()
@@ -603,19 +582,19 @@ if(DeadCheck = 1 && deleteMethod != "13 Pack") {
                 setMetaData()
         }
         
-        ; Hourglass spending - user controlled
+        ; Hourglass spending
         IniRead, spendHourGlass, %A_ScriptDir%\..\Settings.ini, UserSettings, spendHourGlass, 0
         if (spendHourGlass = 1 && !(deleteMethod = "Inject" && accountOpenPacks >= maxAccountPackNum || deleteMethod = "Inject Missions" && accountOpenPacks >= maxAccountPackNum)) {
             LogToFile("Executing hourglass spending - User setting enabled")
             SpendAllHourglass()
         }
 
-        ; ===== FRIEND REMOVAL FOR INJECTION METHODS =====
+        ; Friend removal for inject reroll
         if (injectMethod && friended && !keepAccount) {
             RemoveFriends()
         }
         
-        ; BallCity 2025.02.21 - Keep track of additional metrics
+        ; BallCity 2025.02.21 - Track monitor
         now := A_NowUTC
         IniWrite, %now%, %A_ScriptDir%\%scriptName%.ini, Metrics, LastEndTimeUTC
         EnvSub, now, 1970, seconds
@@ -649,7 +628,7 @@ if(DeadCheck = 1 && deleteMethod != "13 Pack") {
 
         AppendToJsonFile(packsThisRun)
 		
-        ; End sequences check for 40 first	
+        ; Check for 40 first to quit	
         if (deleteMethod = "Inject" || deleteMethod = "Inject Missions" && accountOpenPacks >= maxAccountPackNum) {
             if (injectMethod && loadedAccount) {
                 if (!keepAccount) {
@@ -4976,19 +4955,27 @@ GetEventRewards(frommain := true){
     GoToMain()
 }
 
-GetAllRewards(tomain := true){
+GetAllRewards(tomain := true, dailies := false) {
     FindImageAndClick(2, 85, 34, 120, , "Missions", 261, 478, 500)
     Delay(4)
     failSafe := A_TickCount
     failSafeTime := 0
     GotRewards := true
-    Loop{
+    if(dailies){
+        FindImageAndClick(37, 130, 64, 156, , "DailyMissions", 165, 465, 500)
+    }
+    Loop {
         Delay(2)
         adbClick(172, 427)
-        if FindOrLoseImage(244, 406, 273, 449, , "GotAllMissions", 0, 0) {
+        
+        if(dailies) {
+            FindImageAndClick(68, 148, 94, 169, , "CollectDailies", 250, 135, 500)
+        }
+        
+        if(FindOrLoseImage(244, 406, 273, 449, , "GotAllMissions", 0, 0)) {
             break
         }
-        else if (failSafeTime > 20){
+        else if (failSafeTime > 20) {
             GotRewards := false
             break
         }
