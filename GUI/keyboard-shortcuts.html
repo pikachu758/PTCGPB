@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PTCGP Bot - Complete User Guide</title>
+    <title>PTCGP Bot - Keyboard Shortcuts</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        /* Custom CSS for overall layout and styling */
+        /* Custom CSS for overall layout and styling, consistent across all pages */
         body {
             font-family: 'Inter', sans-serif;
             line-height: 1.7;
@@ -15,9 +15,7 @@
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             padding: 4rem; /* Increased body padding */
-        }
-        @media (max-width: 768px) {
-            body {
+            @media (max-width: 768px) {
                 padding: 2rem; /* Adjusted for smaller screens */
             }
         }
@@ -63,9 +61,7 @@
             text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
             position: relative;
             z-index: 1;
-        }
-         @media (max-width: 768px) {
-            .header h1 {
+            @media (max-width: 768px) {
                 font-size: 2rem;
             }
         }
@@ -117,71 +113,71 @@
             display: flex;
             flex-grow: 1;
         }
-        /* Sidebar is explicitly hidden for this page */
-        .sidebar {
-            display: none;
-        }
+        /* Removed .sidebar styles as it's no longer present */
         .main-content {
             flex-grow: 1;
             padding: 2rem 3rem; /* Adjusted padding */
             min-width: 0;
-        }
-        @media (max-width: 768px) {
-            .main-content {
+            @media (max-width: 768px) {
                 padding: 1.5rem;
                 width: 100%;
             }
         }
-        .toc {
-            background: linear-gradient(135deg, #edf2f7 0%, #e2e8f0 100%);
+        /* Ensure all scroll targets are not obscured by the sticky nav bar */
+        .page-title, /* Retained in case a new H2 is added manually */
+        .keyboard-shortcuts h3,
+        .shortcut-category h4 {
+            scroll-margin-top: 8rem; /* Adjusted for better clearance */
+        }
+        .keyboard-shortcuts {
+            background: linear-gradient(135deg, #1a202c 0%, #2d3748 100%);
+            color: white;
             border-radius: 15px;
             padding: 2rem;
-            margin-bottom: 3rem;
-            border-left: 5px solid #4299e1;
+            margin: 2rem 0;
         }
-        .toc h2 {
-            color: #1a202c;
+        .keyboard-shortcuts h3 {
             font-size: 1.5rem;
             margin-bottom: 1rem;
             display: flex;
             align-items: center;
             gap: 0.5rem;
+            font-weight: 700; /* Added for consistency */
         }
-        .toc-grid {
+        .shortcut-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 1rem;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
             margin-top: 1rem;
-        }
-         @media (max-width: 768px) {
-            .toc-grid {
+            @media (max-width: 768px) {
                 grid-template-columns: 1fr;
             }
         }
-        .toc-item {
-            background: white;
-            padding: 1rem;
+        .shortcut-category {
+            background: rgba(255,255,255,0.1);
             border-radius: 10px;
-            border: 2px solid transparent;
-            transition: all 0.3s ease;
-            cursor: pointer;
+            padding: 1.5rem;
         }
-        .toc-item:hover {
-            border-color: #4299e1;
-            transform: translateY(-2px);
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        .shortcut-category h4 {
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+            color: #90cdf4;
+            font-weight: 700; /* Added for consistency */
         }
-        .toc-item a {
-            text-decoration: none;
-            color: #4299e1;
-            font-weight: 500;
+        .shortcut-item {
             display: flex;
+            justify-content: space-between;
             align-items: center;
-            gap: 0.5rem;
+            margin-bottom: 0.5rem;
         }
-        /* Ensure all scroll targets are not obscured by the sticky nav bar */
-        .toc h2, .highlight-box h3 {
-            scroll-margin-top: 8rem; /* Adjusted for better clearance */
+        .shortcut-key {
+            background: #4a5568;
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.875rem;
+            font-weight: 600;
         }
         .footer {
             background: #1a202c;
@@ -195,16 +191,12 @@
             max-width: 600px;
             margin: 0 auto;
         }
-        .footer h3 {
-            font-size: 1.5rem;
-            margin-bottom: 1rem;
-        }
         .footer-links {
             display: flex;
             justify-content: center;
             gap: 2rem;
             margin-top: 1rem;
-            flex-wrap: wrap; /* Ensure links wrap horizontally */
+            flex-wrap: wrap;
         }
         .footer-link {
             color: #90cdf4;
@@ -241,12 +233,13 @@
             .content-wrapper {
                 flex-direction: column;
             }
+            /* .sidebar no longer applies here */
         }
     </style>
 </head>
 <body>
     <div class="document">
-        <!-- Consistent Header for all pages -->
+        <!-- Define the current version directly in HTML -->
         <div class="header" onclick="window.location.href='Help Guide.html'" style="cursor: pointer;">
             <h1>🎲 PTCGP Bot</h1>
             <p class="subtitle">User Guide & Interface Documentation</p>
@@ -270,67 +263,66 @@
         </nav>
         
         <div class="content-wrapper">
+            <!-- Removed sidebar as per request -->
             <div class="main-content">
-                <div class="toc">
-                    <h2 class="justify-center" id="table-of-contents">📋 Table of Contents</h2>
-                    <div class="flex justify-center mb-4">
-                        <div class="toc-item">
-                            <a href="navigation.html">🧭 Main Menu</a>
+                <!-- Removed H2 page title as per request -->
+                <div class="keyboard-shortcuts">
+                    <h3 id="keyboard-shortcuts-main">⌨️ Keyboard Shortcuts</h3>
+                    <div class="shortcut-grid">
+                        <div class="shortcut-category">
+                            <h4 id="section-navigation">🧭 Section Navigation</h4>
+                            <div class="shortcut-item">
+                                <span>Reroll Settings</span>
+                                <span class="shortcut-key">Ctrl+1</span>
+                            </div>
+                            <div class="shortcut-item">
+                                <span>System Settings</span>
+                                <span class="shortcut-key">Ctrl+2</span>
+                            </div>
+                            <div class="shortcut-item">
+                                <span>Pack Settings</span>
+                                <span class="shortcut-key">Ctrl+3</span>
+                            </div>
+                            <div class="shortcut-item">
+                                <span>Save For Trade</span>
+                                <span class="shortcut-key">Ctrl+4</span>
+                            </div>
+                            <div class="shortcut-item">
+                                <span>Discord Settings</span>
+                                <span class="shortcut-key">Ctrl+5</span>
+                            </div>
+                            <div class="shortcut-item">
+                                <span>Download Settings</span>
+                                <span class="shortcut-key">Ctrl+6</span>
+                            </div>
+                            <div class="shortcut-item">
+                                <span>Account Tools</span>
+                                <span class="shortcut-key">Ctrl+7</span>
+                            </div>
                         </div>
-                    </div>
-                    <div class="toc-grid">
-                        <div class="toc-item">
-                            <a href="reroll-settings.html">🔄 Reroll Settings</a>
-                        </div>
-                        <div class="toc-item">
-                            <a href="system-settings.html">⚙️ System Settings</a>
-                        </div>
-                        <div class="toc-item">
-                            <a href="pack-settings.html">📦 Pack Settings</a>
-                        </div>
-                        <div class="toc-item">
-                            <a href="save-for-trade.html">💎 Save For Trade</a>
-                        </div>
-                        <div class="toc-item">
-                            <a href="discord-settings.html">💬 Discord Settings</a>
-                        </div>
-                        <div class="toc-item">
-                            <a href="download-settings.html">⬇️ Download Settings</a>
-                        </div>
-                        <div class="toc-item">
-                            <a href="keyboard-shortcuts.html">⌨️ Keyboard Shortcuts</a>
-                        </div>
-                        <div class="toc-item">
-                            <a href="important-notes.html">🚨 Important Notes & Warnings</a>
-                        </div>
-                        <div class="toc-item">
-                            <a href="account-management-tools.html">🛠️ Account Tools</a>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="highlight-box bg-green-700 text-white rounded-xl p-8 my-8 text-center shadow-lg">
-                    <h3 class="text-2xl font-bold mb-4" id="quick-tips">💡 New User?</h3>
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-4">
-                        <div class="bg-white bg-opacity-20 rounded-lg p-4">
-                            <div class="bg-white text-green-700 w-8 h-8 rounded-full flex items-center justify-center font-bold mx-auto mb-2">🔄</div>
-                            <strong>Reroll Method</strong>
-                            <p class="text-sm opacity-90">Start with 13 Pack method to create new accounts. Once you have enough accounts to cycle through 1 day, train them with Inject.</p>
-                        </div>
-                        <div class="bg-white bg-opacity-20 rounded-lg p-4">
-                            <div class="bg-white text-green-700 w-8 h-8 rounded-full flex items-center justify-center font-bold mx-auto mb-2">💬</div>
-                            <strong>Discord Integration</strong>
-                            <p class="text-sm opacity-90">Set up webhooks for remote monitoring and notifications</p>
-                        </div>
-                        <div class="bg-white bg-opacity-20 rounded-lg p-4">
-                            <div class="bg-white text-green-700 w-8 h-8 rounded-full flex items-center justify-center font-bold mx-auto mb-2">🎯</div>
-                            <strong>Start Small</strong>
-                            <p class="text-sm opacity-90">Test your system with 1 instance first. Increase instances once you are confident with setup and a complete run finishes.</p>
-                        </div>
-                        <div class="bg-red-700 text-white rounded-lg p-4 shadow-xl border-2 border-red-400 transform hover:scale-105 transition-transform duration-200">
-                            <div class="bg-white text-red-700 w-10 h-10 rounded-full flex items-center justify-center font-extrabold text-xl mx-auto mb-3 animate-pulse">💾</div>
-                            <strong class="text-lg">ALWAYS Backup!</strong>
-                            <p class="text-sm opacity-90 mt-1">Always keep multiple backups of your XML files. XML files are located in the \Accounts\Saved folder</p>
+                        
+                        <div class="shortcut-category">
+                            <h4 id="quick-actions">🚀 Quick Actions</h4>
+                            <div class="shortcut-item">
+                                <span>Launch All MuMu</span>
+                                <span class="shortcut-key">F1</span>
+                            </div>
+                            <div class="shortcut-item">
+                                <span>Arrange Windows</span>
+                                <span class="shortcut-key">F2</span>
+                            </div>
+                            <div class="shortcut-item">
+                                <span>Start Bot</span>
+                                <span class="shortcut-key">F3</span>
+                            </div>
+                            <div class="shortcut-item">
+                                <span>Show Help Menu</span>
+                                <span class="shortcut-key">F4</span>
+                            </div>
+                            <div class="shortcut-item">
+                                <span>Send Offline & Exit</span>
+                                <span class="shortcut-key">Shift+F7</span>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -352,7 +344,7 @@
                         ☕ Support Development
                     </a>
                 </div>
-                <p class="mt-8 text-sm opacity-80">
+                <p class="mt-4 text-sm opacity-80">
                     Licensed under CC BY-NC 4.0 International License<br>
                     Non-commercial use only • Created by Arturo • Version <span id="footer-version">v6.4.17</span>
                 </p>
@@ -379,7 +371,7 @@
             }
         });
 
-        // Smooth scroll to target function (for table of contents)
+        // Smooth scroll to target function (for table of contents) - kept for any potential internal links if added later
         function smoothScrollToTarget(targetId) {
             const target = document.getElementById(targetId);
             if (!target) return;
@@ -402,8 +394,11 @@
             });
         }
 
-        // Add click event listeners to all TOC links (if any, will apply to this page's TOC)
-        document.querySelectorAll('.toc a[href^="#"]').forEach(link => {
+        // Removed generateSidebarTOC() and related event listener as TOC is removed
+        // Only keep addTOCClickListeners if there are other internal links that might benefit from smooth scrolling
+        // For now, no specific TOC links to listen to, so this function can be removed if not needed elsewhere.
+        // Keeping it for now as a general utility, as there are still ID-based anchors in the shortcuts section.
+        document.querySelectorAll('a[href^="#"]').forEach(link => {
             link.addEventListener('click', function(e) {
                 e.preventDefault();
                 const targetId = this.getAttribute('href').substring(1);
