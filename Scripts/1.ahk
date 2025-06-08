@@ -2142,6 +2142,8 @@ FoundTradeable(found3Dmnd := 0, found4Dmnd := 0, found1Star := 0, foundGimmighou
     statusMessage := "Tradeable cards found"
     if (username)
         statusMessage .= " by " . username
+    if (friendCode)
+        statusMessage .= " (" . friendCode . ")"
 
     logMessage := statusMessage . " in instance: " . scriptName . " (" . packsInPool . " packs, " . openPack . ")\nFile name: " . accountFile . "\nScreenshot file: " . screenShotFileName . "\nBacking up to the Accounts\\Trades folder and continuing..."
     LogToFile(StrReplace(logMessage, "\n", " "), "S4T.txt")
