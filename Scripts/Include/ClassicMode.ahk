@@ -505,7 +505,7 @@ if(s4tEnabled) {
   Gui, Add, Text, x775 y130 w210 h2 vs4tLine_1 +0x10 ; Creates a horizontal line
   Gui, Add, Checkbox, % (s4tWP ? "Checked" : "") " vs4tWP gs4tWPSettings x775 y145 cWhite", % currentDictionary.Txt_s4tWP
   Gui, Add, Text, % "x775 y170 vTxt_s4tWPMinCards " . sectionColor . (s4tWP ? "" : " Hidden"), % currentDictionary.Txt_s4tWPMinCards
-  Gui, Add, Edit, % "cFDFDFD w50 x870 y170 h20 vs4tWPMinCards -E0x200 Background2A2A2A Center cWhite" . (s4tWP ? "" : " Hidden"), %s4tWPMinCards%
+  Gui, Add, Edit, % "cFDFDFD w50 x870 y170 h20 vs4tWPMinCards -E0x200 Background2A2A2A Center cWhite gs4tWPMinCardsCheck" . (s4tWP ? "" : " Hidden"), %s4tWPMinCards%
   Gui, Add, Text, x775 y205 w210 h2 vs4tLine_2 +0x10 ; Creates a horizontal line
   Gui, Add, Text, x775 y230 vS4TDiscordSettingsSubHeading %sectionColor%, % currentDictionary.S4TDiscordSettingsSubHeading
   if(StrLen(s4tDiscordUserId) < 3)
@@ -749,6 +749,16 @@ s4tWPSettings:
     GuiControl, Hide, Txt_s4tWPMinCards
     GuiControl, Hide, s4tWPMinCards
   }
+return
+
+s4tWPMinCardsCheck:
+    Gui, Submit, NoHide
+    GuiControlGet, s4tWPMinCards
+    if (s4tWPMinCards < 1)
+        s4tWPMinCards := 1
+    if (s4tWPMinCards > 2)
+        s4tWPMinCards := 2
+    GuiControl,, s4tWPMinCards, %s4tWPMinCards%
 return
 
 defaultLangSetting:

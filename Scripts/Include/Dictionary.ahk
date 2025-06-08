@@ -36,7 +36,7 @@
         Lang["btn_setting"] := "Settings Page"
         Lang["btn_return"] := "↩️ Return"
 
-        Lang["btn_ToolTip"] := "ToolTip"
+        Lang["btn_ToolTip"] := "Help"
         Lang["btn_Language"] := "Language"
         Lang["languageNotice"] := "PTCGPB.ahk needs to reload in order to switch the language. "
         Lang["languageNotice"] .= "Click 'Yes' to reload, or 'No' to return to the settings."
@@ -124,7 +124,7 @@
         Lang["hbName"] := "Name:"
         Lang["hbDelay"] := "Heartbeat Delay (min):"
 
-        Lang["Txt_showcaseEnabled"] := "Use Showcase from showcase_ids.txt"
+        Lang["Txt_showcaseEnabled"] := "Collect 5 Daily Shop Tickets using IDs from showcase_ids.txt"
     } else if (Language = 2) {
         ;; 中文 GUI Text
         Lang["fail_fetch"] := "無法取得發行資訊。" ; checkForUpdate

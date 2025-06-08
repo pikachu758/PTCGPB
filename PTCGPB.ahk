@@ -14,7 +14,7 @@ global STATIC_BRUSH := 0
 
 githubUser := "mixman208"
 repoName := "PTCGPB"
-localVersion := "v6.4.16"
+localVersion := "v6.4.17"
 scriptFolder := A_ScriptDir
 zipPath := A_Temp . "\update.zip"
 extractPath := A_Temp . "\update"
@@ -62,7 +62,6 @@ if not A_IsAdmin
     ExitApp
 }
 
-;; Language Selections
 ; ========== language Selection ==========
 global IsLanguageSet, defaultBotLanguage
 IniRead, IsLanguageSet, Settings.ini, UserSettings, IsLanguageSet, 0
@@ -2198,6 +2197,8 @@ NextStep:
                 waitTime := 5
             if (!IsNumeric(Delay) || Delay < 10)
                 Delay := 250
+            if (s4tWPMinCards < 1 || s4tWPMinCards > 2)
+                s4tWPMinCards := 1
             
             ; Return success
             return true
@@ -2592,7 +2593,7 @@ NextStep:
     SetSmallBtnFont()
     
     ; Add ToolTip Button
-    TestHover := AddBtn("Text", (38+xs_ToolTip), (45+ys_ToolTip), "", "", "Btn_ToolTip", "OpenToolTip", currentDictionary.btn_ToolTip)
+    TestHover := AddBtn("Text", (42+xs_ToolTip), (45+ys_ToolTip), "", "", "Btn_ToolTip", "OpenToolTip", currentDictionary.btn_ToolTip)
     
     ; Add language toggle button next to reload
     TestHover := AddBtn("Text", (93+xs_Language), (45+ys_Language), "", "", "Btn_Language", "SwitchLanguage", currentDictionary.btn_Language)
@@ -2904,7 +2905,7 @@ NextStep:
     AddCheckBox(45, 286, 28, 13, "s4tWP", "s4tWPSettings", checkedPath, uncheckedPath, s4tWP, "Txt_s4tWP", currentDictionary.Txt_s4tWP, 80, 285)
     
     Gui, Add, Text, % "vs4tWPMinCardsLabel x45 y310 backgroundtrans Hidden " . (!s4tEnabled || !s4tWP ? "backgroundtrans Hidden " : ""), % currentDictionary.Txt_s4tWPMinCards
-    Gui, Add, Edit, % "vs4tWPMinCards cFDFDFD w40 x165 y310 h20 -E0x200 Center backgroundtrans Hidden " . (!s4tEnabled || !s4tWP ? "Center backgroundtrans Hidden" : ""), %s4tWPMinCards%
+    Gui, Add, Edit, % "vs4tWPMinCards cFDFDFD w40 x165 y310 h20 -E0x200 Center backgroundtrans Hidden gs4tWPMinCardsCheck " . (!s4tEnabled || !s4tWP ? "Center backgroundtrans Hidden" : ""), %s4tWPMinCards%    
     
     AddSectionDivider(45, 335, 285, "SaveForTradeDivider_2")
     ; === S4T Discord Settings (now part of Save For Trade) ===
@@ -3484,6 +3485,16 @@ s4tWPSettings:
         GuiControl, Hide, s4tWPMinCards
     }
 return
+
+    s4tWPMinCardsCheck:
+        Gui, Submit, NoHide
+        GuiControlGet, s4tWPMinCards
+        if (s4tWPMinCards < 1)
+            s4tWPMinCards := 1
+        if (s4tWPMinCards > 2)
+            s4tWPMinCards := 2
+        GuiControl,, s4tWPMinCards, %s4tWPMinCards%
+    return
 
 TesseractOptionSettings:
     Gui, Submit, NoHide
