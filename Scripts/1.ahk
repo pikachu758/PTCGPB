@@ -2678,14 +2678,16 @@ CleanupUsedAccounts() {
         return
     }
     
-    ; Calculate current time for comparison (48 hours ago)
+    ; Calculate current time for comparison (24 hours ago instead of 48)
     cutoffTime := A_Now
-    cutoffTime += -48, Hours
+    cutoffTime += -24, Hours  ; Reduced from 48 to 24 hours
     
-    ; Keep accounts used within last 48 hours
+    ; Keep accounts used within last 24 hours
     cleanedContent := ""
     removedCount := 0
+    keptCount := 0
     
+    ; Also check if the account files still exist
     Loop, Parse, usedAccountsContent, `n, `r
     {
         if (!A_LoopField)
@@ -2696,12 +2698,21 @@ CleanupUsedAccounts() {
             fileName := parts[1]
             timestamp := parts[2]
             
+            ; Check if account file still exists
+            accountFilePath := saveDir . "\" . fileName
+            if (!FileExist(accountFilePath)) {
+                removedCount++
+                LogToFile("Removed used account entry (file no longer exists): " . fileName)
+                continue
+            }
+            
             ; Compare timestamps directly (YYYYMMDDHHMISS format)
             if (timestamp > cutoffTime) {
-                ; Account was used within last 48 hours, keep it
+                ; Account was used within last 24 hours, keep it
                 cleanedContent .= A_LoopField . "`n"
+                keptCount++
             } else {
-                ; Account is older than 48 hours, remove it
+                ; Account is older than 24 hours, remove it
                 removedCount++
                 LogToFile("Removed stale used account: " . fileName . " (used: " . timestamp . ")")
             }
@@ -2714,11 +2725,7 @@ CleanupUsedAccounts() {
         FileAppend, %cleanedContent%, %usedAccountsLog%
     }
     
-    if (removedCount > 0) {
-        LogToFile("Cleaned up " . removedCount . " stale used accounts")
-    } else {
-        LogToFile("No stale used accounts found to clean up")
-    }
+    LogToFile("Cleanup complete: Kept " . keptCount . " recent entries, removed " . removedCount . " stale entries")
 }
 
 UpdateAccount() {
@@ -4366,26 +4373,50 @@ CreateAccountList(instance) {
     
     ; Check if we need to regenerate the lists
     needRegeneration := false
+    forceRegeneration := false
     
+    ; First check: Do list files exist and are they not empty?
     if (!FileExist(outputTxt) || !FileExist(outputTxt_current)) {
         needRegeneration := true
         LogToFile("List files don't exist, regenerating...")
     } else {
-        lastGenTime := 0
-        if (FileExist(lastGeneratedFile)) {
-            FileRead, lastGenTime, %lastGeneratedFile%
+        ; Check if current list is empty or nearly empty
+        FileRead, currentListContent, %outputTxt_current%
+        currentListLines := StrSplit(Trim(currentListContent), "`n", "`r")
+        eligibleAccountsInList := 0
+        
+        ; Count non-empty lines
+        for index, line in currentListLines {
+            if (StrLen(Trim(line)) > 5) {
+                eligibleAccountsInList++
+            }
         }
         
-        timeDiff := A_Now
-        EnvSub, timeDiff, %lastGenTime%, Minutes
+        LogToFile("Current list contains " . eligibleAccountsInList . " eligible accounts")
         
-        regenerationInterval := 60  ; in minutes
-        if (timeDiff > regenerationInterval || !lastGenTime) {
+        ; If list is empty or has very few accounts, force regeneration
+        if (eligibleAccountsInList <= 1) {
+            LogToFile("Current list is empty or nearly empty, forcing regeneration...")
+            forceRegeneration := true
             needRegeneration := true
-            LogToFile("Lists last generated " . timeDiff . " minutes ago, regenerating...")
         } else {
-            LogToFile("Lists generated " . timeDiff . " minutes ago, reusing existing lists")
-            return
+            ; Check time-based regeneration
+            lastGenTime := 0
+            if (FileExist(lastGeneratedFile)) {
+                FileRead, lastGenTime, %lastGeneratedFile%
+            }
+            
+            timeDiff := A_Now
+            EnvSub, timeDiff, %lastGenTime%, Minutes
+            
+            regenerationInterval := 60  ; in minutes
+            if (timeDiff > regenerationInterval || !lastGenTime) {
+                needRegeneration := true
+                LogToFile("Lists last generated " . timeDiff . " minutes ago, regenerating...")
+            } else {
+                LogToFile("Lists generated " . timeDiff . " minutes ago, reusing existing lists")
+                return
+            }
         }
     }
     
@@ -4393,6 +4424,22 @@ CreateAccountList(instance) {
         return
     }
     
+    ; If we're forcing regeneration due to empty lists, clear used accounts log
+    if (forceRegeneration) {
+        usedAccountsLog := saveDir . "\used_accounts.txt"
+        LogToFile("Forcing regeneration - clearing used accounts log to recover all accounts")
+        
+        ; Backup the used accounts log before clearing
+        if (FileExist(usedAccountsLog)) {
+            backupLog := saveDir . "\used_accounts_backup_" . A_Now . ".txt"
+            FileCopy, %usedAccountsLog%, %backupLog%
+            LogToFile("Backed up used accounts log to: " . backupLog)
+        }
+        
+        ; Clear the used accounts log
+        FileDelete, %usedAccountsLog%
+        LogToFile("Cleared used accounts log - all accounts now available again")
+    }
 
     if (!injectSortMethod)
         injectSortMethod := "ModifiedAsc"
@@ -4421,7 +4468,7 @@ CreateAccountList(instance) {
     
     LogToFile("Injection type: " . parseInjectType . ", Min packs: " . minPacks . ", Max packs: " . maxPacks)
     
-    ; Load used accounts from cleaned up log
+    ; Load used accounts from cleaned up log (will be empty if we just cleared it)
     usedAccountsLog := saveDir . "\used_accounts.txt"
     usedAccounts := {}
     if (FileExist(usedAccountsLog)) {
@@ -4435,7 +4482,9 @@ CreateAccountList(instance) {
                 }
             }
         }
-        LogToFile("Loaded " . usedAccounts.Count() . " used accounts from cleaned log")
+        LogToFile("Loaded " . usedAccounts.Count() . " used accounts from log")
+    } else {
+        LogToFile("No used accounts log found - all accounts available")
     }
     
     ; Delete existing list files before regenerating
@@ -4453,7 +4502,7 @@ CreateAccountList(instance) {
     Loop, %saveDir%\*.xml {
         xml := saveDir . "\" . A_LoopFileName
         
-        ; Skip if this account was recently used
+        ; Skip if this account was recently used (unless we just cleared the log)
         if (usedAccounts.HasKey(A_LoopFileName)) {
             if (verboseLogging)
                 LogToFile("Skipping recently used account: " . A_LoopFileName)
@@ -4464,26 +4513,26 @@ CreateAccountList(instance) {
         modTime := ""
         FileGetTime, modTime, %xml%, M
         
-; Calculate hours difference properly
-hoursDiff := A_Now
-timeVar := modTime
-EnvSub, hoursDiff, %timeVar%, Hours
+        ; Calculate hours difference properly
+        hoursDiff := A_Now
+        timeVar := modTime
+        EnvSub, hoursDiff, %timeVar%, Hours
 
-; Skip files less than 24 hours old
-if (hoursDiff < 24) {
-    if (verboseLogging)
-        LogToFile("Skipping account less than 24 hours old: " . A_LoopFileName . " (age: " . hoursDiff . " hours)")
-    continue
-}
+        ; Always maintain strict age requirements - never relax them
+        if (hoursDiff < 24) {
+            if (verboseLogging)
+                LogToFile("Skipping account less than 24 hours old: " . A_LoopFileName . " (age: " . hoursDiff . " hours)")
+            continue
+        }
 
-; Check if account has "T" flag and needs more time
-if(InStr(A_LoopFileName, "(") && InStr(A_LoopFileName, "T")) {
-    if(hoursDiff < 5*24) {  ; Less than 5 days (120 hours)
-        if (verboseLogging)
-            LogToFile("Skipping account with T flag (testing): " . A_LoopFileName . " (age: " . hoursDiff . " hours, needs 5 days)")
-        continue
-    }
-}
+        ; Check if account has "T" flag and needs more time (always 5 days)
+        if(InStr(A_LoopFileName, "(") && InStr(A_LoopFileName, "T")) {
+            if(hoursDiff < 5*24) {  ; Always 5 days for T-flagged accounts
+                if (verboseLogging)
+                    LogToFile("Skipping account with T flag (testing): " . A_LoopFileName . " (age: " . hoursDiff . " hours, needs 5 days)")
+                continue
+            }
+        }
         
         ; Extract pack count from filename
         packCount := 0
@@ -4514,7 +4563,12 @@ if(InStr(A_LoopFileName, "(") && InStr(A_LoopFileName, "T")) {
     
     ; Log counts
     totalEligible := (fileNames.MaxIndex() ? fileNames.MaxIndex() : 0)
-    LogToFile("Found " . totalEligible . " eligible files (>= 24 hours old, not recently used, packs: " . minPacks . "-" . maxPacks . ")")
+    
+    if (forceRegeneration) {
+        LogToFile("FORCED REGENERATION: Found " . totalEligible . " eligible files (cleared used accounts, maintained strict age requirements)")
+    } else {
+        LogToFile("Found " . totalEligible . " eligible files (>= 24 hours old, not recently used, packs: " . minPacks . "-" . maxPacks . ")")
+    }
     
     ; Sort files based on selected method
     if (fileNames.MaxIndex() > 0) {
@@ -4565,11 +4619,18 @@ if(InStr(A_LoopFileName, "(") && InStr(A_LoopFileName, "T")) {
         LogToFile("  - deleteMethod: " . deleteMethod)
         LogToFile("  - Pack range: " . minPacks . "-" . maxPacks)
         LogToFile("  - Sort method: " . injectSortMethod)
+        LogToFile("  - Force regeneration: " . (forceRegeneration ? "Yes" : "No"))
+        
+        ; If this was a forced regeneration and we still found nothing, there really are no accounts
+        if (forceRegeneration) {
+            LogToFile("CRITICAL: Even after clearing used accounts and relaxing age requirements, no eligible accounts found!")
+            LogToFile("This indicates there truly are no accounts matching the criteria in the directory.")
+        }
         
         ; Create empty files to prevent repeated regeneration attempts
         FileAppend, "", %outputTxt%
         FileAppend, "", %outputTxt_current%
-        LogToFile("Created empty list files to prevent repeated regeneration")
+        LogToFile("Created empty list files")
     }
     
     ; Create a file that tracks when the list was last regenerated
@@ -4585,6 +4646,7 @@ if(InStr(A_LoopFileName, "(") && InStr(A_LoopFileName, "T")) {
         LogToFile("Pack range: " . minPacks . "-" . maxPacks)
         LogToFile("Sort method: " . sortMethod)
         LogToFile("Used accounts excluded: " . usedAccounts.Count())
+        LogToFile("Forced regeneration: " . (forceRegeneration ? "Yes" : "No"))
         LogToFile("============================")
     }
 }
