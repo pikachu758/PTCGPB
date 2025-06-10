@@ -22,7 +22,7 @@ WinHide % "ahk_id " DllCall("GetConsoleWindow", "ptr")
 
 global winTitle, changeDate, failSafe, openPack, Delay, failSafeTime, StartSkipTime, Columns, failSafe, scriptName, GPTest, StatusText, defaultLanguage, setSpeed, jsonFileName, pauseToggle, SelectedMonitorIndex, swipeSpeed, godPack, scaleParam, deleteMethod, packs, FriendID, friendIDs, Instances, username, friendCode, stopToggle, friended, runMain, Mains, showStatus, injectMethod, packMethod, loadDir, loadedAccount, nukeAccount, CheckShinyPackOnly, TrainerCheck, FullArtCheck, RainbowCheck, ShinyCheck, dateChange, foundGP, friendsAdded, PseudoGodPack, packArray, CrownCheck, ImmersiveCheck, InvalidCheck, slowMotion, screenShot, accountFile, invalid, starCount, keepAccount
 global Mewtwo, Charizard, Pikachu, Mew, Dialga, Palkia, Arceus, Shining, Solgaleo, Lunala, Buzzwole
-global shinyPacks, minStars, minStarsShiny, minStarsA1Mewtwo, minStarsA1Charizard, minStarsA1Pikachu, minStarsA1a, minStarsA2Dialga, minStarsA2Palkia, minStarsA2a, minStarsA2b, minStarsA3Solgaleo, minStarsA3Lunala, minStarsA3a
+global shinyPacks, minStars, minStarsShiny
 global DeadCheck
 global s4tEnabled, s4tSilent, s4t3Dmnd, s4t4Dmnd, s4t1Star, s4tGholdengo, s4tWP, s4tWPMinCards, s4tDiscordWebhookURL, s4tDiscordUserId, s4tSendAccountXml
 global avgtotalSeconds
@@ -123,18 +123,6 @@ IniRead, skipMissionsInjectMissions, %A_ScriptDir%\..\Settings.ini, UserSettings
 IniRead, claimSpecialMissions, %A_ScriptDir%\..\Settings.ini, UserSettings, claimSpecialMissions, 0
 IniRead, spendHourGlass, %A_ScriptDir%\..\Settings.ini, UserSettings, spendHourGlass, 1
 IniRead, openExtraPack, %A_ScriptDir%\..\Settings.ini, UserSettings, openExtraPack, 0
-
-IniRead, minStarsA1Mewtwo, %A_ScriptDir%\..\Settings.ini, UserSettings, minStarsA1Mewtwo, 0
-IniRead, minStarsA1Charizard, %A_ScriptDir%\..\Settings.ini, UserSettings, minStarsA1Charizard, 0
-IniRead, minStarsA1Pikachu, %A_ScriptDir%\..\Settings.ini, UserSettings, minStarsA1Pikachu, 0
-IniRead, minStarsA1a, %A_ScriptDir%\..\Settings.ini, UserSettings, minStarsA1a, 0
-IniRead, minStarsA2Dialga, %A_ScriptDir%\..\Settings.ini, UserSettings, minStarsA2Dialga, 0
-IniRead, minStarsA2Palkia, %A_ScriptDir%\..\Settings.ini, UserSettings, minStarsA2Palkia, 0
-IniRead, minStarsA2a, %A_ScriptDir%\..\Settings.ini, UserSettings, minStarsA2a, 0
-IniRead, minStarsA2b, %A_ScriptDir%\..\Settings.ini, UserSettings, minStarsA2b, 0
-IniRead, minStarsA3Solgaleo, %A_ScriptDir%\..\Settings.ini, UserSettings, minStarsA3Solgaleo, 0
-IniRead, minStarsA3Lunala, %A_ScriptDir%\..\Settings.ini, UserSettings, minStarsA3Lunala, 0
-IniRead, minStarsA3a, %A_ScriptDir%\..\Settings.ini, UserSettings, minStarsA3a, 0
 
 IniRead, s4tEnabled, %A_ScriptDir%\..\Settings.ini, UserSettings, s4tEnabled, 0
 IniRead, s4tSilent, %A_ScriptDir%\..\Settings.ini, UserSettings, s4tSilent, 1
@@ -2298,35 +2286,10 @@ FindGodPack(invalidPack := false) {
     ; A god pack (although possibly invalid) has been found.
     keepAccount := true
 
-    ; Count stars if required.
-    packMinStars := minStars
-      if (openPack == "Buzzwole") {
-        packMinStars := minStarsA3a
-    } else if (openPack == "Solgaleo") {
-        packMinStars := minStarsA3Solgaleo
-    } else if (openPack == "Lunala") {
-        packMinStars := minStarsA3Lunala
-    } else if (openPack = "Shining") {
-        packMinStars := minStarsA2b
-    } else if (openPack = "Arceus") {
-        packMinStars := minStarsA2a
-    } else if (openPack = "Dialga") {
-        packMinStars := minStarsA2Dialga
-    } else if (openPack = "Palkia") {
-        packMinStars := minStarsA2Palkia
-    } else if (openPack = "Mewtwo") {
-        packMinStars := minStarsA1Mewtwo
-    } else if (openPack = "Charizard") {
-        packMinStars := minStarsA1Charizard
-    } else if (openPack = "Pikachu") {
-        packMinStars := minStarsA1Pikachu
-    } else if (openPack = "Mew") {
-        packMinStars := minStarsA1a
-    }
-
-    if (!invalidPack && packMinStars > 0) {
+    ; Check if pack meets minimum stars requirement
+    if (!invalidPack && minStars > 0) {
         starCount := 5 - FindBorders("1star")
-        if (starCount < packMinStars) {
+        if (starCount < minStars) {
             CreateStatusMessage("Pack doesn't contain enough 2 stars...",,,, false)
             invalidPack := true
         }
@@ -2334,7 +2297,6 @@ FindGodPack(invalidPack := false) {
 
     if (invalidPack) {
         GodPackFound("Invalid")
-
         RemoveFriends()
         IniWrite, 0, %A_ScriptDir%\%scriptName%.ini, UserSettings, DeadCheck
     } else {
