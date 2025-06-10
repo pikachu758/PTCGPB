@@ -4990,7 +4990,7 @@ GetAllRewards(tomain := true, dailies := false) {
         adbClick(172, 427)
         
         if(dailies) {
-            FindImageAndClick(68, 148, 94, 169, , "CollectDailies", 250, 135, 500)
+            FindImageAndClick(73, 151, 210, 173, , "CollectDailies", 250, 135, 500)
         }
         
         if(FindOrLoseImage(244, 406, 273, 449, , "GotAllMissions", 0, 0)) {
