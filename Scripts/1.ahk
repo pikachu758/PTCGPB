@@ -3741,7 +3741,7 @@ SelectPack(HG := false) {
 		PackIsInHomeScreen := 0
 	}
 	
-	if(openPack == "Buzzwole" || openPack == "Solgaleo" || openPack == "Lunala" || openPack == "Shining") {
+	if(openPack == "Buzzwole") {
 		PackIsLatest := 1
 	} else {
 		PackIsLatest := 0
