@@ -4179,6 +4179,8 @@ getFriendCode() {
         }
         else if(FindOrLoseImage(20, 500, 55, 530, , "Home", 0, failSafeTime)) {
             break
+        } else {
+            adbclick_wbb(146, 494)
         }
 failSafeTime := (A_TickCount - failSafe) // 1000
         CreateStatusMessage("Waiting for Home`n(" . failSafeTime . "/45 seconds)")
