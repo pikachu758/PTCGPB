@@ -2276,6 +2276,8 @@ FindCard(prefix) {
 }
 
 FindGodPack(invalidPack := false) {
+    global openExtraPack, spendHourGlass
+
     ; Check for normal borders.
     normalBorders := FindBorders("normal")
     if (normalBorders) {
@@ -2299,6 +2301,8 @@ FindGodPack(invalidPack := false) {
         GodPackFound("Invalid")
         RemoveFriends()
         IniWrite, 0, %A_ScriptDir%\%scriptName%.ini, UserSettings, DeadCheck
+        openExtraPack := false
+        spendHourGlass := false
     } else {
         GodPackFound("Valid")
     }
@@ -4176,13 +4180,12 @@ getFriendCode() {
             adbClick_wbb(146, 494) ;146, 494
         } else if(FindOrLoseImage(121, 465, 140, 485, , "ConfirmPack", 0, failSafeTime)) {
             break
-        }
-        else if(FindOrLoseImage(20, 500, 55, 530, , "Home", 0, failSafeTime)) {
+        } else if(FindOrLoseImage(20, 500, 55, 530, , "Home", 0, failSafeTime)) {
             break
         } else {
             adbclick_wbb(146, 494)
         }
-failSafeTime := (A_TickCount - failSafe) // 1000
+        failSafeTime := (A_TickCount - failSafe) // 1000
         CreateStatusMessage("Waiting for Home`n(" . failSafeTime . "/45 seconds)")
         if(failSafeTime > 45)
             restartGameInstance("Stuck at Home")
