@@ -11,9 +11,7 @@ Scripts/*.ahk
 Scripts/*.ini
 !Scripts/1.ahk
 !Scripts/Main.ahk
-ids.txt
-usernames.txt
-vip_ids.txt
+*.txt
 *.ini
 *.bak
 !.gitkeep

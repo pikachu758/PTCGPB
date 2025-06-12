@@ -1143,24 +1143,18 @@ AddFriends(renew := false, getFC := false) {
 
 showcaseLikes() {
 	; Liking showcase script
-	Delay(10)
-	adbClick(80, 400)								; Clicking showcase button
-	Delay(10)
+    FindImageAndClick(174, 464, 189, 479, , "CommunityShowcase", 75, 410, 200)
 	Loop, Read, %A_ScriptDir%\..\showcase_ids.txt
 		{
 			showcaseID := Trim(A_LoopReadLine)        
-			adbClick(220, 467)						; Clicking friend ID search
-			Delay(3)		
-			adbClick(152, 272)						; Clicking search bar
+			FindImageAndClick(215, 252, 240, 277, , "FriendIDSearch", 224, 472, 200)
+			FindImageAndClick(238, 500, 261, 520, , "ShowcaseInput", 143, 273, 200)
 			Delay(3)
 			adbInput(showcaseID)					; Pasting ID
 			Delay(1)
 			adbClick(212, 384)						; Pressing OK
-			Delay(3)			
-			adbClick(133, 192)						; Pressing like on showcase
-			Delay(3)
-			adbClick(133, 492)						; Going back to community showcases
-			Delay(3)
+			FindImageAndClick(98, 187, 125, 214, ,"ShowcaseLiked", 175, 200, 200)
+			FindImageAndClick(174, 464, 189, 479, , "CommunityShowcase", 140, 495, 200)
 		}
 }
 
@@ -2112,6 +2106,7 @@ FoundTradeable(found3Dmnd := 0, found4Dmnd := 0, found1Star := 0, foundGimmighou
 
     restartGameInstance("Tradeable cards found. Continuing...", "GodPack")
 }
+
 FoundStars(star) {
     global scriptName, DeadCheck, ocrLanguage, injectMethod, openPack
 
