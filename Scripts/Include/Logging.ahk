@@ -8,7 +8,8 @@ settingsPath := ScriptDir . "\..\..\Settings.ini"
 IniRead, discordWebhookURL, %settingsPath%, UserSettings, discordWebhookURL
 IniRead, discordUserId, %settingsPath%, UserSettings, discordUserId
 IniRead, sendAccountXml, %settingsPath%, UserSettings, sendAccountXml, 0
-IniRead, Debug, %settingsPath%, UserSettings, statusMessage
+IniRead, showStatus, %settingsPath%, UserSettings, statusMessage, 1
+IniRead, Debug, %settingsPath%, UserSettings, debugMode, 0
 
 ; Enable debugging to get more status messages and logging.
 
@@ -20,7 +21,7 @@ CreateStatusMessage(Message, GuiName := "StatusMessage", X := 0, Y := 565, debug
     static hwnds := {}
     static resetStatusFunc := Func("ResetStatusMessage")
 
-    if (!showStatus || (!Debug && debugOnly))
+    if (!showStatus)
         return
 
     if (Debug && Message != DEFAULT_STATUS_MESSAGE)

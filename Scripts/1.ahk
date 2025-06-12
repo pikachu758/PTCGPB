@@ -26,7 +26,7 @@ global shinyPacks, minStars, minStarsShiny
 global DeadCheck
 global s4tEnabled, s4tSilent, s4t3Dmnd, s4t4Dmnd, s4t1Star, s4tGholdengo, s4tWP, s4tWPMinCards, s4tDiscordWebhookURL, s4tDiscordUserId, s4tSendAccountXml
 global avgtotalSeconds
-global verboseLogging := false  ; Set to true only for debugging
+global verboseLogging := false
 global showcaseEnabled
 global injectSortMethod := "ModifiedAsc"  ; Default sort method (oldest accounts first)
 global injectMinPacks := 0       ; Minimum pack count for injection (0 = no minimum)
@@ -123,6 +123,7 @@ IniRead, skipMissionsInjectMissions, %A_ScriptDir%\..\Settings.ini, UserSettings
 IniRead, claimSpecialMissions, %A_ScriptDir%\..\Settings.ini, UserSettings, claimSpecialMissions, 0
 IniRead, spendHourGlass, %A_ScriptDir%\..\Settings.ini, UserSettings, spendHourGlass, 1
 IniRead, openExtraPack, %A_ScriptDir%\..\Settings.ini, UserSettings, openExtraPack, 0
+IniRead, verboseLogging, %A_ScriptDir%\..\Settings.ini, UserSettings, debugMode, 0
 
 IniRead, s4tEnabled, %A_ScriptDir%\..\Settings.ini, UserSettings, s4tEnabled, 0
 IniRead, s4tSilent, %A_ScriptDir%\..\Settings.ini, UserSettings, s4tSilent, 1
@@ -364,9 +365,6 @@ if(DeadCheck = 1 && deleteMethod != "13 Pack") {
                     Sleep, 300000  ; 5 minutes
                     continue  ; Go back to start of loop to check again
                 } else {
-                    ; User chose to stop script when no eligible accounts
-                    CreateStatusMessage("No eligible accounts found for " . deleteMethod . ". Stopping script as per user setting...", "", 0, 0, false)
-                    LogToFile("Script stopped: No eligible accounts found for " . deleteMethod . " and waitForEligibleAccounts = 0")
                     ExitApp
                 }
             }
@@ -463,8 +461,7 @@ if(DeadCheck = 1 && deleteMethod != "13 Pack") {
             Goto, EndOfRun
         }
         if (checkShouldDoMissions()) {
-            LogToFile("Starting mission sequence - Current pack count: " . accountOpenPacks)
-            
+
             HomeAndMission()
             if(beginnerMissionsDone)
                 Goto, EndOfRun
@@ -573,7 +570,6 @@ if(DeadCheck = 1 && deleteMethod != "13 Pack") {
         ; Hourglass spending
         IniRead, spendHourGlass, %A_ScriptDir%\..\Settings.ini, UserSettings, spendHourGlass, 0
         if (spendHourGlass = 1 && !(deleteMethod = "Inject" && accountOpenPacks >= maxAccountPackNum || deleteMethod = "Inject Missions" && accountOpenPacks >= maxAccountPackNum)) {
-            LogToFile("Executing hourglass spending - User setting enabled")
             SpendAllHourglass()
         }
 
@@ -621,7 +617,6 @@ if(DeadCheck = 1 && deleteMethod != "13 Pack") {
             if (injectMethod && loadedAccount) {
                 if (!keepAccount) {
                     MarkAccountAsUsed() 
-                    LogToFile("Marked injected account as used: " . accountFileName)
                 }
                 loadedAccount := false
                 continue
@@ -631,9 +626,11 @@ if(DeadCheck = 1 && deleteMethod != "13 Pack") {
         if (injectMethod && loadedAccount) {
             ; For injection methods, mark the account as used
             if (!keepAccount) {
-                MarkAccountAsUsed()  ; Remove account from queue
+            MarkAccountAsUsed()  ; Remove account from queue
+            if(verboseLogging)
                 LogToFile("Marked injected account as used: " . accountFileName)
             } else {
+            if(verboseLogging)
                 LogToFile("Keeping injected account: " . accountFileName)
             }
             
@@ -750,7 +747,6 @@ HomeAndMission(homeonly := 0, completeSecondMisson=false) {
             break
         failSafeTime := (A_TickCount - failSafe) // 1000
         CreateStatusMessage("In failsafe for WonderPick. " . failSafeTime "/45 seconds")
-        LogToFile("In failsafe for WonderPick. " . failSafeTime "/45 seconds")
     }
     return Leveled
 }
@@ -774,7 +770,6 @@ RemoveFriends() {
     packsInPool := 0 ; if friends are removed, clear the pool
 
     CreateStatusMessage("Starting friend removal process...",,,, false)
-    LogToFile("Starting friend removal process")
 
     failSafe := A_TickCount
     failSafeTime := 0
@@ -819,7 +814,6 @@ RemoveFriends() {
     if(!friendIDs) {
         ; Process single friend ID
         CreateStatusMessage("Processing single friend ID: " . FriendID,,,, false)
-        LogToFile("Processing single friend ID: " . FriendID)
         
         failSafe := A_TickCount
         failSafeTime := 0
@@ -858,7 +852,6 @@ RemoveFriends() {
     } else {
         ; Process multiple friend IDs
         CreateStatusMessage("Processing " . friendIDs.MaxIndex() . " friend IDs...",,,, false)
-        LogToFile("Processing " . friendIDs.MaxIndex() . " friend IDs")
         
         ;randomize friend id list to not back up mains if running in groups since they'll be sent in a random order.
         n := friendIDs.MaxIndex()
@@ -880,7 +873,6 @@ RemoveFriends() {
             }
             
             CreateStatusMessage("Processing friend " . index . "/" . friendIDs.MaxIndex() . ": " . value,,,, false)
-            LogToFile("Processing friend " . index . "/" . friendIDs.MaxIndex() . ": " . value)
             
             failSafe := A_TickCount
             failSafeTime := 0
@@ -930,31 +922,9 @@ RemoveFriends() {
     
     ; Exit friend removal process
     CreateStatusMessage("Friend removal completed. Processed " . friendsProcessed . " friends. Returning to main...",,,, false)
-    LogToFile("Friend removal completed. Processed " . friendsProcessed . " friends")
     
-    ; Navigate back to main screen - DISABLED
-    /*
-    failSafe := A_TickCount
-    failSafeTime := 0
-    Loop {
-        adbClick_wbb(143, 518) ; Try to go back to main
-        Delay(2)
-        if(FindOrLoseImage(233, 400, 264, 428, , "Points", 0, failSafeTime)) {
-            break ; Successfully at main screen
-        }
-        adbInputEvent("111") ; Send ESC to try to get back
-        Delay(1)
-        failSafeTime := (A_TickCount - failSafe) // 1000
-        CreateStatusMessage("Returning to main screen (" . failSafeTime . "/30 seconds)")
-        if(failSafeTime > 30) {
-            LogToFile("Timeout returning to main screen after friend removal")
-            break
-        }
-    }
-    */
 	IniWrite, 0, %A_ScriptDir%\%scriptName%.ini, UserSettings, DeadCheck
     friended := false
-    LogToFile("Friend removal process completed successfully")
     CreateStatusMessage("Friends removed successfully!",,,, false)
 
     if(stopToggle) {
@@ -1206,7 +1176,6 @@ ChooseTag() {
 			break
 		failSafeTime := (A_TickCount - failSafe) // 1000
 		CreateStatusMessage("In failsafe for Profile. " . failSafeTime "/45 seconds")
-		LogToFile("In failsafe for Profile. " . failSafeTime "/45 seconds")
 	}
 	FindImageAndClick(205, 310, 220, 319, , "ChosenTag", 143, 306, 1000)
 	FindImageAndClick(53, 218, 63, 228, , "Badge", 143, 466, 500)
@@ -2417,7 +2386,6 @@ loadAccount() {
                     foundValidAccount := true
                     foundIndex := A_Index
                     currentLoadedAccountIndex := A_Index
-                    LogToFile("Loading account from pre-filtered list: " . accountFileName)
                     break
                 }
 
@@ -2514,8 +2482,6 @@ MarkAccountAsUsed() {
         
         FileDelete, %outputTxt%
         FileAppend, %newListContent%, %outputTxt%
-        
-        LogToFile("Removed used account from queue: " . accountFileName)
     }
     
     ; Track as used with timestamp
@@ -2624,13 +2590,11 @@ TrackUsedAccount(fileName) {
     ; Append with timestamp only (no epoch needed)
     currentTime := A_Now
     FileAppend, % fileName . "|" . currentTime . "`n", %usedAccountsLog%
-    
-    LogToFile("Marked account as used: " . fileName . " at " . currentTime)
 }
 
 ; NEW function to clean up stale used accounts
 CleanupUsedAccounts() {
-    global winTitle
+    global winTitle, verboseLogging
     saveDir := A_ScriptDir "\..\Accounts\Saved\" . winTitle
     usedAccountsLog := saveDir . "\used_accounts.txt"
     
@@ -2668,7 +2632,8 @@ CleanupUsedAccounts() {
             accountFilePath := saveDir . "\" . fileName
             if (!FileExist(accountFilePath)) {
                 removedCount++
-                LogToFile("Removed used account entry (file no longer exists): " . fileName)
+                if(verboseLogging)
+                    LogToFile("Removed used account entry (file no longer exists): " . fileName)
                 continue
             }
             
@@ -2680,7 +2645,8 @@ CleanupUsedAccounts() {
             } else {
                 ; Account is older than 24 hours, remove it
                 removedCount++
-                LogToFile("Removed stale used account: " . fileName . " (used: " . timestamp . ")")
+                if(verboseLogging)
+                    LogToFile("Removed stale used account: " . fileName . " (used: " . timestamp . ")")
             }
         }
     }
@@ -2691,7 +2657,8 @@ CleanupUsedAccounts() {
         FileAppend, %cleanedContent%, %usedAccountsLog%
     }
     
-    LogToFile("Cleanup complete: Kept " . keptCount . " recent entries, removed " . removedCount . " stale entries")
+    if(verboseLogging)
+        LogToFile("Cleanup complete: Kept " . keptCount . " recent entries, removed " . removedCount . " stale entries")
 }
 
 UpdateAccount() {
@@ -3470,8 +3437,9 @@ DoTutorial() {
         Random, randomNum, 1, 500 ; Generate random number from 1 to 500
         username := accountNameValue . "-" . randomNum
         username := SubStr(username, 1, 14)  ; max character limit
-        LogToFile("Using AccountName: " . username)
-    } else {
+        if(verboseLogging)
+            LogToFile("Using AccountName: " . username)
+        } else {
         fileName := A_ScriptDir . "\..\usernames.txt"
         if(FileExist(fileName))
             name := ReadFile("usernames")
@@ -3481,8 +3449,9 @@ DoTutorial() {
         Random, randomIndex, 1, name.MaxIndex()
         username := name[randomIndex]
         username := SubStr(username, 1, 14)  ; max character limit
-        LogToFile("Using random username: " . username)
-    }
+        if(verboseLogging)
+            LogToFile("Using random username: " . username)
+        }
 
     adbInput(username)
     Delay(1)
@@ -4359,8 +4328,6 @@ CreateAccountList(instance) {
             }
         }
         
-        LogToFile("Current list contains " . eligibleAccountsInList . " eligible accounts")
-        
         ; If list is empty or has very few accounts, force regeneration
         if (eligibleAccountsInList <= 1) {
             LogToFile("Current list is empty or nearly empty, forcing regeneration...")
@@ -4379,9 +4346,7 @@ CreateAccountList(instance) {
             regenerationInterval := 60  ; in minutes
             if (timeDiff > regenerationInterval || !lastGenTime) {
                 needRegeneration := true
-                LogToFile("Lists last generated " . timeDiff . " minutes ago, regenerating...")
             } else {
-                LogToFile("Lists generated " . timeDiff . " minutes ago, reusing existing lists")
                 return
             }
         }
@@ -4418,22 +4383,17 @@ CreateAccountList(instance) {
         parseInjectType := "Inject"
         minPacks := 0
         maxPacks := 38
-        LogToFile("Inject mode: range 0-38")
     }
     else if (deleteMethod = "Inject Missions") {
         parseInjectType := "Inject Missions"
         minPacks := 0
         maxPacks := 38
-        LogToFile("Inject Missions mode: range 0-38")
     }
     else if (deleteMethod = "Inject for Reroll") {
         parseInjectType := "Inject for Reroll"
         minPacks := 35
         maxPacks := 9999
-        LogToFile("Inject for Reroll mode: range 35+")
     }
-    
-    LogToFile("Injection type: " . parseInjectType . ", Min packs: " . minPacks . ", Max packs: " . maxPacks)
     
     ; Load used accounts from cleaned up log (will be empty if we just cleared it)
     usedAccountsLog := saveDir . "\used_accounts.txt"
@@ -4449,9 +4409,6 @@ CreateAccountList(instance) {
                 }
             }
         }
-        LogToFile("Loaded " . usedAccounts.Count() . " used accounts from log")
-    } else {
-        LogToFile("No used accounts log found - all accounts available")
     }
     
     ; Delete existing list files before regenerating
@@ -4540,24 +4497,18 @@ CreateAccountList(instance) {
     ; Sort files based on selected method
     if (fileNames.MaxIndex() > 0) {
         sortMethod := (injectSortMethod) ? injectSortMethod : "ModifiedAsc"
-        LogToFile("Sorting " . fileNames.MaxIndex() . " files by method: " . sortMethod)
         
         if (sortMethod == "ModifiedAsc") {
             SortArraysByProperty(fileNames, fileTimes, packCounts, "time", 1)
-            LogToFile("Sorted by modification time ascending (oldest first)")
         } else if (sortMethod == "ModifiedDesc") {
             SortArraysByProperty(fileNames, fileTimes, packCounts, "time", 0)
-            LogToFile("Sorted by modification time descending (newest first)")
         } else if (sortMethod == "PacksAsc") {
             SortArraysByProperty(fileNames, fileTimes, packCounts, "packs", 1)
-            LogToFile("Sorted by pack count ascending (lowest first)")
         } else if (sortMethod == "PacksDesc") {
             SortArraysByProperty(fileNames, fileTimes, packCounts, "packs", 0)
-            LogToFile("Sorted by pack count descending (highest first)")
         } else {
             ; Default to ModifiedAsc if unknown sort method
             SortArraysByProperty(fileNames, fileTimes, packCounts, "time", 1)
-            LogToFile("Unknown sort method '" . sortMethod . "', defaulting to ModifiedAsc")
         }
         
         ; Prepare content for output files
@@ -4567,10 +4518,13 @@ CreateAccountList(instance) {
             
             ; Log first 10 files for verification
             if (i <= 10) {
-                FormatTime, fileTimeStr, % fileTimes[i], yyyy-MM-dd HH:mm:ss
-                LogToFile("  " . i . ": " . fileName . " (Modified: " . fileTimeStr . ", Packs: " . packCounts[i] . ")")
+                if(verboseLogging) {
+                    FormatTime, fileTimeStr, % fileTimes[i], yyyy-MM-dd HH:mm:ss
+                    LogToFile("  " . i . ": " . fileName . " (Modified: " . fileTimeStr . ", Packs: " . packCounts[i] . ")")
+                }
             } else if (i == 11) {
-                LogToFile("  ... (showing first 10 files only)")
+                if(verboseLogging)
+                    LogToFile("  ... (showing first 10 files only)")
             }
         }
         
@@ -4579,21 +4533,7 @@ CreateAccountList(instance) {
         FileAppend, %outputContent%, %outputTxt_current%
         
         LogToFile("Successfully wrote " . fileNames.MaxIndex() . " files to lists")
-        LogToFile("List files updated: " . outputTxt)
-        LogToFile("Current list file: " . outputTxt_current)
-    } else {
-        LogToFile("No eligible files found for injection parameters")
-        LogToFile("  - deleteMethod: " . deleteMethod)
-        LogToFile("  - Pack range: " . minPacks . "-" . maxPacks)
-        LogToFile("  - Sort method: " . injectSortMethod)
-        LogToFile("  - Force regeneration: " . (forceRegeneration ? "Yes" : "No"))
-        
-        ; If this was a forced regeneration and we still found nothing, there really are no accounts
-        if (forceRegeneration) {
-            LogToFile("CRITICAL: Even after clearing used accounts and relaxing age requirements, no eligible accounts found!")
-            LogToFile("This indicates there truly are no accounts matching the criteria in the directory.")
-        }
-        
+        } else {
         ; Create empty files to prevent repeated regeneration attempts
         FileAppend, "", %outputTxt%
         FileAppend, "", %outputTxt_current%
@@ -4619,7 +4559,7 @@ CreateAccountList(instance) {
 }
 
 checkShouldDoMissions() {
-    global beginnerMissionsDone, deleteMethod, injectMethod, loadedAccount, friendIDs, friendID, accountOpenPacks, maxAccountPackNum
+    global beginnerMissionsDone, deleteMethod, injectMethod, loadedAccount, friendIDs, friendID, accountOpenPacks, maxAccountPackNum, verboseLogging
     
     if (beginnerMissionsDone) {
         return false
@@ -4631,14 +4571,17 @@ checkShouldDoMissions() {
     else if (deleteMethod = "Inject Missions") {
         IniRead, skipMissions, %A_ScriptDir%\..\Settings.ini, UserSettings, skipMissionsInjectMissions, 0
         if (skipMissions = 1) {
-            LogToFile("Skipping missions for Inject Missions method (user setting)")
+            if(verboseLogging)
+                LogToFile("Skipping missions for Inject Missions method (user setting)")
             return false
         }
-        LogToFile("Executing missions for Inject Missions method (user setting enabled)")
+        if(verboseLogging)
+            LogToFile("Executing missions for Inject Missions method (user setting enabled)")
         return true
     }
     else if (deleteMethod = "Inject" || deleteMethod = "Inject for Reroll") {
-        LogToFile("Skipping missions for " . deleteMethod . " method - missions only run for 'Inject Missions'")
+        if(verboseLogging)
+            LogToFile("Skipping missions for " . deleteMethod . " method - missions only run for 'Inject Missions'")
         return false
     }
     else {

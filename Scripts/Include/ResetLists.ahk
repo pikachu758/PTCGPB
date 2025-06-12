@@ -12,36 +12,6 @@ if (!FileExist(logsDir)) {
     FileCreateDir, %logsDir%
 }
 
-; FIRST: Clear all existing log files from the Logs folder
-logFilesDeleted := 0
-deletedLogFiles := ""
-
-Loop, Files, %logsDir%\*.txt
-{
-    fileName := A_LoopFileName
-    FileDelete, %A_LoopFileFullPath%
-    if (!ErrorLevel) {
-        logFilesDeleted++
-        deletedLogFiles .= fileName . ", "
-    }
-}
-
-; Also clear any .log files if they exist
-Loop, Files, %logsDir%\*.log
-{
-    fileName := A_LoopFileName
-    FileDelete, %A_LoopFileFullPath%
-    if (!ErrorLevel) {
-        logFilesDeleted++
-        deletedLogFiles .= fileName . ", "
-    }
-}
-
-; Remove trailing comma and space
-if (deletedLogFiles != "") {
-    deletedLogFiles := RTrim(deletedLogFiles, ", ")
-}
-
 ; Custom logging function for ResetLists (self-contained)
 LogToResetListFile(message) {
     global resetListLogFile
@@ -51,13 +21,8 @@ LogToResetListFile(message) {
     FileAppend, %logEntry%, %resetListLogFile%
 }
 
-; Log script start (this creates the new fresh log file)
-LogToResetListFile("ResetLists.ahk started - Beginning fresh cleanup session")
-if (logFilesDeleted > 0) {
-    LogToResetListFile("Cleared " . logFilesDeleted . " existing log files: " . deletedLogFiles)
-} else {
-    LogToResetListFile("No existing log files found to clear")
-}
+; Log script start
+LogToResetListFile("ResetLists.ahk started - Beginning cleanup session")
 
 ; Define the primary paths more efficiently
 scriptDir := A_ScriptDir
