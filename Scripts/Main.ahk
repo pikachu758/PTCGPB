@@ -80,7 +80,7 @@ Loop {
         ;Winset, Alwaysontop, On, %winTitle%
         OwnerWND := WinExist(winTitle)
         x4 := x + 5
-        y4 := y + 536
+        y4 := y + 535
         buttonWidth := 45
         if (scaleParam = 287)
             buttonWidth := buttonWidth + 5
@@ -381,7 +381,7 @@ FindImageAndClick(X1, Y1, X2, Y2, searchVariation := "", imageName := "DEFAULT",
         }
 
         pBitmap := from_window(WinExist(winTitle))
-        Path = %imagePath%Error.png
+        Path = %imagePath%Error1.png
         pNeedle := GetNeedle(Path)
         ; ImageSearch within the region
         vRet := Gdip_ImageSearch(pBitmap, pNeedle, vPosXY, 15, 155, 270, 420, searchVariation)
