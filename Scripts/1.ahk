@@ -1148,7 +1148,7 @@ showcaseLikes() {
 		{
 			showcaseID := Trim(A_LoopReadLine)        
 			FindImageAndClick(215, 252, 240, 277, , "FriendIDSearch", 224, 472, 200)
-			FindImageAndClick(238, 500, 261, 520, , "ShowcaseInput", 143, 273, 200)
+			FindImageAndClick(193, 495, 218, 521, , "ShowcaseInput", 143, 273, 200)
 			Delay(3)
 			adbInput(showcaseID)					; Pasting ID
 			Delay(1)
@@ -2241,7 +2241,7 @@ FindCard(prefix) {
 
 FindGodPack(invalidPack := false) {
     global shinyPacks, openPack, minStars, minStarsShiny, openExtraPack, spendHourGlass
-    
+
     ; Check for normal borders.
     normalBorders := FindBorders("normal")
     if (normalBorders) {
