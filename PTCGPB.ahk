@@ -2795,7 +2795,7 @@ NextStep:
     AddCheckBox(45, 201, 28, 13, "packMethod", "", checkedPath, uncheckedPath, packMethod, "Txt_packMethod", currentDictionary.Txt_packMethod, 80, 200)
     AddCheckBox(185, 201, 28, 13, "nukeAccount", "", checkedPath, uncheckedPath, nukeAccount, "Txt_nukeAccount", currentDictionary.Txt_nukeAccount, 220, 200)
     AddCheckBox(45, 226, 28, 13, "spendHourGlass", "spendHourGlassSettings", checkedPath, uncheckedPath, spendHourGlass, "Txt_spendHourGlass", currentDictionary.Txt_spendHourGlass, 80, 225)
-    AddCheckBox(185, 226, 28, 13, "openExtraPack", "openExtraPackSettings", checkedPath, uncheckedPath, openExtraPack, "Txt_openExtraPack", currentDictionary.Txt_openExtraPack, 220, 225)
+    AddCheckBox(200, 226, 28, 13, "openExtraPack", "openExtraPackSettings", checkedPath, uncheckedPath, openExtraPack, "Txt_openExtraPack", currentDictionary.Txt_openExtraPack, 235, 225)
     ;AddCheckBox((185+xs_SpecialCheck), 226, 28, 13, "claimSpecialMissions", "", checkedPath, uncheckedPath, claimSpecialMissions, "Txt_claimSpecialMissions", currentDictionary.Txt_claimSpecialMissions, (220+xs_SpecialCheck), 225)
     
     ; Create Sort By label and dropdown

@@ -5043,7 +5043,7 @@ RefinedOCRText(screenshotFile, x, y, w, h, allowedChars, validPattern, ByRef out
     if(output = "trophyOCR"){
         blowUp := [500, 1000, 2000, 100, 200, 250, 300, 350, 400, 450, 550, 600, 700, 800, 900]
     } else {
-        blowUp := [200, 500, 1000, 2000, 100, 250, 300, 350, 400, 450, 550, 600, 700, 800, 900]
+        blowUp := [350, 500, 1000, 2000, 100, 200, 250, 300, 400, 450, 550, 600, 700, 800, 900]
     }
     Loop, % blowUp.Length() {
         ; Get the formatted pBitmap
@@ -5064,7 +5064,7 @@ CropAndFormatForOcr(inputFile, x := 0, y := 0, width := 200, height := 200, scal
     ; Get bitmap from file
     pBitmapOrignal := Gdip_CreateBitmapFromFile(inputFile)
     ; Crop to region, Scale up the image, Convert to greyscale, Increase contrast
-    pBitmapFormatted := Gdip_CropResizeGreyscaleContrast(pBitmapOrignal, x, y, width, height, scaleUpPercent, 25)
+    pBitmapFormatted := Gdip_CropResizeGreyscaleContrast(pBitmapOrignal, x, y, width, height, scaleUpPercent, 75)
     
 	filePath := A_ScriptDir . "\temp\" .  winTitle . "_AccountPacks_crop.png"
     Gdip_SaveBitmapToFile(pBitmap, filePath)
