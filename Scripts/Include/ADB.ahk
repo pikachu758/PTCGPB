@@ -221,7 +221,13 @@ adbInput(name) {
 }
 
 adbInputEvent(event) {
-    adbShell.StdIn.WriteLine("input keyevent " . event)
+    if InStr(event, " ") {
+        ; If the event uses a space, we use keycombination
+        adbShell.StdIn.WriteLine("input keycombination " . event)
+    } else {
+        ; It's a single key event (e.g., "67")
+        adbShell.StdIn.WriteLine("input keyevent " . event)
+    }
     waitadb()
 }
 

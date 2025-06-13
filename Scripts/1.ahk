@@ -936,7 +936,7 @@ RemoveFriends() {
 TradeTutorial() {
     if(FindOrLoseImage(100, 120, 175, 145, , "Trade", 0)) {
         Loop{
-            adbClick_wbb(167,437)
+            adbClick_wbb(167, 437)
             Delay(1)
             if(FindOrLoseImage(15, 455, 40, 475, ,"Add2", 0))          
             break
@@ -1190,15 +1190,13 @@ EraseInput(num := 0, total := 0) {
     failSafe := A_TickCount
     failSafeTime := 0
 
-    ; Slow machines with higher delay will use Ctrl + A instead of double clicking
+    ; Slow machines with higher delay will use a different click position and Shift + End
     if (Delay > 250) {
         Loop {
             FindImageAndClick(0, 475, 25, 495, , "OK2", 138, 454)
-            adbClick_wbb(50, 500)
+            adbClick_wbb(15, 500)
             Sleep, 10
-            adbInputEvent("29")  ; Press Ctrl
-            adbInputEvent("41")  ; Press A
-            adbInputEvent("29+41") ; Release both
+            adbInputEvent ("59 123")
             Sleep, 10
             adbInputEvent("67") ; Press Backspace
             if(FindOrLoseImage(15, 500, 68, 520, , "Erase", 0, failSafeTime))
