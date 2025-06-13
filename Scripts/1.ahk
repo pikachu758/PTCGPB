@@ -2240,8 +2240,8 @@ FindCard(prefix) {
 }
 
 FindGodPack(invalidPack := false) {
-    global openExtraPack, spendHourGlass
-
+    global shinyPacks, openPack, minStars, minStarsShiny, openExtraPack, spendHourGlass
+    
     ; Check for normal borders.
     normalBorders := FindBorders("normal")
     if (normalBorders) {
@@ -2253,9 +2253,13 @@ FindGodPack(invalidPack := false) {
     keepAccount := true
 
     ; Check if pack meets minimum stars requirement
-    if (!invalidPack && minStars > 0) {
+    if (!invalidPack) {
         starCount := 5 - FindBorders("1star")
-        if (starCount < minStars) {
+        
+        ; Use minStarsShiny if it's a shiny pack, otherwise use minStars
+        requiredStars := (shinyPacks.HasKey(openPack)) ? minStarsShiny : minStars
+        
+        if (requiredStars > 0 && starCount < requiredStars) {
             CreateStatusMessage("Pack doesn't contain enough 2 stars...",,,, false)
             invalidPack := true
         }
@@ -2321,7 +2325,7 @@ GodPackFound(validity) {
         LogToDiscord(logMessage, screenShot, true, (sendAccountXml ? accountFullPath : ""), fcScreenshot)
         ;ChooseTag()
     } else if (!InvalidCheck) {
-        LogToDiscord(logMessage, screenShot, true, (sendAccountXml ? accountFullPath : ""), fcScreenshot)
+        LogToDiscord(logMessage, screenShot, true, (sendAccountXml ? accountFullPath : ""))
     }
 }
 
