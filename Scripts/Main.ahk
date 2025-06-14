@@ -21,7 +21,7 @@ CoordMode, Pixel, Screen
 DllCall("AllocConsole")
 WinHide % "ahk_id " DllCall("GetConsoleWindow", "ptr")
 
-global winTitle, changeDate, failSafe, openPack, Delay, failSafeTime, StartSkipTime, Columns, failSafe, scriptName, GPTest, StatusText, defaultLanguage, setSpeed, jsonFileName, pauseToggle, SelectedMonitorIndex, swipeSpeed, godPack, scaleParam, skipInvalidGP, deleteXML, packs, FriendID, AddFriend, Instances, showStatus
+global winTitle, changeDate, failSafe, openPack, Delay, failSafeTime, StartSkipTime, Columns, failSafe, scriptName, GPTest, StatusText, defaultLanguage, setSpeed, jsonFileName, pauseToggle, SelectedMonitorIndex, swipeSpeed, godPack, scaleParam, skipInvalidGP, deleteXML, packs, FriendID, AddFriend, Instances, showStatus, AutoSolo
 global triggerTestNeeded, testStartTime, firstRun, minStars, minStarsA2b, vipIdsURL
 global autoUseGPTest, autotest, autotest_time, A_gptest, TestTime
 
@@ -30,6 +30,7 @@ scriptName := StrReplace(A_ScriptName, ".ahk")
 winTitle := scriptName
 pauseToggle := false
 showStatus := true
+AutoSolo := false
 jsonFileName := A_ScriptDir . "\..\json\Packs.json"
 IniRead, FriendID, %A_ScriptDir%\..\Settings.ini, UserSettings, FriendID
 IniRead, Instances, %A_ScriptDir%\..\Settings.ini, UserSettings, Instances
@@ -93,7 +94,7 @@ Loop {
         Gui, ToolBar:Add, Button, % "x" . (buttonWidth * 1) . " y0 w" . buttonWidth . " h25 gPauseScript", Pause (Shift+F6)
         Gui, ToolBar:Add, Button, % "x" . (buttonWidth * 2) . " y0 w" . buttonWidth . " h25 gResumeScript", Resume (Shift+F6)
         Gui, ToolBar:Add, Button, % "x" . (buttonWidth * 3) . " y0 w" . buttonWidth . " h25 gStopScript", Stop (Shift+F7)
-        Gui, ToolBar:Add, Button, % "x" . (buttonWidth * 4) . " y0 w" . buttonWidth . " h25 gShowStatusMessages", Status (Shift+F8)
+        Gui, ToolBar:Add, Button, % "x" . (buttonWidth * 4) . " y0 w" . buttonWidth . " h25 gSoloScript", Solo Battle (Shift+F8)
         Gui, ToolBar:Add, Button, % "x" . (buttonWidth * 5) . " y0 w" . buttonWidth . " h25 gTestScript", GP Test (Shift+F9)
         DllCall("SetWindowPos", "Ptr", WinExist(), "Ptr", 1  ; HWND_BOTTOM
                 , "Int", 0, "Int", 0, "Int", 0, "Int", 0, "UInt", 0x13)  ; SWP_NOSIZE, SWP_NOMOVE, SWP_NOACTIVATE
@@ -123,6 +124,17 @@ pToken := Gdip_Startup()
 
 if(heartBeat)
     IniWrite, 1, %A_ScriptDir%\..\HeartBeat.ini, HeartBeat, Main
+failSafe := A_TickCount
+Loop { ; prevent unexpected interruption of battle
+    failSafeTime := (A_TickCount - failSafe) // 1000
+    if(FindOrLoseImage(233, 400, 264, 428, , "Points", 0, failSafeTime))
+        break
+    if(FindOrLoseImage(20, 500, 55, 530, , "Home", 0, failSafeTime))
+        break
+    adbClick(40, 384) ; click home button
+    Sleep, 1000 
+}
+;FindImageAndClick(20, 500, 55, 530, , "Home", 40, 384, 500) ; prevent unexpected interruption of battle
 FindImageAndClick(120, 500, 155, 530, , "Social", 143, 518, 1000, 150)
 firstRun := true
 
@@ -155,16 +167,19 @@ if (scaleParam = 287) {
 Loop {
     if (autoUseGPTest) {
         autotest_time := (A_TickCount - autotest) // 1000
-        CreateStatusMessage("Auto GP Test Timer : " . autotest_time .  "/ " . TestTime . " seconds", "AutoGPTest", 0, 605, false, true)
-        if (autotest_time >= TestTime) {
-            A_gptest := 1
-            ToggleTestScript()
-        }        
+        CreateStatusMessage("Last GP Test: " . autotest_time//60 .  " mins ago | Auto GP Test CD: " Max(0,(TestTime-autotest_time)//60) " mins", "AutoGPTest", 0, 605, false, true)      
     }
-
     if (GPTest) {
         if (triggerTestNeeded)
             GPTestScript()
+        Sleep, 1000
+        if (heartBeat && (Mod(A_Index, 60) = 0))
+            IniWrite, 1, %A_ScriptDir%\..\HeartBeat.ini, HeartBeat, Main
+        Continue
+    }
+    
+    if (AutoSolo) {
+        SoloBattle()
         Sleep, 1000
         if (heartBeat && (Mod(A_Index, 60) = 0))
             IniWrite, 1, %A_ScriptDir%\..\HeartBeat.ini, HeartBeat, Main
@@ -197,15 +212,19 @@ Loop {
                 clickButton := FindOrLoseImage(75, 340, 195, 530, 80, "Button", 0, failSafeTime) ;looking for ok button in case an invite is withdrawn
                 if(FindOrLoseImage(99Leftx, 110, 99Rightx, 127, , 99Path, 0, failSafeTime)) {
                     done := true
+                    if (autoUseGPTest && autotest_time >= TestTime) {
+                        A_gptest := 1
+                        ToggleTestScript()
+                    }
                     break
                 } else if(FindOrLoseImage(80, 170, 120, 195, , "player", 0, failSafeTime)) {
-                    if (GPTest)
+                    if (GPTest || AutoSolo)
                         break
                     Sleep, %Delay%
                     adbClick(210, 210)
                     Sleep, 1000
                 } else if(FindOrLoseImage(225, 195, 250, 220, , "Pending", 0, failSafeTime)) {
-                    if (GPTest)
+                    if (GPTest || AutoSolo)
                         break
                     adbClick(245, 210)
                 } else if(FindOrLoseImage(186, 496, 206, 518, , "Accept", 0, failSafeTime)) {
@@ -222,13 +241,13 @@ Loop {
                         adbClick(210, 210)
                     }
                 }
-                if (GPTest)
+                if (GPTest || AutoSolo)
                     break
                 failSafeTime := (A_TickCount - failSafe) // 1000
                 CreateStatusMessage("Failsafe " . failSafeTime . "/180 seconds")
             }
         }
-        if(done || fullList|| GPTest)
+        if(done || fullList|| GPTest || AutoSolo)
             break
     }
 }
@@ -291,6 +310,8 @@ FindOrLoseImage(X1, Y1, X2, Y2, searchVariation := "", imageName := "DEFAULT", E
         FSTime := 90
     else if(imageName = "Button")
         FSTime := 240
+    else if(imageName = "Solo2")
+        FSTime := 600
     else
         FSTime := 180
     if (safeTime >= FSTime) {
@@ -455,7 +476,7 @@ resetWindows(){
     return true
 }
 
-restartGameInstance(reason, RL := true){
+restartGameInstance(reason, RL := true, isFirstRun := false) {
     global Delay, scriptName, adbShell, adbPath, adbPort
     initializeAdbShell()
 
@@ -463,8 +484,8 @@ restartGameInstance(reason, RL := true){
         CreateStatusMessage("Restarting game reason:`n" . reason)
     else
         CreateStatusMessage("Restarting game...",,,, false)
-
-    adbShell.StdIn.WriteLine("am force-stop jp.pokemon.pokemontcgp")
+    if (!isFirstRun) 
+        adbShell.StdIn.WriteLine("am force-stop jp.pokemon.pokemontcgp")
     ;adbShell.StdIn.WriteLine("rm -rf /data/data/jp.pokemon.pokemontcgp/cache/*") ; clear cache
     Sleep, 3000
     adbShell.StdIn.WriteLine("am start -n jp.pokemon.pokemontcgp/com.unity3d.player.UnityPlayerActivity")
@@ -531,9 +552,10 @@ StopScript:
 ExitApp
 return
 
-ShowStatusMessages:
-    ToggleStatusMessages()
+SoloScript:
+    ToggleSoloScript()
 return
+
 
 ReloadScript:
     Reload
@@ -689,14 +711,14 @@ from_window(ByRef image) {
 ~+F5::Reload
 ~+F6::Pause
 ~+F7::ExitApp
-~+F8::ToggleStatusMessages()
+~+F8::ToggleSoloScript()
 ~+F9::ToggleTestScript() ; hoytdj Add
 
-ToggleStatusMessages() {
-    if(showStatus)
-        showStatus := False
+ToggleSoloScript() {
+    if(AutoSolo)
+        AutoSolo := false
     else
-        showStatus := True
+        AutoSolo := true
 }
 
 bboxAndPause(X1, Y1, X2, Y2, doPause := False) {
@@ -824,9 +846,9 @@ RemoveNonVipFriends() {
             CreateStatusMessage("End of list - scrolled without friend codes multiple times.`nReady to test.")
             if(A_gptest && autoUseGPTest) {
                 A_gptest := 0
-                autotest := A_TickCount
                 ToggleTestScript()
 			}
+            autotest := A_TickCount
             return
         }
         friendClickY := 195 + (95 * friendIndex)
@@ -852,9 +874,9 @@ RemoveNonVipFriends() {
                 adbClick(143, 507)
                 if(A_gptest && autoUseGPTest) {
 					A_gptest := 0
-					autotest := A_TickCount
 					ToggleTestScript()
 				}
+				autotest := A_TickCount
                 return
             }
             matchedFriend := ""
@@ -924,7 +946,8 @@ RemoveNonVipFriends() {
 			scrolledWithoutFriend++
         }
         if (!GPTest) {
-            Return
+			autotest := A_TickCount
+            return
         }
     }
 }
@@ -1294,4 +1317,46 @@ DownloadFile(url, filename) {
         FileAppend, %contents%, %localPath%
     }
     return !errored
+}
+
+SoloBattle() {
+    global AutoSolo, failSafe
+    FindImageAndClick(120, 500, 155, 530, , "Social",143, 518)
+    FindImageAndClick(191, 383, 223, 416, , "Solo", 189, 517, 1000)
+
+    Loop {
+        FindImageAndClick(11, 107, 27, 121, , "SoloUL", 224, 404) ; click on solo battle
+        Delay(4)
+        if(!FindOrLoseImage(234, 359, 259, 370, , "Beginner", 0)) ; if beginner not in middle, then there is no event. Break
+            break
+
+        adbClick(238, 197)
+        Delay(4)
+        adbSwipe("275 450 275 200 300") ; swipe to the bottom of the event battle list
+        Delay(1)
+        adbSwipe("275 450 275 200 300") ; swipe twice to make sure we reach the bottom
+        Delay(1)
+        FindImageAndClick(250, 502, 261, 510, , "AutoOff", 243, 358) ; select the battle
+        Delay(1)
+        adbClick(255, 505) ; turn on auto
+        Delay(1)
+        adbClick(229, 463) ; enter the battle
+        Delay(10)
+        if(FindOrLoseImage(119, 356, 180, 363, , "stamina", 0)) ; if no stamina, exit
+            break
+
+        failSafe := A_TickCount
+        Loop {
+            failSafeTime := (A_TickCount - failSafe) // 1000
+            adbClick(189, 517)
+            Delay(5)
+            if(FindOrLoseImage(191, 383, 223, 416, , "Solo2", 0, failSafeTime)) {
+                failSafeTime := 0
+                break
+            }
+            CreateStatusMessage("In Battle. " . failSafeTime "/600 seconds")
+        }
+    }
+
+    AutoSolo := False
 }

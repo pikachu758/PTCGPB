@@ -302,12 +302,12 @@ if(DeadCheck = 1 && deleteMethod != "13 Pack") {
 
         if (avgtotalSeconds > 0 ) {
             StartTime := changeDate
-            StartTime += -(1.5*avgtotalSeconds), Seconds
+            StartTime += -(1*avgtotalSeconds), Seconds
             EndTime := changeDate
-            EndTime += (1.5*avgtotalSeconds), Seconds
+            EndTime += (1*avgtotalSeconds), Seconds
         } else {
             StartTime := changeDate
-            StartTime += -10, minutes
+            StartTime += -5, minutes
             EndTime := changeDate
             EndTime += 5, minutes
         }
@@ -936,7 +936,7 @@ RemoveFriends() {
 TradeTutorial() {
     if(FindOrLoseImage(100, 120, 175, 145, , "Trade", 0)) {
         Loop{
-            adbClick_wbb(167, 437)
+            adbClick_wbb(167,437)
             Delay(1)
             if(FindOrLoseImage(15, 455, 40, 475, ,"Add2", 0))          
             break
@@ -1000,6 +1000,14 @@ AddFriends(renew := false, getFC := false) {
                 failSafeTime := (A_TickCount - failSafe) // 1000
                 CreateStatusMessage("Waiting for Social`n(" . failSafeTime . "/90 seconds)")
             }
+			IniRead, showcaseNumber, %A_ScriptDir%\..\Settings.ini, UserSettings, showcaseLikes
+			IniRead, showcaseEnabled, %A_ScriptDir%\..\Settings.ini, UserSettings, showcaseEnabled
+			if (showcaseNumber > 0 && showcaseEnabled = 1) {
+				showcaseNumber -= 1
+				IniWrite, %showcaseNumber%, %A_ScriptDir%\..\Settings.ini, UserSettings, showcaseLikes
+				showcaseLikes()
+                FindImageAndClick(120, 500, 155, 530, , "Social", 143, 518, 500)
+			}
 			if (!getFC && friendingStarted) {
 				IniWrite, 1, %A_ScriptDir%\%scriptName%.ini, UserSettings, DeadCheck
 				friendingStarted := false
@@ -1122,16 +1130,8 @@ AddFriends(renew := false, getFC := false) {
                     }
                 }
             }
-            FindImageAndClick(120, 500, 155, 530, , "Social", 143, 518, 500)
-			
-			IniRead, showcaseNumber, %A_ScriptDir%\..\Settings.ini, UserSettings, showcaseLikes
-			IniRead, showcaseEnabled, %A_ScriptDir%\..\Settings.ini, UserSettings, showcaseEnabled
-			if (showcaseNumber > 0 && showcaseEnabled = 1) {
-				showcaseNumber -= 1
-				IniWrite, %showcaseNumber%, %A_ScriptDir%\..\Settings.ini, UserSettings, showcaseLikes
-				showcaseLikes()
-			}
-			
+			FindImageAndClick(120, 500, 155, 530, , "Social", 143, 518, 500)
+            
             FindImageAndClick(20, 500, 55, 530, , "Home", 40, 516, 500)
         }
         CreateStatusMessage("Waiting for friends to accept request`n(" . count . "/" . waitTime . " seconds)")
@@ -1148,7 +1148,7 @@ showcaseLikes() {
 		{
 			showcaseID := Trim(A_LoopReadLine)        
 			FindImageAndClick(215, 252, 240, 277, , "FriendIDSearch", 224, 472, 200)
-			FindImageAndClick(193, 495, 218, 521, , "ShowcaseInput", 143, 273, 200)
+			FindImageAndClick(157, 498, 225, 522, , "ShowcaseInput", 143, 273, 200)
 			Delay(3)
 			adbInput(showcaseID)					; Pasting ID
 			Delay(1)
@@ -1190,29 +1190,11 @@ EraseInput(num := 0, total := 0) {
     failSafe := A_TickCount
     failSafeTime := 0
 
-    ; Slow machines with higher delay will use a different click position and Shift + End
-    if (Delay > 250) {
-        Loop {
-            FindImageAndClick(0, 475, 25, 495, , "OK2", 138, 454)
-            adbClick_wbb(15, 500)
-            Sleep, 10
-            adbInputEvent ("59 123")
-            Sleep, 10
-            adbInputEvent("67") ; Press Backspace
-            if(FindOrLoseImage(15, 500, 68, 520, , "Erase", 0, failSafeTime))
-                break
-        }
-    } else {
-        ; Default is set to double click unless delay is greater than 250
-        Loop {
-            FindImageAndClick(0, 475, 25, 495, , "OK2", 138, 454)
-            adbClick_wbb(50, 500)
-            adbClick_wbb(50, 500)
-            Sleep, 10
-            adbInputEvent("67")
-            if(FindOrLoseImage(15, 500, 68, 520, , "Erase", 0, failSafeTime))
-                break
-        }
+    Loop {
+        FindImageAndClick(0, 475, 25, 495, , "OK2", 138, 454)
+        adbInputEvent("59 122 67") ; Press Shift + Home + Backspace to select all and delete
+        if(FindOrLoseImage(15, 500, 68, 520, , "Erase", 0, failSafeTime))
+            break
     }
 
     failSafeTime := (A_TickCount - failSafe) // 1000
@@ -2080,7 +2062,7 @@ FoundTradeable(found3Dmnd := 0, found4Dmnd := 0, found1Star := 0, foundGimmighou
         if (injectMethod && IsFunc("ocr")) {
             ; Region: x32, y120, 175x26
             playerName := ""
-            if(RefinedOCRText(fcScreenshot, 32, 120, 175, 26, "", "", playerName, ".\•")) {
+            if(RefinedOCRText(fcScreenshot, 32, 120, 175, 26, "", "", playerName)) {
             username := playerName
             }
         }
@@ -2131,7 +2113,7 @@ FoundStars(star) {
             if (injectMethod && IsFunc("ocr")) {
                 ; Region: x32, y120, 175x26
                 playerName := ""
-               if(RefinedOCRText(fcScreenshot, 32, 120, 175, 26, "", "", playerName, ".\•")) {
+               if(RefinedOCRText(fcScreenshot, 32, 120, 175, 26, "", "", playerName)) {
                 username := playerName
                 }
             }
@@ -2238,7 +2220,7 @@ FindCard(prefix) {
 }
 
 FindGodPack(invalidPack := false) {
-    global shinyPacks, openPack, minStars, minStarsShiny, openExtraPack, spendHourGlass
+    global openExtraPack, spendHourGlass
 
     ; Check for normal borders.
     normalBorders := FindBorders("normal")
@@ -2249,15 +2231,11 @@ FindGodPack(invalidPack := false) {
 
     ; A god pack (although possibly invalid) has been found.
     keepAccount := true
-
+    requiredStars := (shinyPacks.HasKey(openPack)) ? minStarsShiny : minStars
     ; Check if pack meets minimum stars requirement
-    if (!invalidPack) {
+    if (!invalidPack && requiredStars > 0) {
         starCount := 5 - FindBorders("1star")
-        
-        ; Use minStarsShiny if it's a shiny pack, otherwise use minStars
-        requiredStars := (shinyPacks.HasKey(openPack)) ? minStarsShiny : minStars
-        
-        if (requiredStars > 0 && starCount < requiredStars) {
+        if (starCount < requiredStars) {
             CreateStatusMessage("Pack doesn't contain enough 2 stars...",,,, false)
             invalidPack := true
         }
@@ -2306,7 +2284,7 @@ GodPackFound(validity) {
         if (injectMethod && IsFunc("ocr")) {
             ; Region: x32, y120, 175x26
             playerName := ""
-            if(RefinedOCRText(fcScreenshot, 32, 120, 175, 26, "", "", playerName, ".\•")) {
+            if(RefinedOCRText(fcScreenshot, 32, 120, 175, 26, "", "", playerName)) {
             username := playerName
             }
         }
@@ -2323,7 +2301,7 @@ GodPackFound(validity) {
         LogToDiscord(logMessage, screenShot, true, (sendAccountXml ? accountFullPath : ""), fcScreenshot)
         ;ChooseTag()
     } else if (!InvalidCheck) {
-        LogToDiscord(logMessage, screenShot, true, (sendAccountXml ? accountFullPath : ""))
+        LogToDiscord(logMessage, screenShot, true, (sendAccountXml ? accountFullPath : ""), fcScreenshot)
     }
 }
 
@@ -5039,19 +5017,19 @@ FindPackStats() {
 }
 
 ; Attempts to extract and validate text from a specified region of a screenshot using OCR.
-RefinedOCRText(screenshotFile, x, y, w, h, allowedChars, validPattern, ByRef output, disallowedChars := "") {
+RefinedOCRText(screenshotFile, x, y, w, h, allowedChars, validPattern, ByRef output) {
     success := False
     ; Pack count gets bigger blowup
     if(output = "trophyOCR"){
         blowUp := [500, 1000, 2000, 100, 200, 250, 300, 350, 400, 450, 550, 600, 700, 800, 900]
     } else {
-        blowUp := [200, 500, 1000, 2000, 100, 200, 250, 300, 400, 450, 550, 600, 700, 800, 900]
+        blowUp := [350, 500, 1000, 2000, 100, 200, 250, 300, 400, 450, 550, 600, 700, 800, 900]
     }
     Loop, % blowUp.Length() {
         ; Get the formatted pBitmap
         pBitmap := CropAndFormatForOcr(screenshotFile, x, y, w, h, blowUp[A_Index])
         ; Run OCR
-        output := GetTextFromBitmap(pBitmap, allowedChars, disallowedChars)
+        output := GetTextFromBitmap(pBitmap, allowedChars)
         ; Validate result
         if (RegExMatch(output, validPattern)) {
             success := True
@@ -5076,7 +5054,7 @@ CropAndFormatForOcr(inputFile, x := 0, y := 0, width := 200, height := 200, scal
 }
 
 ; Extracts text from a bitmap using OCR. Converts the bitmap to a format usable by Windows OCR, performs OCR, and optionally removes characters not in the allowed character list.
-GetTextFromBitmap(pBitmap, charAllowList := "", charDisallowList := "") {
+GetTextFromBitmap(pBitmap, charAllowList := "") {
     global ocrLanguage
     ocrText := ""
     ; OCR the bitmap directly
@@ -5086,11 +5064,6 @@ GetTextFromBitmap(pBitmap, charAllowList := "", charDisallowList := "") {
     ; Cleanup references
     DeleteObject(hBitmapFriendCode)
     ; Remove disallowed characters
-    if (charDisallowList != "") {
-        disallowedPattern := "[" RegExEscape(charDisallowList) "]"
-        ocrText := RegExReplace(ocrText, disallowedPattern, "")
-    }
-
     if (charAllowList != "") {
         allowedPattern := "[^" RegExEscape(charAllowList) "]"
         ocrText := RegExReplace(ocrText, allowedPattern)
