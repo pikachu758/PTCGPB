@@ -2080,7 +2080,7 @@ FoundTradeable(found3Dmnd := 0, found4Dmnd := 0, found1Star := 0, foundGimmighou
         if (injectMethod && IsFunc("ocr")) {
             ; Region: x32, y120, 175x26
             playerName := ""
-            if(RefinedOCRText(fcScreenshot, 32, 120, 175, 26, "", "", playerName)) {
+            if(RefinedOCRText(fcScreenshot, 32, 120, 175, 26, "", "", playerName, ".\•")) {
             username := playerName
             }
         }
@@ -2131,7 +2131,7 @@ FoundStars(star) {
             if (injectMethod && IsFunc("ocr")) {
                 ; Region: x32, y120, 175x26
                 playerName := ""
-               if(RefinedOCRText(fcScreenshot, 32, 120, 175, 26, "", "", playerName)) {
+               if(RefinedOCRText(fcScreenshot, 32, 120, 175, 26, "", "", playerName, ".\•")) {
                 username := playerName
                 }
             }
@@ -2306,7 +2306,7 @@ GodPackFound(validity) {
         if (injectMethod && IsFunc("ocr")) {
             ; Region: x32, y120, 175x26
             playerName := ""
-            if(RefinedOCRText(fcScreenshot, 32, 120, 175, 26, "", "", playerName)) {
+            if(RefinedOCRText(fcScreenshot, 32, 120, 175, 26, "", "", playerName, ".\•")) {
             username := playerName
             }
         }
@@ -5039,7 +5039,7 @@ FindPackStats() {
 }
 
 ; Attempts to extract and validate text from a specified region of a screenshot using OCR.
-RefinedOCRText(screenshotFile, x, y, w, h, allowedChars, validPattern, ByRef output) {
+RefinedOCRText(screenshotFile, x, y, w, h, allowedChars, validPattern, ByRef output, disallowedChars := "") {
     success := False
     ; Pack count gets bigger blowup
     if(output = "trophyOCR"){
@@ -5051,7 +5051,7 @@ RefinedOCRText(screenshotFile, x, y, w, h, allowedChars, validPattern, ByRef out
         ; Get the formatted pBitmap
         pBitmap := CropAndFormatForOcr(screenshotFile, x, y, w, h, blowUp[A_Index])
         ; Run OCR
-        output := GetTextFromBitmap(pBitmap, allowedChars)
+        output := GetTextFromBitmap(pBitmap, allowedChars, disallowedChars)
         ; Validate result
         if (RegExMatch(output, validPattern)) {
             success := True
@@ -5076,7 +5076,7 @@ CropAndFormatForOcr(inputFile, x := 0, y := 0, width := 200, height := 200, scal
 }
 
 ; Extracts text from a bitmap using OCR. Converts the bitmap to a format usable by Windows OCR, performs OCR, and optionally removes characters not in the allowed character list.
-GetTextFromBitmap(pBitmap, charAllowList := "") {
+GetTextFromBitmap(pBitmap, charAllowList := "", charDisallowList := "") {
     global ocrLanguage
     ocrText := ""
     ; OCR the bitmap directly
@@ -5086,6 +5086,11 @@ GetTextFromBitmap(pBitmap, charAllowList := "") {
     ; Cleanup references
     DeleteObject(hBitmapFriendCode)
     ; Remove disallowed characters
+    if (charDisallowList != "") {
+        disallowedPattern := "[" RegExEscape(charDisallowList) "]"
+        ocrText := RegExReplace(ocrText, disallowedPattern, "")
+    }
+
     if (charAllowList != "") {
         allowedPattern := "[^" RegExEscape(charAllowList) "]"
         ocrText := RegExReplace(ocrText, allowedPattern)
