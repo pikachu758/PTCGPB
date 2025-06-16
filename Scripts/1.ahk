@@ -806,7 +806,7 @@ RemoveFriends() {
     }
     
     FindImageAndClick(226, 100, 270, 135, , "Add", 38, 460)
-    FindImageAndClick(97, 452, 104, 476, 3, "requests", 174, 467)
+    FindImageAndClick(97, 452, 104, 476, 10, "requests", 174, 467)
     Loop{
         if (FindOrLoseImage(191, 498, 207, 514, , "clearAll", 0))
             break
@@ -814,7 +814,7 @@ RemoveFriends() {
         Delay(1)
         adbClick(210, 372)
     }
-    FindImageAndClick(84, 463, 100, 475, 3, "Friends", 22, 464)
+    FindImageAndClick(84, 463, 100, 475, 10, "Friends", 22, 464)
     friendsProcessed := 0
     finished := false
     accepted := false
@@ -826,8 +826,8 @@ RemoveFriends() {
                 accepted := true
                 break
             }
-            else if(FindOrLoseImage(84, 463, 100, 475, 1, "Friends", 0)) {
-                if(FindOrLoseImage(42, 163, 66, 185, 1, "empty", 0)) {
+            else if(FindOrLoseImage(84, 463, 100, 475, 5, "Friends", 0)) {
+                if(FindOrLoseImage(42, 163, 66, 185, 5, "empty", 0)) {
                     finished := true
                     break
                 }
