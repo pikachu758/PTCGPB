@@ -302,14 +302,14 @@ if(DeadCheck = 1 && deleteMethod != "13 Pack") {
 
         if (avgtotalSeconds > 0 ) {
             StartTime := changeDate
-            StartTime += -(1*avgtotalSeconds), Seconds
+            StartTime += -(0.7*avgtotalSeconds), Seconds
             EndTime := changeDate
-            EndTime += (1*avgtotalSeconds), Seconds
+            EndTime += (0.3*avgtotalSeconds), Seconds
         } else {
             StartTime := changeDate
             StartTime += -5, minutes
             EndTime := changeDate
-            EndTime += 5, minutes
+            EndTime += 2, minutes
         }
 
         StartCurrentTimeDiff := A_Now
@@ -549,12 +549,6 @@ if(DeadCheck = 1 && deleteMethod != "13 Pack") {
 
         EndOfRun:
 
-        ; Collect Daily Hourglasses - either separate setting? or will be currently part of openExtraPack
-        if(deleteMethod = "Inject for Reroll" && openExtraPack) {
-            GoToMain()
-            GetAllRewards(true, true)
-        }
-        
         ; Special missions
         IniRead, claimSpecialMissions, %A_ScriptDir%\..\Settings.ini, UserSettings, claimSpecialMissions, 0
         if (claimSpecialMissions = 1 && !specialMissionsDone && !(deleteMethod = "Inject" && accountOpenPacks >= maxAccountPackNum || deleteMethod = "Inject Missions" && accountOpenPacks >= maxAccountPackNum)) {
@@ -578,6 +572,12 @@ if(DeadCheck = 1 && deleteMethod != "13 Pack") {
             RemoveFriends()
         }
         
+        ; Collect Daily Hourglasses - either separate setting? or will be currently part of openExtraPack
+        if(deleteMethod = "Inject for Reroll" && openExtraPack) {
+            GoToMain(true)
+            GetAllRewards(false, true)
+        }
+
         ; BallCity 2025.02.21 - Track monitor
         now := A_NowUTC
         IniWrite, %now%, %A_ScriptDir%\%scriptName%.ini, Metrics, LastEndTimeUTC
@@ -812,7 +812,8 @@ RemoveFriends() {
             break
         adbClick(205, 510)
         Delay(1)
-        adbClick(210, 372)
+        if (FindOrLoseImage(190, 364, 209, 373, , "OKRed", 0))
+            adbClick(210, 372)
     }
     FindImageAndClick(84, 463, 100, 475, 10, "Friends", 22, 464)
     friendsProcessed := 0
@@ -826,8 +827,8 @@ RemoveFriends() {
                 accepted := true
                 break
             }
-            else if(FindOrLoseImage(84, 463, 100, 475, 5, "Friends", 0)) {
-                if(FindOrLoseImage(42, 163, 66, 185, 5, "empty", 0)) {
+            else if(FindOrLoseImage(84, 463, 100, 475, 10, "Friends", 0)) {
+                if(FindOrLoseImage(42, 163, 66, 185, 10, "empty", 0)) {
                     finished := true
                     break
                 }
@@ -4738,19 +4739,25 @@ GetAllRewards(tomain := true, dailies := false) {
     }
 }
 
-GoToMain(){
+GoToMain(fromSocial := false) {
     failSafe := A_TickCount
     failSafeTime := 0
-    Delay(2)
-    Loop {
-        Delay(3) ;increase this delay if you see "close app" on home page
-        if(FindOrLoseImage(191, 393, 211, 411, , "Shop", 0, failSafeTime)) {
-            break
+    if(!fromSocial) {
+        Delay(2)
+        Loop {
+            Delay(3) ;increase this delay if you see "close app" on home page
+            if(FindOrLoseImage(191, 393, 211, 411, , "Shop", 0, failSafeTime)) {
+                break
+            }
+            else
+                adbInputEvent("111") ;send ESC
+            failSafeTime := (A_TickCount - failSafe) // 1000
+            CreateStatusMessage("Waiting for Shop`n(" . failSafeTime . "/45 seconds)")
         }
-        else
-            adbInputEvent("111") ;send ESC
-        failSafeTime := (A_TickCount - failSafe) // 1000
-        CreateStatusMessage("Waiting for Shop`n(" . failSafeTime . "/45 seconds)")
+    }
+    else {
+        FindImageAndClick(120, 500, 155, 530, , "Social", 143, 493)
+        FindImageAndClick(191, 393, 211, 411, , "Shop", 20, 515, 500) ;click until at main menu
     }
 }
 
