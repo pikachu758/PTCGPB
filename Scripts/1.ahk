@@ -812,7 +812,7 @@ RemoveFriends() {
             break
         adbClick(205, 510)
         Delay(1)
-        if (FindOrLoseImage(190, 364, 209, 373, , "OKRed", 0))
+        if (FindOrLoseImage(238, 350, 258, 387, , "OKRed", 0))
             adbClick(210, 372)
     }
     FindImageAndClick(84, 463, 100, 475, 10, "Friends", 22, 464)
