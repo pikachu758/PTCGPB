@@ -134,7 +134,6 @@ Loop { ; prevent unexpected interruption of battle
     adbClick(40, 384) ; click home button
     Sleep, 1000 
 }
-;FindImageAndClick(20, 500, 55, 530, , "Home", 40, 384, 500) ; prevent unexpected interruption of battle
 FindImageAndClick(120, 500, 155, 530, , "Social", 143, 518, 1000, 150)
 firstRun := true
 

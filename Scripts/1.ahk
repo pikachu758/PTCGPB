@@ -865,7 +865,7 @@ TradeTutorial() {
             adbClick_wbb(167,437)
             Delay(1)
             if(FindOrLoseImage(15, 455, 40, 475, ,"Add2", 0))          
-            break
+                break
         }
 
         FindImageAndClick(226, 100, 270, 135, , "Add", 38, 460, 500,,2)
@@ -1660,6 +1660,7 @@ menuDeleteStart() {
     ;    FileDelete, %loadedAccount%
     }
 }
+
 CheckPack() {
     ; Update pack count.
 	accountOpenPacks += 1
@@ -1716,17 +1717,17 @@ CheckPack() {
     ; Check for god pack. if found we know its not invalid
     foundGP := FindGodPack()
 
-if (foundGP) {
-    if (loadedAccount) {
-        ;accountFoundGP()
-        accountHasPackInTesting := 1 
-        setMetaData()               
-        IniWrite, 0, %A_ScriptDir%\%scriptName%.ini, UserSettings, DeadCheck
-    }
+    if (foundGP) {
+        if (loadedAccount) {
+            ;accountFoundGP()
+            accountHasPackInTesting := 1 
+            setMetaData()               
+            IniWrite, 0, %A_ScriptDir%\%scriptName%.ini, UserSettings, DeadCheck
+        }
 
-    restartGameInstance("God Pack found. Continuing...", "GodPack")
-    return
-}
+        restartGameInstance("God Pack found. Continuing...", "GodPack")
+        return
+    }
 
     ; if not invalid and no GP, Check for 2-star cards.
     if (!CheckShinyPackOnly || shinyPacks.HasKey(openPack)) {
@@ -2152,7 +2153,6 @@ GodPackFound(validity) {
     }
 }
 
-
 loadAccount() {
 
     beginnerMissionsDone := 0
@@ -2391,18 +2391,6 @@ saveAccount(file := "Valid", ByRef filePath := "", packDetails := "") {
     return xmlFile
 }
 
-/* ;Deprecated, use T flag instead
-accountFoundGP() {
-	saveDir := A_ScriptDir "\..\Accounts\Saved\" . winTitle
-	accountFile := saveDir . "\" . accountFileName
-	
-	FileGetTime, accountFileTime, %accountFile%, M
-	accountFileTime += 5, days
-	
-	FileSetTime, accountFileTime, %accountFile%
-}
-*/
-
 ; MODIFIED TrackUsedAccount function with better timestamp tracking
 TrackUsedAccount(fileName) {
     global winTitle
@@ -2512,6 +2500,7 @@ UpdateAccount() {
     ; Direct display of metrics rather than calling function
     CreateStatusMessage("Avg: " . aminutes . "m " . aseconds . "s | Runs: " . rerolls . " | Account Packs " . accountOpenPacks, "AvgRuns", 0, 605, false, true)
 }
+
 ControlClick(X, Y) {
     global winTitle
     ControlClick, x%X% y%Y%, %winTitle%
@@ -2555,7 +2544,6 @@ ReadFile(filename, numbers := false) {
 
     return values.MaxIndex() ? values : false
 }
-
 
 Screenshot_dev(fileType := "Dev",subDir := "") {
 	global adbShell, scriptName, ocrLanguage, loadDir
@@ -2680,7 +2668,6 @@ Screenshot(fileType := "Valid", subDir := "", ByRef fileName := "") {
     ; For PACKSTATS, return both values and delete temp file after OCR is done
     return {filepath: filePath, bitmap: pBitmap, deleteAfterUse: true}
 }
-
 
 ; Pause Script
 PauseScript:
@@ -3252,45 +3239,45 @@ DoTutorial() {
     failSafeTime := 0
     Loop {
     ; Check for AccountName in Settings.ini
-    IniRead, accountNameValue, %A_ScriptDir%\..\Settings.ini, UserSettings, AccountName, ERROR
+        IniRead, accountNameValue, %A_ScriptDir%\..\Settings.ini, UserSettings, AccountName, ERROR
 
-    ; Use AccountName if it exists and isn't empty
-    if (accountNameValue != "ERROR" && accountNameValue != "") {
-        Random, randomNum, 1, 500 ; Generate random number from 1 to 500
-        username := accountNameValue . "-" . randomNum
-        username := SubStr(username, 1, 14)  ; max character limit
-        if(verboseLogging)
-            LogToFile("Using AccountName: " . username)
-        } else {
-        fileName := A_ScriptDir . "\..\usernames.txt"
-        if(FileExist(fileName))
-            name := ReadFile("usernames")
-        else
-            name := ReadFile("usernames_default")
+        ; Use AccountName if it exists and isn't empty
+        if (accountNameValue != "ERROR" && accountNameValue != "") {
+            Random, randomNum, 1, 500 ; Generate random number from 1 to 500
+            username := accountNameValue . "-" . randomNum
+            username := SubStr(username, 1, 14)  ; max character limit
+            if(verboseLogging)
+                LogToFile("Using AccountName: " . username)
+            } else {
+            fileName := A_ScriptDir . "\..\usernames.txt"
+            if(FileExist(fileName))
+                name := ReadFile("usernames")
+            else
+                name := ReadFile("usernames_default")
 
-        Random, randomIndex, 1, name.MaxIndex()
-        username := name[randomIndex]
-        username := SubStr(username, 1, 14)  ; max character limit
-        if(verboseLogging)
-            LogToFile("Using random username: " . username)
-        }
+            Random, randomIndex, 1, name.MaxIndex()
+            username := name[randomIndex]
+            username := SubStr(username, 1, 14)  ; max character limit
+            if(verboseLogging)
+                LogToFile("Using random username: " . username)
+            }
 
-    adbInput(username)
-    Delay(1)
-    if(FindImageAndClick(121, 490, 161, 520, , "Return", 185, 372, , 10)) ;click through until return button on open pack
-        break
-    adbClick_wbb(90, 370)
-    Delay(1)
-    adbClick_wbb(139, 254) ; 139 254 194 372
-    Delay(1)
-    adbClick_wbb(139, 254)
-    Delay(1)
-    EraseInput() ; incase the random pokemon is not accepted
-    failSafeTime := (A_TickCount - failSafe) // 1000
-    CreateStatusMessage("In failsafe for Trace. " . failSafeTime "/45 seconds")
-    if(failSafeTime > 45)
-        restartGameInstance("Stuck at name")
-}
+        adbInput(username)
+        Delay(1)
+        if(FindImageAndClick(121, 490, 161, 520, , "Return", 185, 372, , 10)) ;click through until return button on open pack
+            break
+        adbClick_wbb(90, 370)
+        Delay(1)
+        adbClick_wbb(139, 254) ; 139 254 194 372
+        Delay(1)
+        adbClick_wbb(139, 254)
+        Delay(1)
+        EraseInput() ; incase the random pokemon is not accepted
+        failSafeTime := (A_TickCount - failSafe) // 1000
+        CreateStatusMessage("In failsafe for Trace. " . failSafeTime "/45 seconds")
+        if(failSafeTime > 45)
+            restartGameInstance("Stuck at name")
+    }
 
 
     Delay(1)
@@ -3298,11 +3285,11 @@ DoTutorial() {
     adbClick_wbb(140, 424)
 
     FindImageAndClick(225, 273, 235, 290, , "Pack", 140, 424) ;wait for pack to be ready  to trace
-        if(setSpeed > 1) {
-            FindImageAndClick(25, 145, 70, 170, , "Platin", 18, 109, 2000) ; click mod settings
-            FindImageAndClick(9, 170, 25, 190, , "One", 26, 180) ; click mod settings
-            Delay(1)
-        }
+    if(setSpeed > 1) {
+        FindImageAndClick(25, 145, 70, 170, , "Platin", 18, 109, 2000) ; click mod settings
+        FindImageAndClick(9, 170, 25, 190, , "One", 26, 180) ; click mod settings
+        Delay(1)
+    }
     failSafe := A_TickCount
     failSafeTime := 0
     Loop {
@@ -3323,11 +3310,11 @@ DoTutorial() {
     }
 
     FindImageAndClick(34, 99, 74, 131, , "Swipe", 140, 375) ;click through cards until needing to swipe up
-        if(setSpeed > 1) {
-            FindImageAndClick(25, 145, 70, 170, , "Platin", 18, 109, 2000) ; click mod settings
-            FindImageAndClick(9, 170, 25, 190, , "One", 26, 180) ; click mod settings
-            Delay(1)
-        }
+    if(setSpeed > 1) {
+        FindImageAndClick(25, 145, 70, 170, , "Platin", 18, 109, 2000) ; click mod settings
+        FindImageAndClick(9, 170, 25, 190, , "One", 26, 180) ; click mod settings
+        Delay(1)
+    }
     failSafe := A_TickCount
     failSafeTime := 0
     Loop {
@@ -3348,7 +3335,7 @@ DoTutorial() {
         Delay(1)
     }
 
-Delay(1)
+    Delay(1)
     if(setSpeed > 2) {
         FindImageAndClick(136, 420, 151, 436, , "Move", 134, 375, 500) ; click through until move
         FindImageAndClick(50, 394, 86, 412, , "Proceed", 141, 483, 750) ;wait for menu to proceed then click ok. increased delay in between clicks to fix freezing on 3x speed
@@ -3393,11 +3380,11 @@ Delay(1)
     adbClick_wbb(142, 436)
 
     FindImageAndClick(225, 273, 235, 290, , "Pack", 239, 497) ;wait for pack to be ready  to Trace
-        if(setSpeed > 1) {
-            FindImageAndClick(25, 145, 70, 170, , "Platin", 18, 109, 2000) ; click mod settings
-            FindImageAndClick(9, 170, 25, 190, , "One", 26, 180) ; click mod settings
-            Delay(1)
-        }
+    if(setSpeed > 1) {
+        FindImageAndClick(25, 145, 70, 170, , "Platin", 18, 109, 2000) ; click mod settings
+        FindImageAndClick(9, 170, 25, 190, , "One", 26, 180) ; click mod settings
+        Delay(1)
+    }
     failSafe := A_TickCount
     failSafeTime := 0
     Loop {
