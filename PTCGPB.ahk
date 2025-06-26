@@ -14,11 +14,11 @@ global STATIC_BRUSH := 0
 
 githubUser := "pikachu758"
 repoName := "PTCGPB"
-localVersion := "v6.4.20"
+localVersion := "v6.4.21"
 scriptFolder := A_ScriptDir
 zipPath := A_Temp . "\update.zip"
 extractPath := A_Temp . "\update"
-intro := "Reroll 1 Extra Pack!"
+intro := "Eevee Grove!"
 
 ; GUI dimensions
 global GUI_WIDTH := 377 
@@ -424,7 +424,7 @@ NextStep:
         global autoLaunchMonitor, autoUseGPTest, TestTime
         global CheckShinyPackOnly, TrainerCheck, FullArtCheck, RainbowCheck, ShinyCheck, CrownCheck
         global InvalidCheck, ImmersiveCheck, PseudoGodPack, minStars, Palkia, Dialga, Arceus, Shining
-        global Mew, Pikachu, Charizard, Mewtwo, Solgaleo, Lunala, Buzzwole, slowMotion, ocrLanguage, clientLanguage
+        global Mew, Pikachu, Charizard, Mewtwo, Solgaleo, Lunala, Buzzwole, Eevee, slowMotion, ocrLanguage, clientLanguage
         global CurrentVisibleSection, heartBeatDelay, sendAccountXml, showcaseEnabled, showcaseURL, isDarkTheme
         global useBackgroundImage, tesseractPath, applyRoleFilters, debugMode, tesseractOption, statusMessage
         global s4tEnabled, s4tSilent, s4t3Dmnd, s4t4Dmnd, s4t1Star, s4tGholdengo, s4tWP, s4tWPMinCards
@@ -493,6 +493,7 @@ NextStep:
         IniWrite, %Solgaleo%, Settings.ini, UserSettings, Solgaleo
         IniWrite, %Lunala%, Settings.ini, UserSettings, Lunala
         IniWrite, %Buzzwole%, Settings.ini, UserSettings, Buzzwole
+        IniWrite, %Eevee%, Settings.ini, UserSettings, Eevee
         ; Save basic settings
         IniWrite, %AccountName%, Settings.ini, UserSettings, AccountName
         IniWrite, %waitTime%, Settings.ini, UserSettings, waitTime
@@ -602,8 +603,8 @@ NextStep:
         controlList .= "Txt_RowGap,Txt_InstanceLaunchDelay,Txt_autoLaunchMonitor,"
         controlList .= "Txt_MinStars,Txt_ShinyMinStars,Txt_DeleteMethod,Txt_packMethod,Txt_nukeAccount,"
         controlList .= "Txt_VariablePackCount,Txt_spendHourGlass,Txt_openExtraPack,SortByText,"
-        controlList .= "Txt_Buzzwole,Txt_Solgaleo,Txt_Lunala,Txt_Shining,Txt_Arceus,Txt_Palkia,Txt_Dialga,Txt_Pikachu,Txt_Charizard,Txt_Mewtwo,Txt_Mew,"
-        controlList .= "AllPackSelection,Txt_PackHeading,Txt_PageBuzzwole,Txt_PageSolgaleo,Txt_PageLunala,Txt_PageShining,"
+        controlList .= "Txt_Eevee,Txt_Buzzwole,Txt_Solgaleo,Txt_Lunala,Txt_Shining,Txt_Arceus,Txt_Palkia,Txt_Dialga,Txt_Pikachu,Txt_Charizard,Txt_Mewtwo,Txt_Mew,"
+        controlList .= "AllPackSelection,Txt_PackHeading,Txt_PageEevee,Txt_PageBuzzwole,Txt_PageSolgaleo,Txt_PageLunala,"
         controlList .= "Txt_FullArtCheck,Txt_TrainerCheck,Txt_RainbowCheck,Txt_PseudoGodPack,"
         controlList .= "Txt_CrownCheck,Txt_ShinyCheck,Txt_ImmersiveCheck,Txt_CheckShinyPackOnly,Txt_InvalidCheck,"
         controlList .= "Txt_s4tEnabled,Txt_s4tSilent,Txt_s4t3Dmnd,Txt_s4t4Dmnd,Txt_s4t1Star,Txt_s4tWP,"
@@ -1167,11 +1168,11 @@ NextStep:
         packControls := "PackSettingsHeading,Txt_MinStars,minStars,"
         packControls .= "Txt_ShinyMinStars,minStarsShiny,Txt_DeleteMethod,deleteMethod,packMethod,Txt_packMethod,nukeAccount,Txt_nukeAccount,"
         packControls .= "SortByText,SortByDropdown,"
-        packControls .= "Pack_Divider1,Buzzwole,Solgaleo,Lunala,Shining,Arceus,Palkia,Dialga,Pikachu,"
-        packControls .= "Txt_Shining,Txt_Arceus,Txt_Palkia,Txt_Dialga,Txt_Pikachu,Txt_Charizard,Txt_Mewtwo,Txt_Mew,Txt_Solgaleo,Txt_Lunala,Txt_Buzzwole,"
+        packControls .= "Pack_Divider1,Eevee,Buzzwole,Solgaleo,Lunala,Shining,Arceus,Palkia,Dialga,Pikachu,"
+        packControls .= "Txt_Shining,Txt_Arceus,Txt_Palkia,Txt_Dialga,Txt_Pikachu,Txt_Charizard,Txt_Mewtwo,Txt_Mew,Txt_Solgaleo,Txt_Lunala,Txt_Buzzwole,Txt_Eevee,"
         packControls .= "Charizard,Mewtwo,Mew,Pack_Divider2,ShinyCheck,"
-        packControls .= "AllPackSelection,Txt_PackHeading,Page_Buzzwole,Page_Solgaleo,Page_Lunala,Page_Shining,"
-        packControls .= "Txt_PageBuzzwole,Txt_PageSolgaleo,Txt_PageLunala,Txt_PageShining,Btn_returnPack,Txt_Btn_returnPack,"
+        packControls .= "AllPackSelection,Txt_PackHeading,Page_Eevee,Page_Buzzwole,Page_Solgaleo,Page_Lunala,"
+        packControls .= "Txt_PageEevee,Txt_PageBuzzwole,Txt_PageSolgaleo,Txt_PageLunala,Btn_returnPack,Txt_Btn_returnPack,"
         packControls .= "FullArtCheck,TrainerCheck,RainbowCheck,PseudoGodPack,InvalidCheck,"
         packControls .= "Txt_FullArtCheck,Txt_TrainerCheck,Txt_RainbowCheck,Txt_PseudoGodPack,Txt_CrownCheck,Txt_ShinyCheck,Txt_ImmersiveCheck,Txt_CheckShinyPackOnly,Txt_InvalidCheck,"
         packControls .= "CheckShinyPackOnly,CrownCheck,ImmersiveCheck,Pack_Divider3,"
@@ -1534,7 +1535,7 @@ NextStep:
     ShowPackSettingsSection() {
         global isDarkTheme, DARK_TEXT, LIGHT_TEXT, DARK_INPUT_BG, DARK_INPUT_TEXT, LIGHT_INPUT_BG, LIGHT_INPUT_TEXT
         global DARK_SECTION_COLORS, LIGHT_SECTION_COLORS, deleteMethod, nukeAccount
-        global Shining, Arceus, Palkia, Dialga, Pikachu, Charizard, Mewtwo, Mew, Solgaleo, Lunala, Buzzwole
+        global Shining, Arceus, Palkia, Dialga, Pikachu, Charizard, Mewtwo, Mew, Solgaleo, Lunala, Buzzwole, Eevee
         global sortByCreated
         ToggleImageOnHover.ResetAllHoverStates()
         ; Ensure the fade-in is finished before calling HideAllSection()
@@ -1563,8 +1564,8 @@ NextStep:
         godPackControls := "title_pack,Txt_MinStars,minStars,Txt_ShinyMinStars,minStarsShiny,"
         godPackControls .= "Txt_DeleteMethod,deleteMethod,Pack_Divider1"
         
-        packSelectionControls := "Buzzwole,Solgaleo,Lunala,Shining,"
-        packSelectionControls .= "Txt_Buzzwole,Txt_Solgaleo,Txt_Lunala,Txt_Shining,"
+        packSelectionControls := "Eevee,Buzzwole,Solgaleo,Lunala,"
+        packSelectionControls .= "Txt_Eevee,Txt_Buzzwole,Txt_Solgaleo,Txt_Lunala,"
         packSelectionControls .= "AllPackSelection,Pack_Divider2"
         
         cardDetectionControls := "FullArtCheck,TrainerCheck,RainbowCheck,"
@@ -1639,7 +1640,7 @@ NextStep:
         }
         
         ; Pack Selection text controls
-        packSelectionTextControls := "Txt_Buzzwole,Txt_Solgaleo,Txt_Lunala,Txt_Shining"
+        packSelectionTextControls := "Txt_Eevee,Txt_Buzzwole,Txt_Solgaleo,Txt_Lunala"
         
         ; Card Detection text controls
         cardDetectionTextControls := "Txt_FullArtCheck,Txt_TrainerCheck,Txt_RainbowCheck,Txt_PseudoGodPack,"
@@ -1943,9 +1944,9 @@ NextStep:
         HideAllSections()
         ShowInsettingpage()
         
-        controlList := "title_Pack,Page_Buzzwole,Page_Solgaleo,Page_Lunala,Page_Shining,Arceus,"
+        controlList := "title_Pack,Page_Eevee,Page_Buzzwole,Page_Solgaleo,Page_Lunala,Shining,Arceus,"
         controlList .= "Palkia,Dialga,Pikachu,Charizard,Mewtwo,Mew,Btn_returnPack"
-        Txt_controlList := "Txt_PackHeading,Txt_PageBuzzwole,Txt_PageSolgaleo,Txt_PageLunala,Txt_PageShining,Txt_Arceus,"
+        Txt_controlList := "Txt_PackHeading,Txt_PageEevee,Txt_PageBuzzwole,Txt_PageSolgaleo,Txt_PageLunala,Txt_Shining,Txt_Arceus,"
         Txt_controlList .= "Txt_Palkia,Txt_Dialga,Txt_Pikachu,Txt_Charizard,Txt_Mewtwo,Txt_Mew"
         HideControls := "Btn_next,Btn_previous,Btn_inset,Txt_Btn_inset"
         
@@ -2130,7 +2131,8 @@ NextStep:
             IniRead, Mewtwo, Settings.ini, UserSettings, Mewtwo, 0
             IniRead, Solgaleo, Settings.ini, UserSettings, Solgaleo, 0
             IniRead, Lunala, Settings.ini, UserSettings, Lunala, 0
-            IniRead, Buzzwole, Settings.ini, UserSettings, Buzzwole, 1
+            IniRead, Buzzwole, Settings.ini, UserSettings, Buzzwole, 0
+            IniRead, Eevee, Settings.ini, UserSettings, Eevee, 1
             
             IniRead, CheckShinyPackOnly, Settings.ini, UserSettings, CheckShinyPackOnly, 0
             IniRead, TrainerCheck, Settings.ini, UserSettings, TrainerCheck, 0
@@ -2178,9 +2180,11 @@ NextStep:
             IniRead, minStarsA2Dialga, Settings.ini, UserSettings, minStarsA2Dialga, 0
             IniRead, minStarsA2Palkia, Settings.ini, UserSettings, minStarsA2Palkia, 0
             IniRead, minStarsA2a, Settings.ini, UserSettings, minStarsA2a, 0
+            IniRead, minStarsA2b, Settings.ini, UserSettings, minStarsA2b, 0
             IniRead, minStarsA3Solgaleo, Settings.ini, UserSettings, minStarsA3Solgaleo, 0
             IniRead, minStarsA3Lunala, Settings.ini, UserSettings, minStarsA3Lunala, 0
-            IniRead, minStarsA3a, Settings.ini, UserSettings, minStarA3aBuzzwole, 0
+            IniRead, minStarsA3a, Settings.ini, UserSettings, minStarA3a, 0
+            IniRead, minStarsA3b, Settings.ini, UserSettings, minStarA3b, 0
             
             IniRead, waitForEligibleAccounts, Settings.ini, UserSettings, waitForEligibleAccounts, 1
             IniRead, maxWaitHours, Settings.ini, UserSettings, maxWaitHours, 24
@@ -2614,7 +2618,7 @@ NextStep:
     global Txt_runMain, Txt_autoUseGPTest, Txt_slowMotion,
     global Txt_autoLaunchMonitor, Txt_applyRoleFilters, Txt_debugMode, Txt_tesseractOption, Txt_statusMessage
     global Txt_packMethod, Txt_nukeAccount, Txt_spendHourGlass, Txt_openExtraPack
-    global Txt_Buzzwole, Txt_Solgaleo, Txt_Lunala, Txt_Shining, Txt_Arceus, Txt_Palkia, Txt_Dialga, Txt_Pikachu, Txt_Charizard, Txt_Mewtwo, Txt_Mew
+    global Txt_Eevee, Txt_Buzzwole, Txt_Solgaleo, Txt_Lunala, Txt_Shining, Txt_Arceus, Txt_Palkia, Txt_Dialga, Txt_Pikachu, Txt_Charizard, Txt_Mewtwo, Txt_Mew
     global Txt_FullArtCheck, Txt_TrainerCheck, Txt_RainbowCheck, Txt_PseudoGodPack, Txt_CrownCheck, Txt_ShinyCheck, Txt_ImmersiveCheck, Txt_CheckShinyPackOnly, Txt_InvalidCheck
     global Txt_s4tEnabled, Txt_s4tSilent
     global Txt_s4t3Dmnd, Txt_s4t4Dmnd, Txt_s4t1Star, s4tGholdengoArrow, Txt_s4tWP, Txt_s4tSendAccountXml
@@ -2821,14 +2825,14 @@ NextStep:
     ; === Pack Selection Subsection ===
     SetNormalFont()
     ; Latest 4 Packs
-    AddCheckBox(45, 301, 28, 13, "Buzzwole", "", checkedPath, uncheckedPath, Buzzwole, "Txt_Buzzwole", currentDictionary.Txt_Buzzwole, 80, 300)
-    AddCheckBox(190, 301, 28, 13, "Solgaleo", "", checkedPath, uncheckedPath, Solgaleo, "Txt_Solgaleo", currentDictionary.Txt_Solgaleo, 225, 300)
-    AddCheckBox(45, 326, 28, 13, "Lunala", "", checkedPath, uncheckedPath, Lunala, "Txt_Lunala", currentDictionary.Txt_Lunala, 80, 325)
-    AddCheckBox(190, 326, 28, 13, "Shining", "", checkedPath, uncheckedPath, Shining, "Txt_Shining", currentDictionary.Txt_Shining, 225, 325)
+    AddCheckBox(45, 301, 28, 13, "Eevee", "", checkedPath, uncheckedPath, Eevee, "Txt_Eevee", currentDictionary.Txt_Eevee, 80, 300)
+    AddCheckBox(190, 301, 28, 13, "Buzzwole", "", checkedPath, uncheckedPath, Buzzwole, "Txt_Buzzwole", currentDictionary.Txt_Buzzwole, 225, 300)
+    AddCheckBox(45, 326, 28, 13, "Solgaleo", "", checkedPath, uncheckedPath, Solgaleo, "Txt_Solgaleo", currentDictionary.Txt_Solgaleo, 80, 325)
+    AddCheckBox(190, 326, 28, 13, "Lunala", "", checkedPath, uncheckedPath, Lunala, "Txt_Lunala", currentDictionary.Txt_Lunala, 225, 325)
     ; Page for all pack settings
     global AllPackSelection, Btn_returnPack, Txt_Btn_returnPack
-    global Page_Buzzwole, Page_Solgaleo, Page_Lunala, Page_Shining
-    global Txt_PageBuzzwole,Txt_PageSolgaleo, Txt_PageLunala, Txt_PageShining, Txt_PageArceus
+    global Page_Eevee, Page_Buzzwole, Page_Solgaleo, Page_Lunala
+    global Txt_PageEevee, Txt_PageBuzzwole, Txt_PageSolgaleo, Txt_PageLunala
     SetSmallBtnFont()
     TestHover := AddBtn("Text", 235, 360, "", "", "AllPackSelection", "GoPackSelect", currentDictionary.AllPack, "", "", "", "")
     
@@ -2838,22 +2842,27 @@ NextStep:
     SetNormalFont()
     Yline := 185
     Xline := 55
+    AddCheckBox(Xline, (Yline+1), 28, 13, "Page_Eevee", "PackCheck", checkedPath, uncheckedPath, Eevee, "Txt_PageEevee", currentDictionary.Txt_Eevee, (Xline+35), Yline)
+    Xline += 155
     AddCheckBox(Xline, (Yline+1), 28, 13, "Page_Buzzwole", "PackCheck", checkedPath, uncheckedPath, Buzzwole, "Txt_PageBuzzwole", currentDictionary.Txt_Buzzwole, (Xline+35), Yline)
-    Xline += 155
+    Xline -= 155
+    Yline += 25
     AddCheckBox(Xline, (Yline+1), 28, 13, "Page_Solgaleo", "PackCheck", checkedPath, uncheckedPath, Solgaleo, "Txt_PageSolgaleo", currentDictionary.Txt_Solgaleo, (Xline+35), Yline)
-    Xline -= 155
-    Yline += 25
+    Xline += 155
     AddCheckBox(Xline, (Yline+1), 28, 13, "Page_Lunala", "PackCheck", checkedPath, uncheckedPath, Lunala, "Txt_PageLunala", currentDictionary.Txt_Lunala, (Xline+35), Yline)
-    Xline += 155
-    AddCheckBox(Xline, (Yline+1), 28, 13, "Page_Shining", "PackCheck", checkedPath, uncheckedPath, Shining, "Txt_PageShining", currentDictionary.Txt_Shining, (Xline+35), Yline)
     Xline -= 155
     Yline += 25
+    AddCheckBox(Xline, (Yline+1), 28, 13, "Shining", "", checkedPath, uncheckedPath, Shining, "Txt_Shining", currentDictionary.Txt_Shining, (Xline+35), Yline)
+    Xline += 155
     AddCheckBox(Xline, (Yline+1), 28, 13, "Arceus", "", checkedPath, uncheckedPath, Arceus, "Txt_Arceus", currentDictionary.Txt_Arceus, (Xline+35), Yline)
-    Xline += 155
-    AddCheckBox(Xline, (Yline+1), 28, 13, "Palkia", "", checkedPath, uncheckedPath, Palkia, "Txt_Palkia", currentDictionary.Txt_Palkia, (Xline+35), Yline)
     Xline -= 155
     Yline += 25
+    AddCheckBox(Xline, (Yline+1), 28, 13, "Palkia", "", checkedPath, uncheckedPath, Palkia, "Txt_Palkia", currentDictionary.Txt_Palkia, (Xline+35), Yline)
+    Xline += 155
     AddCheckBox(Xline, (Yline+1), 28, 13, "Dialga", "", checkedPath, uncheckedPath, Dialga, "Txt_Dialga", currentDictionary.Txt_Dialga, (Xline+35), Yline)
+    Xline -= 155
+    Yline += 25
+    AddCheckBox(Xline, (Yline+1), 28, 13, "Mew", "", checkedPath, uncheckedPath, Mew, "Txt_Mew", currentDictionary.Txt_Mew, (Xline+35), Yline)
     Xline += 155
     AddCheckBox(Xline, (Yline+1), 28, 13, "Pikachu", "", checkedPath, uncheckedPath, Pikachu, "Txt_Pikachu", currentDictionary.Txt_Pikachu, (Xline+35), Yline)
     Xline -= 155
@@ -2861,9 +2870,6 @@ NextStep:
     AddCheckBox(Xline, (Yline+1), 28, 13, "Charizard", "", checkedPath, uncheckedPath, Charizard, "Txt_Charizard", currentDictionary.Txt_Charizard, (Xline+35), Yline)
     Xline += 155
     AddCheckBox(Xline, (Yline+1), 28, 13, "Mewtwo", "", checkedPath, uncheckedPath, Mewtwo, "Txt_Mewtwo", currentDictionary.Txt_Mewtwo, (Xline+35), Yline)
-    Xline -= 155
-    Yline += 25
-    AddCheckBox(Xline, (Yline+1), 28, 13, "Mew", "", checkedPath, uncheckedPath, Mew, "Txt_Mew", currentDictionary.Txt_Mew, (Xline+35), Yline)
     
     SetPageBtnFont()
     ReturnPackBtn := AddBtn("Picture", 85, 590, 204, 68, "Btn_returnPack", "ReturnPackSettingsSection", currentDictionary.btn_return, btn_inset, "Txt_Btn_returnPack", (137+xs_Return), (604+ys_Return))
@@ -3288,7 +3294,7 @@ return
 CheckBoxToggle:
     varName := A_GuiControl
     ToggleCheckbox(varName)
-    if (varName = "Buzzwole" || varName = "Solgaleo" || varName = "Lunala" || varName = "Shining") {
+    if (varName = "Eevee" || varName = "Buzzwole" || varName = "Solgaleo" || varName = "Lunala") {
         PageVarName := "Page_" . varName
         newValue := %varName%
         GuiControl,, %PageVarName%, % newValue ? checkedPath : uncheckedPath
@@ -3981,6 +3987,8 @@ StartBot:
     confirmMsg := SetUpDictionary.Confirm_SelectedMethod . deleteMethod . "`n"
     
     confirmMsg .= "`n" . SetUpDictionary.Confirm_SelectedPacks . "`n"
+    if (Eevee)
+        confirmMsg .= "• " . currentDictionary.Txt_Eevee . "`n"
     if (Buzzwole)
         confirmMsg .= "• " . currentDictionary.Txt_Buzzwole . "`n"
     if (Solgaleo)
@@ -4282,6 +4290,8 @@ StartBot:
         Selected.Push("Lunala")
     if(Buzzwole)
         Selected.Push("Buzzwole")
+    if(Eevee)
+        Selected.Push("Eevee")
     
     for index, value in Selected {
         if(index = Selected.MaxIndex())

@@ -21,7 +21,7 @@ DllCall("AllocConsole")
 WinHide % "ahk_id " DllCall("GetConsoleWindow", "ptr")
 
 global winTitle, changeDate, failSafe, openPack, Delay, failSafeTime, StartSkipTime, Columns, failSafe, scriptName, GPTest, StatusText, defaultLanguage, setSpeed, jsonFileName, pauseToggle, SelectedMonitorIndex, swipeSpeed, godPack, scaleParam, deleteMethod, packs, FriendID, friendIDs, Instances, username, friendCode, stopToggle, friended, runMain, Mains, showStatus, injectMethod, packMethod, loadDir, loadedAccount, nukeAccount, CheckShinyPackOnly, TrainerCheck, FullArtCheck, RainbowCheck, ShinyCheck, dateChange, foundGP, friendsAdded, PseudoGodPack, packArray, CrownCheck, ImmersiveCheck, InvalidCheck, slowMotion, screenShot, accountFile, invalid, starCount, keepAccount
-global Mewtwo, Charizard, Pikachu, Mew, Dialga, Palkia, Arceus, Shining, Solgaleo, Lunala, Buzzwole
+global Mewtwo, Charizard, Pikachu, Mew, Dialga, Palkia, Arceus, Shining, Solgaleo, Lunala, Buzzwole, Eevee
 global shinyPacks, minStars, minStarsShiny
 global DeadCheck
 global s4tEnabled, s4tSilent, s4t3Dmnd, s4t4Dmnd, s4t1Star, s4tGholdengo, s4tWP, s4tWPMinCards, s4tDiscordWebhookURL, s4tDiscordUserId, s4tSendAccountXml
@@ -101,9 +101,10 @@ IniRead, PseudoGodPack, %A_ScriptDir%\..\Settings.ini, UserSettings, PseudoGodPa
 IniRead, minStars, %A_ScriptDir%\..\Settings.ini, UserSettings, minStars, 0
 IniRead, minStarsShiny, %A_ScriptDir%\..\Settings.ini, UserSettings, minStarsShiny, 0
 
+IniRead, Eevee, %A_ScriptDir%\..\Settings.ini, UserSettings, Eevee, 1
 IniRead, Buzzwole, %A_ScriptDir%\..\Settings.ini, UserSettings, Buzzwole, 0
-IniRead, Solgaleo, %A_ScriptDir%\..\Settings.ini, UserSettings, Solgaleo, 1
-IniRead, Lunala, %A_ScriptDir%\..\Settings.ini, UserSettings, Lunala, 1
+IniRead, Solgaleo, %A_ScriptDir%\..\Settings.ini, UserSettings, Solgaleo, 0
+IniRead, Lunala, %A_ScriptDir%\..\Settings.ini, UserSettings, Lunala, 0
 IniRead, Shining, %A_ScriptDir%\..\Settings.ini, UserSettings, Shining, 0
 IniRead, Arceus, %A_ScriptDir%\..\Settings.ini, UserSettings, Arceus, 0
 IniRead, Dialga, %A_ScriptDir%\..\Settings.ini, UserSettings, Dialga, 0
@@ -142,8 +143,8 @@ IniRead, rerollStartTime, %A_ScriptDir%\%scriptName%.ini, Metrics, rerollStartTi
 ;rerollstartTime := A_TickCount
 
 
-pokemonList := ["Mewtwo", "Charizard", "Pikachu", "Mew", "Dialga", "Palkia", "Arceus", "Shining", "Solgaleo", "Lunala", "Buzzwole"]
-shinyPacks := {"Shining": 1, "Solgaleo": 1, "Lunala": 1, "Buzzwole": 1}
+pokemonList := ["Mewtwo", "Charizard", "Pikachu", "Mew", "Dialga", "Palkia", "Arceus", "Shining", "Solgaleo", "Lunala", "Buzzwole", "Eevee"]
+shinyPacks := {"Shining": 1, "Solgaleo": 1, "Lunala": 1, "Buzzwole": 1, "Eevee": 1}
 
 packArray := []  ; Initialize an empty array
 
@@ -267,30 +268,29 @@ adbSwipeX2 := Round(267 / 277 * 535)
 adbSwipeY := Round((327 - 44) / 489 * 960)
 global adbSwipeParams := adbSwipeX1 . " " . adbSwipeY . " " . adbSwipeX2 . " " . adbSwipeY . " " . swipeSpeed
 
-if(DeadCheck = 1 && deleteMethod != "13 Pack") {
-    CreateStatusMessage("Account is stuck! Restarting and unfriending...")
-    friended := true
-    CreateStatusMessage("Stuck account still has friends. Unfriending accounts...")
-    FindImageAndClick(25, 145, 70, 170, , "Platin", 18, 109, 2000) ; click mod settings
-    if(setSpeed = 3)
-        FindImageAndClick(182, 170, 194, 190, , "Three", 187, 180) ; click mod settings
-    else
-        FindImageAndClick(100, 170, 113, 190, , "Two", 107, 180) ; click mod settings
-    adbClick_wbb(41, 296)
-    Delay(1)
-    RemoveFriends()
-    DeadCheck := 0
-    IniWrite, 0, %A_ScriptDir%\%scriptName%.ini, UserSettings, DeadCheck
-    createAccountList(scriptName)
-    Reload
-} else if(DeadCheck = 1 && deleteMethod = "13 Pack") {
-    CreateStatusMessage("New account creation is stuck! Deleting account...")
-    menuDeleteStart()
-    Reload
-} else {
-    ; in injection mode, we dont need to reload
-        
-    Loop {
+Loop {
+    if(DeadCheck = 1 && deleteMethod != "13 Pack") {
+        CreateStatusMessage("Account is stuck! Restarting and unfriending...")
+        friended := true
+        CreateStatusMessage("Stuck account still has friends. Unfriending accounts...")
+        FindImageAndClick(25, 145, 70, 170, , "Platin", 18, 109, 2000) ; click mod settings
+        if(setSpeed = 3)
+            FindImageAndClick(182, 170, 194, 190, , "Three", 187, 180) ; click mod settings
+        else
+            FindImageAndClick(100, 170, 113, 190, , "Two", 107, 180) ; click mod settings
+        adbClick_wbb(41, 296)
+        Delay(1)
+        RemoveFriends()
+        DeadCheck := 0
+        IniWrite, 0, %A_ScriptDir%\%scriptName%.ini, UserSettings, DeadCheck
+        createAccountList(scriptName)
+        continue
+    } else if(DeadCheck = 1 && deleteMethod = "13 Pack") {
+        CreateStatusMessage("New account creation is stuck! Deleting account...")
+        menuDeleteStart()
+        continue
+    } else {
+        ; in injection mode, we dont need to reload
         clearMissionCache()
         Randmax := packArray.Length()
         Random, rand, 1, Randmax
@@ -302,9 +302,9 @@ if(DeadCheck = 1 && deleteMethod != "13 Pack") {
 
         if (avgtotalSeconds > 0 ) {
             StartTime := changeDate
-            StartTime += -(0.7*avgtotalSeconds), Seconds
+            StartTime += -(0.8*avgtotalSeconds), Seconds
             EndTime := changeDate
-            EndTime += (0.3*avgtotalSeconds), Seconds
+            EndTime += (0.2*avgtotalSeconds), Seconds
         } else {
             StartTime := changeDate
             StartTime += -5, minutes
@@ -3509,27 +3509,27 @@ SelectPack(HG := false) {
 	inselectexpansionscreen := 0
 	
     packy := HomeScreenAllPackY
-    if (openPack == "Buzzwole") {
+    if (openPack == "Eevee") {
         packx := MiddlePackX
-    } else if (openPack == "Solgaleo") {
+    } else if (openPack == "Buzzwole") {
         packx := RightPackX
     } else {
         packx := LeftPackX
     }
 	
-	if(openPack == "Buzzwole" || openPack == "Solgaleo" || openPack == "Shining") {
+	if(openPack == "Eevee" || openPack == "Buzzwole" || openPack == "Solgaleo") {
 		PackIsInHomeScreen := 1
 	} else {
 		PackIsInHomeScreen := 0
 	}
 	
-	if(openPack == "Buzzwole") {
+	if(openPack == "Eevee") {
 		PackIsLatest := 1
 	} else {
 		PackIsLatest := 0
 	}
 		
-	if (openPack == "Buzzwole" || openPack == "Solgaleo" || openPack == "Lunala") {
+	if (openPack == "Eevee" || openPack == "Buzzwole" || openPack == "Solgaleo") {
 		packInTopRowsOfSelectExpansion := 1
 	} else {
 		packInTopRowsOfSelectExpansion := 0
@@ -3587,7 +3587,7 @@ SelectPack(HG := false) {
 					Delay(10)
 				}
 			} else {
-				FindImageAndClick(115, 140, 160, 155, , "SelectExpansion", 248, 459, 3000) ; if selected pack is not the latest pack click directly select other boosters
+				FindImageAndClick(115, 140, 160, 155, , "SelectExpansion", 248, 459, 1000) ; if selected pack is not the latest pack click directly select other boosters
 				
 				if(PackIsInHomeScreen) {
 					; the only one that is not handled below because should show in home page
@@ -3597,31 +3597,31 @@ SelectPack(HG := false) {
 		}
 	} else {
 		; if not first or not injected, or friends were added, always start from home page
-		FindImageAndClick(233, 400, 264, 428, , "Points", packx, packy, 3000)  ; open selected pack from home page
+		FindImageAndClick(233, 400, 264, 428, , "Points", packx, packy, 1000)  ; open selected pack from home page
 	}
 
 	; if not the ones showing in home screen, click select other booster packs
     if (!PackIsInHomeScreen && !inselectexpansionscreen) {
-        FindImageAndClick(115, 140, 160, 155, , "SelectExpansion", 248, 459, 3000)
+        FindImageAndClick(115, 140, 160, 155, , "SelectExpansion", 248, 459, 1000)
 		inselectexpansionscreen := 1
 	}
 	
 	if(inselectexpansionscreen) {
-        if (openPack = "Dialga" || openPack = "Palkia" || openPack = "Mew") {
+        if (openPack = "Arceus" || openPack = "Dialga" || openPack = "Palkia") {
             ; One swipe
             adbSwipe("266 770 266 355 160")
             Sleep, 500
 
             packy := 490
 			
-			if (openPack = "Dialga") {
-                packx := SelectExpansionLeftCollumnMiddleX + 2PackExpansionLeft
+			if (openPack = "Arceus") {
+                packx := SelectExpansionLeftCollumnMiddleX
+            } else if (openPack = "Dialga") {
+                packx := SelectExpansionRightCollumnMiddleX + 2PackExpansionLeft
             } else if (openPack = "Palkia") {
-                packx := SelectExpansionLeftCollumnMiddleX + 2PackExpansionRight
-            } else if (openPack = "Mew") {
-                packx := SelectExpansionRightCollumnMiddleX
+                packx := SelectExpansionRightCollumnMiddleX + 2PackExpansionRight
             }
-        } else if (openPack = "Charizard" || openPack = "Mewtwo" || openPack = "Pikachu") {
+        } else if (openPack = "Mew" || openPack = "Charizard" || openPack = "Mewtwo" || openPack = "Pikachu") {
             ; Two swipes
             adbSwipe("266 770 266 355 160")
             Sleep, 500
@@ -3629,29 +3629,30 @@ SelectPack(HG := false) {
             Sleep, 500
 
             packy := 450
-			
-			if (openPack = "Charizard") {
-                packx := SelectExpansionLeftCollumnMiddleX + 3PackExpansionLeft
-            } else if (openPack = "Mewtwo") {
+			if (openPack = "Mew") {
                 packx := SelectExpansionLeftCollumnMiddleX
+            } else if (openPack = "Charizard") {
+                packx := SelectExpansionRightCollumnMiddleX + 3PackExpansionLeft
+            } else if (openPack = "Mewtwo") {
+                packx := SelectExpansionRightCollumnMiddleX
             } else if (openPack = "Pikachu") {
-                packx := SelectExpansionLeftCollumnMiddleX + 3PackExpansionRight
+                packx := SelectExpansionRightCollumnMiddleX + 3PackExpansionRight
             }
         } else {
             ; No swipe, top row
-            if (openPack == "Buzzwole") {
+            if (openPack == "Eevee") {
 				packy := SelectExpansionFirstRowY
                 packx := SelectExpansionLeftCollumnMiddleX
+            } else if (openPack == "Buzzwole") {
+				packy := SelectExpansionFirstRowY
+                packx := SelectExpansionRightCollumnMiddleX
             } else if (openPack == "Solgaleo") {
-				packy := SelectExpansionFirstRowY
-                packx := SelectExpansionRightCollumnMiddleX + 2PackExpansionLeft
-            } else if (openPack == "Lunala") {
-				packy := SelectExpansionFirstRowY
-                packx := SelectExpansionRightCollumnMiddleX + 2PackExpansionRight
-            } else if (openPack == "Shining") {
 				packy := SelectExpansionSecondRowY
-                packx := SelectExpansionLeftCollumnMiddleX 
-            } else if (openPack = "Arceus") {
+                packx := SelectExpansionLeftCollumnMiddleX + 2PackExpansionLeft
+            } else if (openPack == "Lunala") {
+				packy := SelectExpansionSecondRowY
+                packx := SelectExpansionLeftCollumnMiddleX + 2PackExpansionRight
+            } else if (openPack = "Shining") {
 				packy := SelectExpansionSecondRowY
                 packx := SelectExpansionRightCollumnMiddleX
             }
@@ -3870,6 +3871,10 @@ HourglassOpening(HG := false, NEIRestart := true) {
 			
 		if(cantOpenMorePacks)
 			return
+        
+        if(FindOrLoseImage(100, 240, 185, 275, , "Error", 0, failSafeTime)){
+            SelectPack("HGPack")
+        }
 		
         clickButton := FindOrLoseImage(145, 440, 258, 480, 80, "Button", 0, failSafeTime)
         if(clickButton) {
@@ -4902,7 +4907,7 @@ GetTextFromBitmap(pBitmap, charAllowList := "") {
     pIRandomAccessStream := HBitmapToRandomAccessStream(hBitmap)
     ocrText := ocr(pIRandomAccessStream, ocrLanguage)
     ; Cleanup references
-    DeleteObject(hBitmapFriendCode)
+    DeleteObject(hBitmap)
     ; Remove disallowed characters
     if (charAllowList != "") {
         allowedPattern := "[^" RegExEscape(charAllowList) "]"
