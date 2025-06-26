@@ -124,6 +124,7 @@ pToken := Gdip_Startup()
 
 if(heartBeat)
     IniWrite, 1, %A_ScriptDir%\..\HeartBeat.ini, HeartBeat, Main
+
 failSafe := A_TickCount
 Loop { ; prevent unexpected interruption of battle
     failSafeTime := (A_TickCount - failSafe) // 1000
@@ -131,10 +132,13 @@ Loop { ; prevent unexpected interruption of battle
         break
     if(FindOrLoseImage(20, 500, 55, 530, , "Home", 0, failSafeTime))
         break
-    adbClick(40, 384) ; click home button
-    Sleep, 1000 
+    if(FindOrLoseImage(120, 500, 155, 530, , "Social", 0, failSafeTime))
+        break
+    adbClick(40, 384)
+    Sleep, 1000  
+    adbClick(143, 518)
 }
-FindImageAndClick(120, 500, 155, 530, , "Social", 143, 518, 1000, 150)
+
 firstRun := true
 
 global 99Configs := {}
@@ -191,15 +195,7 @@ Loop {
     FindImageAndClick(120, 500, 155, 530, , "Social", 143, 518, 1000, 30)
     FindImageAndClick(226, 100, 270, 135, , "Add", 38, 460, 500)
     FindImageAndClick(170, 450, 195, 480, , "Approve", 228, 464)
-    /* ; Deny all option
-    if(firstRun) {
-        Sleep, 1000
-        adbClick(205, 510)
-        Sleep, 1000
-        adbClick(210, 372)
-        firstRun := false
-    }
-    */
+
     done := false
     Loop 3 {
         Sleep, %Delay%
@@ -210,21 +206,12 @@ Loop {
                 Sleep, %Delay%
                 clickButton := FindOrLoseImage(75, 340, 195, 530, 80, "Button", 0, failSafeTime) ;looking for ok button in case an invite is withdrawn
                 if(FindOrLoseImage(99Leftx, 110, 99Rightx, 127, , 99Path, 0, failSafeTime)) {
-                    done := true
                     if (autoUseGPTest && autotest_time >= TestTime) {
                         A_gptest := 1
                         ToggleTestScript()
                     }
-                    break
-                } else if(FindOrLoseImage(80, 170, 120, 195, , "player", 0, failSafeTime)) {
-                    if (GPTest || AutoSolo)
-                        break
-                    Sleep, %Delay%
-                    adbClick(210, 210)
-                    Sleep, 1000
-                } else if(FindOrLoseImage(225, 195, 250, 220, , "Pending", 0, failSafeTime)) {
-                    if (GPTest || AutoSolo)
-                        break
+                }
+                if(FindOrLoseImage(225, 195, 250, 220, , "Pending", 0, failSafeTime)) {
                     adbClick(245, 210)
                 } else if(FindOrLoseImage(186, 496, 206, 518, , "Accept", 0, failSafeTime)) {
                     done := true
@@ -826,6 +813,11 @@ RemoveNonVipFriends() {
     CreateStatusMessage("Downloading vip_ids.txt.",,,, false)
     if (vipIdsURL != "" && !DownloadFile(vipIdsURL, "vip_ids.txt")) {
         CreateStatusMessage("Failed to download vip_ids.txt. Aborting test...",,,, false)
+        if(A_gptest && autoUseGPTest) {
+            A_gptest := 0
+            ToggleTestScript()
+        }
+        autotest := A_TickCount
         return
     }
 
@@ -833,6 +825,11 @@ RemoveNonVipFriends() {
     vipFriendsArray :=  GetFriendAccountsFromFile(A_ScriptDir . "\..\vip_ids.txt", includesIdsAndNames)
     if (!vipFriendsArray.MaxIndex()) {
         CreateStatusMessage("No accounts found in vip_ids.txt. Aborting test...",,,, false)
+        if(A_gptest && autoUseGPTest) {
+            A_gptest := 0
+            ToggleTestScript()
+        }
+        autotest := A_TickCount
         return
     }
 
@@ -1255,7 +1252,7 @@ GetTextFromBitmap(pBitmap, charAllowList := "") {
     ocrText := ocr(pIRandomAccessStream, ocrLanguage)
     ; Cleanup references
     ; ObjRelease(pIRandomAccessStream) ; TODO: do I need this?
-    DeleteObject(hBitmapFriendCode)
+    DeleteObject(hBitmap)
     ; Remove disallowed characters
     if (charAllowList != "") {
         allowedPattern := "[^" RegExEscape(charAllowList) "]"
