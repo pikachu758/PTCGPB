@@ -56,9 +56,9 @@ findAdbPorts(baseFolder := "C:\Program Files\Netease") {
 }
 
 ConnectAdb(folderPath := "C:\Program Files\Netease") {
-    adbPort := findAdbPorts(folderPath)
 
     adbPath := folderPath . "\MuMuPlayerGlobal-12.0\shell\adb.exe"
+    adbPort := findAdbPorts(folderPath)
 
     if !FileExist(adbPath) ;if international mumu file path isn't found look for chinese domestic path
         adbPath := folderPath . "\MuMu Player 12\shell\adb.exe"
@@ -74,11 +74,12 @@ ConnectAdb(folderPath := "C:\Program Files\Netease") {
     MaxRetries := 5
     RetryCount := 0
     connected := false
-    ip := "127.0.0.1:" . adbPort ; Specify the connection IP:port
 
     CreateStatusMessage("Connecting to ADB...",,,, false)
 
     Loop %MaxRetries% {
+        adbPort := findAdbPorts(folderPath)
+        ip := "127.0.0.1:" . adbPort ; Specify the connection IP:port
         ; Attempt to connect using CmdRet
         connectionResult := CmdRet(adbPath . " connect " . ip)
 
@@ -124,7 +125,7 @@ CmdRet(sCmd, callBackFuncObj := "", encoding := "") {
    {
       DllCall("CloseHandle", "Ptr", hPipeRead)
       DllCall("CloseHandle", "Ptr", hPipeWrite)
-      throw "CreateProcess is failed"
+      throw Exception("CreateProcess is failed")
    }
    DllCall("CloseHandle", "Ptr", hPipeWrite)
    VarSetCapacity(sTemp, 4096), nSize := 0
@@ -151,10 +152,10 @@ initializeAdbShell() {
 
                 ; Validate adbPath and adbPort
                 if (!FileExist(adbPath)) {
-                    throw "ADB path is invalid: " . adbPath
+                    throw Exception("ADB path is invalid: " . adbPath)
                 }
                 if (adbPort < 0 || adbPort > 65535) {
-                    throw "ADB port is invalid: " . adbPort
+                    throw Exception("ADB port is invalid: " . adbPort)
                 }
 
                 ; Attempt to start adb shell
@@ -163,7 +164,7 @@ initializeAdbShell() {
                 ; Ensure adbShell is running before sending 'su'
                 Sleep, 500
                 if (adbShell.Status != 0) {
-                    throw "Failed to start ADB shell."
+                    throw Exception("Failed to start ADB shell.")
                 }
 
                 adbShell.StdIn.WriteLine("su")
@@ -175,11 +176,11 @@ initializeAdbShell() {
             }
         } catch e {
             RetryCount++
-            LogToFile("ADB Shell Error: " . e.message, "ADB.txt")
+            LogToFile("ADB Shell Error: " . e.Message, "ADB.txt")
 
             if (RetryCount >= MaxRetries) {
                 if (Debug)
-                    CreateStatusMessage("Failed to connect to shell after multiple attempts: " . e.message)
+                    CreateStatusMessage("Failed to connect to shell after multiple attempts: " . e.Message)
                 else
                     CreateStatusMessage("Failed to connect to shell. Pausing.",,,, false)
                 Pause
