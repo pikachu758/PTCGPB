@@ -798,8 +798,8 @@ RemoveFriends() {
                     pos2 += 5
                 }
                 adbClick_wbb(pos1, pos2)
-                }
             }
+        }
         Sleep, 500
         failSafeTime := (A_TickCount - failSafe) // 1000
         CreateStatusMessage("Waiting for Social`n(" . failSafeTime . "/90 seconds)")
@@ -975,7 +975,8 @@ AddFriends(renew := false, getFC := false) {
             adbClick_wbb(232, 453)
             if(FindOrLoseImage(165, 250, 190, 275, , "Send", 0, failSafeTime)) {
                 adbClick_wbb(243, 258)
-                Delay(2)
+                adbClick_wbb(243, 258)
+                adbClick_wbb(243, 258)
                 break
             }
             else if(FindOrLoseImage(165, 240, 255, 270, , "Withdraw", 0, failSafeTime)) {
@@ -986,7 +987,8 @@ AddFriends(renew := false, getFC := false) {
                     FindImageAndClick(135, 355, 160, 385, , "Remove", 193, 258)
                     FindImageAndClick(165, 250, 190, 275, , "Send", 200, 372)
                     adbClick_wbb(243, 258)
-                    Delay(2)
+                    adbClick_wbb(243, 258)
+                    adbClick_wbb(243, 258)
                 }
                 break
             }
@@ -1476,19 +1478,13 @@ restartGameInstance(reason, RL := true) {
         waitadb()
         adbShell.StdIn.WriteLine("am force-stop jp.pokemon.pokemontcgp")
         waitadb()
-        Sleep, 2000
-        ;MsgBox, 1
         clearMissionCache()
         if (!RL && DeadCheck = 0) {
-            ;MsgBox, 2
             adbShell.StdIn.WriteLine("rm /data/data/jp.pokemon.pokemontcgp/shared_prefs/deviceAccount:.xml") ; delete account data
-            ;MsgBox, 3
             ;TODO improve friend list cluter with deadcheck/stuck at, for injection. need to check also loadAccount at the beggining
         }
         waitadb()
-        Sleep, 500
         adbShell.StdIn.WriteLine("am start -n jp.pokemon.pokemontcgp/com.unity3d.player.UnityPlayerActivity")
-        
         waitadb()
         Sleep, 5000
         ;MsgBox, 4
@@ -2247,22 +2243,17 @@ loadAccount() {
 
     ; OPTIMIZED ADB OPERATIONS - Reduced delays
     waitadb()
-    adbShell.StdIn.WriteLine("am force-stop jp.pokemon.pokemontcgp")
-    waitadb()
-
-    Sleep, 1500  ; Reduced from 3000
     RunWait, % adbPath . " -s 127.0.0.1:" . adbPort . " push " . loadFile . " /sdcard/deviceAccount.xml",, Hide
-
-    Sleep, 1500  ; Reduced from 3000
+    waitadb()
+    adbShell.StdIn.WriteLine("am force-stop jp.pokemon.pokemontcgp")
     waitadb()
     adbShell.StdIn.WriteLine("cp /sdcard/deviceAccount.xml /data/data/jp.pokemon.pokemontcgp/shared_prefs/deviceAccount:.xml")
     waitadb()
     adbShell.StdIn.WriteLine("rm /sdcard/deviceAccount.xml")
     waitadb()
-    Sleep, 1000  ; Reduced from 3000
     adbShell.StdIn.WriteLine("am start -n jp.pokemon.pokemontcgp/com.unity3d.player.UnityPlayerActivity")
     waitadb()
-    Sleep, 500   ; Reduced from 1000
+    Sleep, 5000
 
     ; Parse account filename for pack info (unchanged)
     if (InStr(accountFileName, "P")) {
@@ -3391,15 +3382,15 @@ DoTutorial() {
         adbSwipe_wbb(adbSwipeParams)
         Sleep, 10
         if (FindOrLoseImage(225, 273, 235, 290, , "Pack", 1, failSafeTime)){
-        if(setSpeed > 1) {
-            if(setSpeed = 3)
-                        FindImageAndClick(182, 170, 194, 190, , "Three", 187, 180) ; click mod settings
-            else
-                        FindImageAndClick(100, 170, 113, 190, , "Two", 107, 180) ; click mod settings
-        }
-                adbClick_wbb(41, 296)
-                break
+            if(setSpeed > 1) {
+                if(setSpeed = 3)
+                    FindImageAndClick(182, 170, 194, 190, , "Three", 187, 180) ; click mod settings
+                else
+                    FindImageAndClick(100, 170, 113, 190, , "Two", 107, 180) ; click mod settings
             }
+            adbClick_wbb(41, 296)
+            break
+        }
         failSafeTime := (A_TickCount - failSafe) // 1000
         CreateStatusMessage("Waiting for Pack`n(" . failSafeTime . "/45 seconds)")
         Delay(1)
