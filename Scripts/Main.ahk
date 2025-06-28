@@ -134,9 +134,10 @@ Loop { ; prevent unexpected interruption of battle
         break
     if(FindOrLoseImage(120, 500, 155, 530, , "Social", 0, failSafeTime))
         break
-    adbClick(40, 384)
-    Sleep, 1000  
     adbClick(143, 518)
+    Delay(1)
+    adbClick(40, 384)
+    Delay(1)
 }
 
 firstRun := true
@@ -206,10 +207,12 @@ Loop {
                 Sleep, %Delay%
                 clickButton := FindOrLoseImage(75, 340, 195, 530, 80, "Button", 0, failSafeTime) ;looking for ok button in case an invite is withdrawn
                 if(FindOrLoseImage(99Leftx, 110, 99Rightx, 127, , 99Path, 0, failSafeTime)) {
+                    done := true
                     if (autoUseGPTest && autotest_time >= TestTime) {
                         A_gptest := 1
                         ToggleTestScript()
                     }
+                    break
                 }
                 if(FindOrLoseImage(225, 195, 250, 220, , "Pending", 0, failSafeTime)) {
                     adbClick(245, 210)

@@ -1114,7 +1114,9 @@ FindOrLoseImage(X1, Y1, X2, Y2, searchVariation := "", imageName := "DEFAULT", E
     ; ImageSearch within the region
     vRet := Gdip_ImageSearch_wbb(pBitmap, pNeedle, vPosXY, 225, 300, 242, 314, searchVariation)
     if (vRet = 1) {
-        restartGameInstance("Stuck at " . imageName . "...")
+        ;restartGameInstance("Stuck at " . imageName . "...")
+        LogToFile("Restarting game instance for " . scriptName . " due to stuck at " . imageName, "Restart.txt")
+        adbShell.StdIn.WriteLine("am start -n jp.pokemon.pokemontcgp/com.unity3d.player.UnityPlayerActivity")
     }
     if(imageName = "Social" || imageName = "Add" || imageName = "Add2") {
         TradeTutorial()
@@ -1307,7 +1309,9 @@ FindImageAndClick(X1, Y1, X2, Y2, searchVariation := "", imageName := "DEFAULT",
         ; ImageSearch within the region
         vRet := Gdip_ImageSearch_wbb(pBitmap, pNeedle, vPosXY, 225, 300, 242, 314, searchVariation)
         if (vRet = 1) {
-            restartGameInstance("Stuck at " . imageName . "...")
+            ;restartGameInstance("Stuck at " . imageName . "...")
+            LogToFile("Restarting game instance for " . scriptName . " due to stuck at " . imageName, "Restart.txt")
+            adbShell.StdIn.WriteLine("am start -n jp.pokemon.pokemontcgp/com.unity3d.player.UnityPlayerActivity")
         }
         if(imageName = "Social" || imageName = "Country" || imageName = "Account2" || imageName = "Account") { ;only look for deleted account on start up.
             Path = %imagePath%NoSave.png ; look for No Save Data error message > if loaded account > delete xml > reload
