@@ -197,48 +197,31 @@ Loop {
     FindImageAndClick(226, 100, 270, 135, , "Add", 38, 460, 500)
     FindImageAndClick(170, 450, 195, 480, , "Approve", 228, 464)
 
-    done := false
-    Loop 3 {
-        Sleep, %Delay%
-        if(FindOrLoseImage(225, 195, 250, 215, , "Pending", 0)) {
-            failSafe := A_TickCount
-            failSafeTime := 0
-            Loop {
+    failSafe := A_TickCount
+    failSafeTime := 0
+    Loop {
+        if(FindOrLoseImage(99Leftx, 110, 99Rightx, 127, , 99Path, 0, failSafeTime)) {
+            if (autoUseGPTest && autotest_time >= TestTime) {
+                A_gptest := 1
+                ToggleTestScript()
+            }
+            break
+        } else if(FindOrLoseImage(186, 496, 206, 518, , "Accept", 0, failSafeTime)) {
+            break
+        } else if(FindOrLoseImage(75, 340, 195, 530, 80, "Button", 0, failSafeTime)) {
+            Sleep, 1000
+            if(FindImageAndClick(190, 195, 215, 220, , "DeleteFriend", 169, 365, 4000)) {
                 Sleep, %Delay%
-                clickButton := FindOrLoseImage(75, 340, 195, 530, 80, "Button", 0, failSafeTime) ;looking for ok button in case an invite is withdrawn
-                if(FindOrLoseImage(99Leftx, 110, 99Rightx, 127, , 99Path, 0, failSafeTime)) {
-                    done := true
-                    if (autoUseGPTest && autotest_time >= TestTime) {
-                        A_gptest := 1
-                        ToggleTestScript()
-                    }
-                    break
-                }
-                if(FindOrLoseImage(225, 195, 250, 220, , "Pending", 0, failSafeTime)) {
-                    adbClick(245, 210)
-                } else if(FindOrLoseImage(186, 496, 206, 518, , "Accept", 0, failSafeTime)) {
-                    done := true
-                    break
-                } else if(clickButton) {
-                    StringSplit, pos, clickButton, `,  ; Split at ", "
-                    if (scaleParam = 287) {
-                        pos2 += 5
-                    }
-                    Sleep, 1000
-                    if(FindImageAndClick(190, 195, 215, 220, , "DeleteFriend", pos1, pos2, 4000)) {
-                        Sleep, %Delay%
-                        adbClick(210, 210)
-                    }
-                }
-                if (GPTest || AutoSolo)
-                    break
-                failSafeTime := (A_TickCount - failSafe) // 1000
-                CreateStatusMessage("Failsafe " . failSafeTime . "/180 seconds")
+                adbClick(210, 210)
             }
         }
-        if(done || fullList|| GPTest || AutoSolo)
+        adbClick(245, 210)
+        if (GPTest || AutoSolo)
             break
+        failSafeTime := (A_TickCount - failSafe) // 1000
+        CreateStatusMessage("Failsafe " . failSafeTime . "/180 seconds")
     }
+    
 }
 return
 
