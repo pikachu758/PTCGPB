@@ -118,6 +118,14 @@ LoadSettingsFromIni() {
     IniRead, vipIdsURL, %A_ScriptDir%\..\..\Settings.ini, UserSettings, vipIdsURL, ""
     IniRead, showcaseEnabled, %A_ScriptDir%\..\..\Settings.ini, UserSettings, showcaseEnabled, 0
     
+    ;rename settings
+    IniRead, renameMode, %A_ScriptDir%\..\..\Settings.ini, UserSettings, renameMode, 0
+    IniRead, renameAndSaveAndReload, %A_ScriptDir%\..\..\Settings.ini, UserSettings, renameAndSaveAndReload, 0
+    IniRead, targetUsername, %A_ScriptDir%\..\..\Settings.ini, UserSettings, TargetUsername, ""
+    IniRead, renameXML, %A_ScriptDir%\..\..\Settings.ini, UserSettings, renameXML, 0
+    IniRead, renameXMLwithFC, %A_ScriptDir%\..\..\Settings.ini, UserSettings, renameXMLwithFC, 0
+    
+    
     ; Validate numeric values
     if (!IsNumeric(Instances))
       Instances := 1
@@ -151,6 +159,7 @@ SaveAllSettings() {
   global s4tDiscordUserId, s4tDiscordWebhookURL, s4tSendAccountXml, minStarsShiny, instanceLaunchDelay, mainIdsURL, vipIdsURL
   global spendHourGlass, openExtraPack, injectSortMethod, rowGap, SortByDropdown
   global waitForEligibleAccounts, maxWaitHours, skipMissionsInjectMissions
+  global renameMode, renameAndSaveAndReload, targetUsername, renameXML, renameXMLwithFC
   
   ; === MISSING ADVANCED SETTINGS VARIABLES ===
   global minStarsA1Mewtwo, minStarsA1Charizard, minStarsA1Pikachu, minStarsA1a
@@ -287,6 +296,13 @@ SaveAllSettings() {
   IniWrite, %vipIdsURL%, %A_ScriptDir%\..\..\Settings.ini, UserSettings, vipIdsURL
   ; Save showcase settings
   IniWrite, %showcaseEnabled%, %A_ScriptDir%\..\..\Settings.ini, UserSettings, showcaseEnabled  
+  ; Save Rename Settings
+  IniWrite, %renameMode%, %A_ScriptDir%\..\..\Settings.ini, UserSettings, renameMode
+  IniWrite, %renameAndSaveAndReload%, %A_ScriptDir%\..\..\Settings.ini, UserSettings, renameAndSaveAndReload
+  IniWrite, %targetUsername%, %A_ScriptDir%\..\..\Settings.ini, UserSettings, targetUsername
+  IniWrite, %renameXML%, %A_ScriptDir%\..\..\Settings.ini, UserSettings, renameXML
+  IniWrite, %renameXMLwithFC%, %A_ScriptDir%\..\..\Settings.ini, UserSettings, renameXMLwithFC
+
   ; FIXED: Debug logging if enabled
   if (debugMode) {
     FileAppend, % A_Now . " - Settings saved. DeleteMethod: " . deleteMethod . "`n", %A_ScriptDir%\..\..\debug_settings.log
@@ -585,10 +601,11 @@ if (heartBeat) {
 }
 
 ; ========== Action Buttons ==========
-Gui, Add, Button, gSave x1005 y310 w240 h90, Save Settings
+Gui, Add, Button, gSave x1005 y465 w240 h125, Save Settings
 ; ========== Download Settings Section (Bottom right) ==========
 sectionColor := "cWhite"
-Gui, Add, GroupBox, x755 y405 w490 h185 %sectionColor%, Download Settings ;
+Gui, Add, GroupBox, x755 y405 w240 h185 %sectionColor%, Download Settings ;
+
 
 if(StrLen(mainIdsURL) < 3)
   mainIdsURL =
@@ -596,10 +613,32 @@ if(StrLen(vipIdsURL) < 3)
   vipIdsURL =
 
 Gui, Add, Text, x770 y425 %sectionColor%, ids.txt API:
-Gui, Add, Edit, vmainIdsURL w460 x770 y445 h20 -E0x200 Background2A2A2A cWhite, %mainIdsURL%
+Gui, Add, Edit, vmainIdsURL w210 x770 y445 h20 -E0x200 Background2A2A2A cWhite, %mainIdsURL%
 Gui, Add, Text, x770 y465 %sectionColor%, vip_ids.txt (GP Test Mode) API:
-Gui, Add, Edit, vvipIdsURL w460 x770 y485 h20 -E0x200 Background2A2A2A cWhite, %vipIdsURL%
+Gui, Add, Edit, vvipIdsURL w210 x770 y485 h20 -E0x200 Background2A2A2A cWhite, %vipIdsURL%
 Gui, Add, Checkbox, % (showcaseEnabled ? "Checked" : "") " vshowcaseEnabled x770 y510 " . sectionColor, % currentDictionary.Txt_showcaseEnabled
+
+; ========== Rename Setting ==========
+sectionColor := "cFFDDAA" ; 
+Gui, Add, GroupBox, x1005 y295 w240 h160 %sectionColor%, Rename Settings
+Gui, Add, Checkbox, % (RenameMode ? "Checked" : "") " vRenameMode x1020 y320 gRenameSettings " . sectionColor, RenameMode
+
+if(StrLen(targetUsername) < 3)
+  targetUsername =
+
+if (RenameMode) {
+  Gui, Add, Text, vtargetUsernameEntry x1020 y340 %sectionColor%, targetUsernameEntry:
+  Gui, Add, Edit, vtargetUsername w210 x1020 y360 h20 -E0x200 Background2A2A2A cWhite, %targetUsername%
+  Gui, Add, Checkbox, % (renameAndSaveAndReload ? "Checked" : "") " vrenameAndSaveAndReload x1020 y385 " . sectionColor, renameAndSaveAndReload
+  Gui, Add, Checkbox, % (renameXML ? "Checked" : "") " vrenameXML x1020 y405 " . sectionColor, renameXML
+  Gui, Add, Checkbox, % (renameXMLwithFC ? "Checked" : "") " vrenameXMLwithFC x1020 y425 " . sectionColor, renameXMLwithFC
+} else {
+  Gui, Add, Text, vtargetUsernameEntry x1020 y340 Hidden %sectionColor%, targetUsernameEntry:
+  Gui, Add, Edit, vtargetUsername w210 x1020 y360 h20 Hidden -E0x200 Background2A2A2A cWhite, %targetUsername%
+  Gui, Add, Checkbox, % (renameAndSaveAndReload ? "Checked" : "") " vrenameAndSaveAndReload x1020 y385 Hidden " . sectionColor, renameAndSaveAndReload
+  Gui, Add, Checkbox, % (renameXML ? "Checked" : "") " vrenameXML x1020 y405 Hidden " . sectionColor, renameXML
+  Gui, Add, Checkbox, % (renameXMLwithFC ? "Checked" : "") " vrenameXMLwithFC x1020 y425 Hidden " . sectionColor, renameXMLwithFC
+}
 
 Gui, Show, w%GUI_WIDTH% h%GUI_HEIGHT%, Classic Mode
 Return
@@ -666,6 +705,25 @@ discordSettings:
     GuiControl, Hide, hbName
     GuiControl, Hide, hbURL
     GuiControl, Hide, hbDelay
+  }
+return
+
+RenameSettings:
+  Gui, Submit, NoHide
+  
+  if (RenameMode) {
+    GuiControl, Show, renameAndSaveAndReload
+    GuiControl, Show, targetUsername
+    GuiControl, Show, targetUsernameEntry
+    GuiControl, Show, renameXML
+    GuiControl, Show, renameXMLwithFC
+  }
+  else {
+    GuiControl, Hide, renameAndSaveAndReload
+    GuiControl, Hide, targetUsername
+    GuiControl, Hide, targetUsernameEntry
+    GuiControl, Hide, renameXML
+    GuiControl, Hide, renameXMLwithFC
   }
 return
 

@@ -62,6 +62,7 @@ dbg_bbox :=0
 dbg_bboxNpause :=0
 dbg_bbox_click :=0
 
+global newPlayerName, renameMode, renameAndSaveAndReload, targetUsername, renameXML, renameOcrText, renameXMLwithFC, userFriendCode
 
 scriptName := StrReplace(A_ScriptName, ".ahk")
 winTitle := scriptName
@@ -141,6 +142,13 @@ IniRead, s4tSendAccountXml, %A_ScriptDir%\..\Settings.ini, UserSettings, s4tSend
 IniRead, rerolls, %A_ScriptDir%\%scriptName%.ini, Metrics, rerolls, 0
 IniRead, rerollStartTime, %A_ScriptDir%\%scriptName%.ini, Metrics, rerollStartTime, A_TickCount
 ;rerollstartTime := A_TickCount
+
+IniRead, renameMode, %A_ScriptDir%\..\Settings.ini, UserSettings, renameMode, 0
+IniRead, renameAndSaveAndReload, %A_ScriptDir%\..\Settings.ini, UserSettings, renameAndSaveAndReload, 0
+IniRead, targetUsername, %A_ScriptDir%\..\Settings.ini, UserSettings, TargetUsername, No_targetname
+IniRead, renameXML, %A_ScriptDir%\..\Settings.ini, UserSettings, renameXML, 0
+IniRead, renameXMLwithFC, %A_ScriptDir%\..\Settings.ini, UserSettings, renameXMLwithFC, 0
+
 
 
 pokemonList := ["Mewtwo", "Charizard", "Pikachu", "Mew", "Dialga", "Palkia", "Arceus", "Shining", "Solgaleo", "Lunala", "Buzzwole", "Eevee"]
@@ -397,6 +405,219 @@ Loop {
             DoTutorial()
             accountOpenPacks := 0 ;tutorial packs don't count
         }
+         if(targetUsername = "No_targetname")
+            renameMode := 0
+        
+        ; Taken from Josh, to rename the accounts
+        if (renameMode) {
+            failSafe := A_TickCount
+	        failSafeTime := 0
+            ; Click for hamburger menu and wait for profile
+            Loop {
+                adbClick_wbb(140, 203) ; 
+                Delay(1)
+                if(FindOrLoseImage(233, 400, 264, 428, , "Points", 0, failSafeTime)) {
+                    break
+                }
+                else if(!renew && !getFC) {
+                    if(FindOrLoseImage(241, 377, 269, 407, , "closeduringpack", 0)) {
+                        adbClick_wbb(139, 371)
+                    }
+                }
+                else if(FindOrLoseImage(175, 165, 255, 235, , "Hourglass3", 0)) {
+                    ;TODO hourglass tutorial still broken after injection
+                    Delay(3)
+                    adbClick_wbb(146, 441) ; 146 440
+                    Delay(3)
+                    adbClick_wbb(146, 441)
+                    Delay(3)
+                    adbClick_wbb(146, 441)
+                    Delay(3)
+
+                    FindImageAndClick(98, 184, 151, 224, , "Hourglass1", 168, 438, 500, 5) ;stop at hourglasses tutorial 2
+                    Delay(1)
+
+                    adbClick_wbb(203, 436) ; 203 436
+                    FindImageAndClick(236, 198, 266, 226, , "Hourglass2", 180, 436, 500) ;stop at hourglasses tutorial 2 180 to 203?
+                }
+
+                failSafeTime := (A_TickCount - failSafe) // 1000
+                CreateStatusMessage("Waiting for Points`n(" . failSafeTime . "/90 seconds)")
+            }
+            Loop {
+                adbClick(240, 499)
+                if(FindOrLoseImage(230, 120, 260, 150, , "UserProfile", 0, failSafeTime)) {
+                    break
+                } else {
+                    clickButton := FindOrLoseImage(75, 340, 195, 530, 80, "Button", 0)
+                    if(clickButton) {
+                        StringSplit, pos, clickButton, `,  ; Split at ", "
+                        if (scaleParam = 287) {
+                            pos2 += 5
+                        }
+                        adbClick(pos1, pos2)
+			        }
+		        }
+		        levelUp()
+                Delay(1)
+		        failSafeTime := (A_TickCount - failSafe) // 1000
+            }
+
+	        FindImageAndClick(203, 272, 237, 300, , "Profile", 210, 140, 200) ; Open profile/stats page and wait
+
+            if(!renameXMLwithFC)
+                FindImageAndClick(249,70,260,82, , "profilecopyidbutton", 137, 78)
+
+            else {
+                FindImageAndClick(249,70,260,82, , "profilecopyidbutton", 259, 79)
+                Delay(3)
+                userFriendCode := Clipboard
+                    Delay(5)
+                adbClick(137, 78)
+                Delay(3)
+            }
+
+            ; Take a screenshot of the profile page with the username
+            tempDir := A_ScriptDir . "\temp"
+            if !FileExist(tempDir)
+                FileCreateDir, %tempDir%
+
+            profileUsernameScreenshot := tempDir . "\" . winTitle . "_PlayerName.png"
+            adbTakeScreenshot(profileUsernameScreenshot)
+
+            ; OCR the area where the restriction message typically appears (adjust coordinates as needed)
+            if (ParseUsername(profileUsernameScreenshot, 105, 450, 295, 42, targetUsername)) {
+                LogToFile("Player name detected as " . targetUsername, "PlayerRename.txt")
+                CreateStatusMessage("Player name detected as " . targetUsername, , , , , true)
+                adbClick(143, 518)  ; Click OK button to dismiss the message
+                Delay(3)
+                adbClick(143, 518)  ; Click to close/go back
+                Delay(10)
+                
+		        ;newPlayerName := renameOcrText
+                ;setRenameData() 
+
+		        SplitPath, loadedAccount, fileName
+                LogToFile("New Player Name: " newPlayerName " | File: " fileName, "PlayerRename.txt")
+                ; Clean up temp file
+                if (FileExist(profileUsernameScreenshot))
+                    FileDelete, %profileUsernameScreenshot%
+                if(loadedAccount && renameAndSaveAndReload) {
+                    renamedDir := A_ScriptDir . "\..\Accounts\RenamedPlayer\"
+                    if !FileExist(renamedDir)
+                        FileCreateDir, %renamedDir%
+			
+                    SplitPath, loadedAccount, fileName
+                    FileMove, %loadedAccount%, %renamedDir%%fileName%
+                    LogToFile("New Player Name: " newPlayerName " | File: " fileName, "PlayerRename.txt")
+                    canStopSafely := true
+                    Goto, EndOfRun
+                    ;if(stopToggle)
+                        ;ExitApp
+                    ;Reload
+                }
+            } else {
+                ; Clean up temp file if no restriction found
+                if (FileExist(profileUsernameScreenshot))
+                    FileDelete, %profileUsernameScreenshot%
+
+
+                Loop {
+                    adbClick_wbb(217, 284)
+                        if(FindOrLoseImage(39, 240, 65, 284, , "renametextbar", 0, failSafeTime)){
+                            canRename := True
+                            break
+                        }
+                        else if(FindOrLoseImage(130, 363, 152, 379, , "renamed_ok", 0, failSafeTime)) {
+                            canRename := False
+                            break
+                        }
+                }
+                
+
+                if(canRename){
+                    Delay(3)
+                    adbClick(138, 262)
+                    Delay(1)
+                    adbClick(138, 262)
+                    Delay(1)
+                    Loop 20 {
+                        adbInputEvent("67")
+                        Sleep, 10
+                    }
+                    Delay(1)
+                    ; Random, randomLetter, 65, 90
+                    Random, randomDigit1, 0, 9
+                    Random, randomDigit2, 0, 9
+                    Random, randomDigit3, 0, 9
+                    Random, randomDigit4, 0, 9
+                    newPlayerName := targetUsername . randomDigit1 . randomDigit2 . randomDigit3 . randomDigit4 
+                    adbInput(newPlayerName)
+                    Sleep, 2000
+                    FindImageAndClick(209,277,224,292, , "playerrenamepencilicon", 193, 373)
+                    Sleep, 2000
+                    FindImageAndClick(209,277,224,292, , "playerrenamepencilicon", 193, 373)
+                    Sleep, 2000
+                    if(renameXML)
+                        setRenameData() 
+                    SplitPath, loadedAccount, fileName
+                    LogToFile("New Player Name: " newPlayerName " | File: " fileName, "PlayerRename.txt")
+                    adbClick(143, 518)  ; Click OK button to dismiss the message
+                    Delay(3)
+                    adbClick(143, 518)  ; Click to close/go back
+                    Delay(10)
+                    if(loadedAccount && renameAndSaveAndReload) {
+                        renamedDir := A_ScriptDir . "\..\Accounts\RenamedPlayer\"
+                        if !FileExist(renamedDir)
+                            FileCreateDir, %renamedDir%
+
+                        SplitPath, loadedAccount, fileName
+                        if(renameXML)
+                            setRenameData() 
+                        FileMove, %loadedAccount%, %renamedDir%%fileName%
+                        LogToFile("New Player Name: " newPlayerName " | File: " fileName, "PlayerRename.txt")
+                        Goto, EndOfRun
+                        canStopSafely := true
+                        ;if(stopToggle)
+                            ;ExitApp
+                            ;Reload
+                    }
+                } else {
+                    adbClick_wbb(142, 370)
+                    Delay(3)
+		            adbClick(143, 518)  ; Click OK button to dismiss the message
+                    Delay(3)
+                    adbClick(143, 518)  ; Click to close/go back
+                    Delay(10)
+
+                    
+                    ;newPlayerName := renameOcrText
+                    ;setRenameData() 
+		            ;SplitPath, loadedAccount, fileName
+                    ;LogToFile("New Player Name: " newPlayerName " | File: " fileName, "PlayerRename.txt")
+
+                    ; Clean up temp file
+                    if (FileExist(profileUsernameScreenshot))
+                        FileDelete, %profileUsernameScreenshot%
+                    if(loadedAccount && renameAndSaveAndReload) {
+                        renamedDir := A_ScriptDir . "\..\Accounts\RenamedPlayer\"
+                        if !FileExist(renamedDir)
+                            FileCreateDir, %renamedDir%
+
+                        SplitPath, loadedAccount, fileName
+                        FileMove, %loadedAccount%, %renamedDir%%fileName%
+                        LogToFile("New Player Name: " newPlayerName " | File: " fileName, "PlayerRename.txt")
+                        canStopSafely := true
+                        Goto, EndOfRun
+                        ;if(stopToggle)
+                            ;ExitApp
+                        ;Reload
+                        ;return
+		    }
+                }
+            }
+    
+        }
         
         if(deleteMethod = "5 Pack" || deleteMethod = "5 Pack (Fast)" || deleteMethod = "13 Pack")
             wonderPicked := DoWonderPick()
@@ -456,10 +677,15 @@ Loop {
             friendsAdded := AddFriends(true)
             SelectPack("HGPack")
             HourglassOpening(true)
+
+        } else if(deleteMethod = "Inject for Reroll" && !openExtraPack && !packMethod) {
+            Goto, EndOfRun
+
         } else if(deleteMethod = "Inject for Reroll" && openExtraPack && !packMethod) {
             HourglassOpening(true)
             Goto, EndOfRun
         }
+
         if (checkShouldDoMissions()) {
 
             HomeAndMission()
@@ -578,6 +804,17 @@ Loop {
             GetAllRewards(false, true)
         }
 
+        if(deleteMethod = "Inject" && !renameAndSaveAndReload) {
+            GoToMain()
+            GetAllRewards(false, true)
+            Loop {
+                adbClick_wbb(143, 518)
+                if(FindOrLoseImage(120, 500, 155, 530, , "Social", 0, failSafeTime))
+                    break
+                }
+                FindImageAndClick(226, 100, 270, 135, , "Add", 38, 460, 500)
+        }
+
         ; BallCity 2025.02.21 - Track monitor
         now := A_NowUTC
         IniWrite, %now%, %A_ScriptDir%\%scriptName%.ini, Metrics, LastEndTimeUTC
@@ -678,7 +915,21 @@ HomeAndMission(homeonly := 0, completeSecondMisson=false) {
             if(FindImageAndClick(120, 188, 140, 208, , "Album", 79, 86 , 500, 1)){
                 FindImageAndClick(191, 393, 211, 411, , "Shop", 142, 488, 500)
                 break
+            } else if(FindOrLoseImage(175, 165, 255, 235, , "Hourglass3", 0)) {
+                Delay(3)
+                adbClick_wbb(146, 441) ; 146 440
+                Delay(3)
+                adbClick_wbb(146, 441)
+                Delay(3)
+                adbClick_wbb(146, 441)
+                Delay(3)
+
+                FindImageAndClick(98, 184, 151, 224, , "Hourglass1", 168, 438, 500, 5) ;stop at hourglasses tutorial 2
+                Delay(1)
+
+                adbClick_wbb(203, 436) ; 203 436
             }
+
             failSafeTime := (A_TickCount - failSafe) // 1000
         }
         if(!homeonly){
@@ -866,6 +1117,10 @@ TradeTutorial() {
             Delay(1)
             if(FindOrLoseImage(15, 455, 40, 475, ,"Add2", 0))          
                 break
+            if(FindOrLoseImage(226, 100, 270, 135, ,"Add", 0))
+            break
+	        adbClick_wbb(38,460)
+            Delay(1)
         }
 
         FindImageAndClick(226, 100, 270, 135, , "Add", 38, 460, 500,,2)
@@ -2485,10 +2740,10 @@ UpdateAccount() {
     if(accountOpenPacks<10)
         accountOpenPacksStr := "0" . accountOpenPacks ; add a trailing 0 for sorting
         
-    if(InStr(accountFileName, "P")){
-        AccountName := StrSplit(accountFileName , "P")
-        accountFileNameParts := StrSplit(accountFileName, "P")  ; Split at P
-        AccountNewName := accountOpenPacksStr . "P" . accountFileNameParts[2]
+    if(InStr(accountFileName, "P_")){
+        AccountName := StrSplit(accountFileName , "P_")
+        accountFileNameParts := StrSplit(accountFileName, "P_")  ; Split at P
+        AccountNewName := accountOpenPacksStr . "P_" . accountFileNameParts[2]
     } else if (ocrSuccess)
         AccountNewName := accountOpenPacksStr . "P_" . accountFileNameOrig
     else
@@ -4927,3 +5182,161 @@ GetTextFromBitmap(pBitmap, charAllowList := "") {
 RegExEscape(str) {
     return RegExReplace(str, "([-[\]{}()*+?.,\^$|#\s])", "\$1")
 }
+
+setRenameData() {
+    ; Check if newPlayerName is set and not empty
+    if (newPlayerName = "") {
+        LogToFile("Warning: setRenameData called but newPlayerName is empty.", "RenameLog.txt")
+        return false
+    }
+    
+    SplitPath, loadedAccount, fileName
+    originalFileName := fileName
+    if (originalFileName = "") {
+        LogToFile("Error: setRenameData called but accountFileNameOrig is empty. Cannot rename file.", "RenameLog.txt")
+        return false
+    }
+
+    renamedFileName := ""
+    
+    ; Check if the filename contains "P_"
+    if (InStr(originalFileName, "P_")) {
+        ; Scenario 1: Filename contains "P_" (e.g., 42P_20250205154233_1.xml)
+        parts := StrSplit(originalFileName, "P_")
+        
+        if (parts.Length() >= 2) {
+            newNameWithoutExt := ""
+            fileExtension := ""
+            tempParts2 := parts[2]
+
+            ; Split filename and extension
+            SplitPath, tempParts2 , , , fileExtension, newNameWithoutExt
+
+        if (userFriendCode) {
+            if (InStr(originalFileName, "2025")) {
+                fileparts := StrSplit(originalFileName, "2025")
+                fullStringAfter2025 := fileparts[2] 
+                dates := "_" . SubStr(fullStringAfter2025, 1, 4) 
+                newNameWithoutExt := userFriendCode . dates
+                if RegExMatch(originalFileName, "\(([A-Z]+)\)", match){ 
+                    extractedContent := match1 
+                    newNameWithoutExt := newNameWithoutExt . "(" . match1 . ")"
+            }
+            } else {
+                newNameWithoutExt := userFriendCode 
+                if RegExMatch(originalFileName, "\(([A-Z]+)\)", match){ 
+                    extractedContent := match1 
+                    newNameWithoutExt := newNameWithoutExt . "(" . match1 . ")"
+                }
+            }
+        }
+            
+            ; Combine the new filename: XXP_NewPlayerName_YYYYMMDDHHMMSS_INSTANCE.xml
+            renamedFileName := parts[1] . "P_" . newPlayerName . "_" . newNameWithoutExt . "." . fileExtension
+        } else {
+            LogToFile("Warning: 'P_' found but filename format is unexpected: " . originalFileName, "PlayerRename.txt")
+            ; Fallback to prepending newPlayerName if format is unexpected
+            SplitPath, originalFileName, , , fileExtension, nameWithoutExt
+            renamedFileName := newPlayerName . "_" . nameWithoutExt . "." . fileExtension
+        }
+    } else {
+        ; Scenario 2: Filename does not contain "P_" (e.g., 20250205154233_1.xml)
+        newNameWithoutExt := ""
+        fileExtension := ""
+        
+        SplitPath, originalFileName, , , fileExtension, newNameWithoutExt
+
+        if(userFriendCode){
+            newNameWithoutExt := userFriendCode
+        }
+        
+        ; Prepend newPlayerName: NewPlayerName_20250205154233_1.xml
+        renamedFileName := newPlayerName . "_" . newNameWithoutExt . "." . fileExtension
+    }
+
+    ; Execute file rename
+    saveDir := A_ScriptDir "\..\Accounts\Saved\" . winTitle
+    originalFullPath := saveDir . "\" . originalFileName
+    renamedFullPath := saveDir . "\" . renamedFileName
+    
+    ; Check if new and old filenames are the same to avoid unnecessary FileMove
+    if (originalFileName = renamedFileName) {
+        LogToFile("Filename already contains " . newPlayerName . ", no rename needed for: " . originalFileName, "PlayerRename.txt")
+        return true
+    }
+
+    ; If target file already exists, handle it to prevent FileMove failure
+    if FileExist(renamedFullPath) {
+        LogToFile("Warning: Target renamed file already exists: " . renamedFullPath . ". Deleting existing file before move.", "PlayerRename.txt")
+        FileDelete, %renamedFullPath%
+    }
+
+    ; Perform file move
+    FileMove, %originalFullPath%, %renamedFullPath%
+    
+    ; Update global variables to reflect the new filename
+    accountFileName := renamedFileName
+    accountFileNameOrig := renamedFileName
+    loadedAccount := renamedFullPath
+
+    LogToFile("Account renamed to: " . renamedFileName . " (Original: " . originalFileName . ")", "PlayerRename.txt")
+    CreateStatusMessage("Account renamed to " . newPlayerName, , , , , true)
+    return true
+}
+
+ParseUsername(screenshotFile, x, y, w, h, targetUsername) {
+    success := False
+    CreateStatusMessage("Parsing username from screenshot...", , , , , true)
+    Sleep 500
+    ; Use multiple scale factors to improve OCR accuracy
+    scaleFactors := [500, 1000, 2000, 100, 200, 250, 300, 350, 400, 450, 550, 600, 700, 800, 900]
+
+    defaultUsernameList := []
+    defaultUsernameFile := A_ScriptDir . "\..\usernames_default.txt"
+
+    Loop, Read, %defaultUsernameFile%
+    {
+        if (A_LoopReadLine != "") {
+            StringLower, lowerUsername, A_LoopReadLine
+            defaultUsernameList.Push(Trim(lowerUsername))
+        }
+    }
+
+    Loop, % scaleFactors.Length() {
+        ; Get the formatted pBitmap using existing function
+        pBitmap := CropAndFormatForOcr(screenshotFile, x, y, w, h, scaleFactors[A_Index])
+
+        ; Run OCR using existing function
+        ocrText := GetTextFromBitmap(pBitmap, "")
+        CreateStatusMessage("OCR Result: " . ocrText, , , , , true)
+        ; Convert to lowercase for easier matching
+        StringLower, lowerOcrText, ocrText
+        cleanedOcrText := RegExReplace(ocrText, "[^a-zA-Z0-9]", "")  ; 
+        cleanedOcrText := Trim(cleanedOcrText) 
+        renameOcrText := cleanedOcrText
+        Sleep 1000
+        CreateStatusMessage("Checking if OCR text starts with '" . targetUsername . "'..." . lowerOcrText, , , , , true)
+        if (SubStr(lowerOcrText, 1, StrLen(targetUsername)) = targetUsername) {
+            success := True
+            LogToFile("OCR detected text starting with '" . targetUsername . "': " . ocrText, "PlayerRename.txt")
+            break
+        } else {
+            forLoopBroken := False
+            for index, defaultUsername in defaultUsernameList {
+                if (SubStr(lowerOcrText, 1, StrLen(defaultUsername)) = defaultUsername) {
+                    success := False
+                    LogToFile("OCR text does not match target username: " . lowerOcrText, "PlayerRename.txt")
+                    forLoopBroken := True
+		
+                    break
+                }
+            }
+            if (forLoopBroken) {
+                break
+            }
+        }
+    }
+    
+    return success
+}
+
