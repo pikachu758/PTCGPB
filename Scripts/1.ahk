@@ -1109,6 +1109,17 @@ FindOrLoseImage(X1, Y1, X2, Y2, searchVariation := "", imageName := "DEFAULT", E
     } else if(!confirmed && vRet = GDEL && GDEL = 0) {
         confirmed := true
     }
+    Path = %imagePath%Error.png ; Search for communication error
+    pNeedle := GetNeedle(Path)
+    ; ImageSearch within the region
+    vRet := Gdip_ImageSearch_wbb(pBitmap, pNeedle, vPosXY, 120, 187, 155, 210, searchVariation)
+    if (vRet = 1) {
+        CreateStatusMessage("Error message in " . scriptName . ". Clicking retry...",,,, false)
+        adbClick_wbb(82, 389)
+        Delay(1)
+        adbClick_wbb(139, 386)
+        Sleep, 1000
+    }
     Path = %imagePath%App.png
     pNeedle := GetNeedle(Path)
     ; ImageSearch within the region
