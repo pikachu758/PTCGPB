@@ -528,7 +528,7 @@ Loop {
                             canRename := True
                             break
                         }
-                        else if(FindOrLoseImage(130, 363, 152, 379, , "renamed_ok", 0, failSafeTime)) {
+                        else if(FindOrLoseImage(84, 349, 104, 391, , "renamed", 0, failSafeTime)) {
                             canRename := False
                             break
                         }
@@ -5239,7 +5239,23 @@ setRenameData() {
         SplitPath, originalFileName, , , fileExtension, newNameWithoutExt
 
         if(userFriendCode){
+            if (InStr(originalFileName, "2025")) {
+                fileparts := StrSplit(originalFileName, "2025")
+                fullStringAfter2025 := fileparts[2] 
+                dates := "_" . SubStr(fullStringAfter2025, 1, 4) 
+                newNameWithoutExt := userFriendCode . dates
+                if RegExMatch(originalFileName, "\(([A-Z]+)\)", match){ 
+                    extractedContent := match1 
+                    newNameWithoutExt := newNameWithoutExt . "(" . match1 . ")"
+                }
+
+            } else {
             newNameWithoutExt := userFriendCode
+                if RegExMatch(originalFileName, "\(([A-Z]+)\)", match){ 
+                    extractedContent := match1 
+                    newNameWithoutExt := newNameWithoutExt . "(" . match1 . ")"
+                }
+            }
         }
         
         ; Prepend newPlayerName: NewPlayerName_20250205154233_1.xml
