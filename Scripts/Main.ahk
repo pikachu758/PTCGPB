@@ -184,9 +184,6 @@ Loop {
     
     if (AutoSolo) {
         SoloBattle()
-        Sleep, 1000
-        if (heartBeat && (Mod(A_Index, 60) = 0))
-            IniWrite, 1, %A_ScriptDir%\..\HeartBeat.ini, HeartBeat, Main
         Continue
     }
 
@@ -206,6 +203,8 @@ Loop {
                 ToggleTestScript()
             }
             break
+        } else if(FindOrLoseImage(225, 195, 250, 220, , "Pending", 0, failSafeTime)) {
+            adbClick(245, 210)
         } else if(FindOrLoseImage(186, 496, 206, 518, , "Accept", 0, failSafeTime)) {
             break
         } else if(FindOrLoseImage(75, 340, 195, 530, 80, "Button", 0, failSafeTime)) {
@@ -214,8 +213,9 @@ Loop {
                 Sleep, %Delay%
                 adbClick(210, 210)
             }
+        } else if(FindOrLoseImage(170, 450, 195, 480, , "Approve", 1, failSafeTime)) {
+            adbClick(228, 464)
         }
-        adbClick(245, 210)
         if (GPTest || AutoSolo)
             break
         failSafeTime := (A_TickCount - failSafe) // 1000
