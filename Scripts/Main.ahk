@@ -272,13 +272,11 @@ FindOrLoseImage(X1, Y1, X2, Y2, searchVariation := "", imageName := "DEFAULT", E
     Path = %imagePath%Error.png
     pNeedle := GetNeedle(Path)
     ; ImageSearch within the region
-    vRet := Gdip_ImageSearch(pBitmap, pNeedle, vPosXY, 15, 155, 270, 420, searchVariation)
+    vRet := Gdip_ImageSearch(pBitmap, pNeedle, vPosXY, 120, 187, 155, 210, searchVariation)
     Gdip_DisposeImage(pBitmap)
     if (vRet = 1) {
         CreateStatusMessage("Error message in " . scriptName . ". Clicking retry...")
         LogToFile("Error message in " . scriptName . ". Clicking retry...")
-        adbClick(82, 389)
-        Sleep, %Delay%
         adbClick(139, 386)
         Sleep, 1000
     }
@@ -289,8 +287,7 @@ FindOrLoseImage(X1, Y1, X2, Y2, searchVariation := "", imageName := "DEFAULT", E
     vRet := Gdip_ImageSearch(pBitmap, pNeedle, vPosXY, 15, 155, 270, 420, searchVariation)
     Gdip_DisposeImage(pBitmap)
     if (vRet = 1) {
-        LogToFile("Stuck at home while looking for " . imageName . "...")
-        restartGameInstance("Stuck at " . imageName . "...")
+        restartGameInstance("*Stuck at " . imageName . "...")
     }
     if(imageName = "Country" || imageName = "Social")
         FSTime := 90
@@ -391,13 +388,11 @@ FindImageAndClick(X1, Y1, X2, Y2, searchVariation := "", imageName := "DEFAULT",
         Path = %imagePath%Error.png
         pNeedle := GetNeedle(Path)
         ; ImageSearch within the region
-        vRet := Gdip_ImageSearch(pBitmap, pNeedle, vPosXY, 15, 155, 270, 420, searchVariation)
+        vRet := Gdip_ImageSearch(pBitmap, pNeedle, vPosXY, 120, 187, 155, 210, searchVariation)
         Gdip_DisposeImage(pBitmap)
         if (vRet = 1) {
             CreateStatusMessage("Error message in " . scriptName . ". Clicking retry...")
             LogToFile("Error message in " . scriptName . ". Clicking retry...")
-            adbClick(82, 389)
-            Sleep, %Delay%
             adbClick(139, 386)
             Sleep, 1000
         }
@@ -408,8 +403,7 @@ FindImageAndClick(X1, Y1, X2, Y2, searchVariation := "", imageName := "DEFAULT",
         vRet := Gdip_ImageSearch(pBitmap, pNeedle, vPosXY, 15, 155, 270, 420, searchVariation)
         Gdip_DisposeImage(pBitmap)
         if (vRet = 1) {
-            LogToFile("At the home page while looking for " . imageName . "...")
-            restartGameInstance("At the home page while looking for " . imageName . "...")
+            restartGameInstance("*Stuck at " . imageName . "...")
         }
 
         if(skip) {
