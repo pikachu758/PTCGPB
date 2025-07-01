@@ -18,7 +18,7 @@ localVersion := "v6.4.25"
 scriptFolder := A_ScriptDir
 zipPath := A_Temp . "\update.zip"
 extractPath := A_Temp . "\update"
-intro := "Rename Mode!"
+intro := "Event Battle!"
 
 ; GUI dimensions
 global GUI_WIDTH := 377 
