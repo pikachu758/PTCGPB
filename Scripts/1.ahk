@@ -1370,8 +1370,6 @@ FindOrLoseImage(X1, Y1, X2, Y2, searchVariation := "", imageName := "DEFAULT", E
     vRet := Gdip_ImageSearch_wbb(pBitmap, pNeedle, vPosXY, 120, 187, 155, 210, searchVariation)
     if (vRet = 1) {
         CreateStatusMessage("Error message in " . scriptName . ". Clicking retry...",,,, false)
-        adbClick_wbb(82, 389)
-        Delay(1)
         adbClick_wbb(139, 386)
         Sleep, 1000
     }
@@ -1380,9 +1378,7 @@ FindOrLoseImage(X1, Y1, X2, Y2, searchVariation := "", imageName := "DEFAULT", E
     ; ImageSearch within the region
     vRet := Gdip_ImageSearch_wbb(pBitmap, pNeedle, vPosXY, 225, 300, 242, 314, searchVariation)
     if (vRet = 1) {
-        ;restartGameInstance("Stuck at " . imageName . "...")
-        LogToFile("Restarting game instance for " . scriptName . " due to stuck at " . imageName, "Restart.txt")
-        adbShell.StdIn.WriteLine("am start -n jp.pokemon.pokemontcgp/com.unity3d.player.UnityPlayerActivity")
+        restartGameInstance("*Stuck at " . imageName . "...")
     }
     if(imageName = "Social" || imageName = "Add" || imageName = "Add2") {
         TradeTutorial()
@@ -1565,8 +1561,6 @@ FindImageAndClick(X1, Y1, X2, Y2, searchVariation := "", imageName := "DEFAULT",
         vRet := Gdip_ImageSearch_wbb(pBitmap, pNeedle, vPosXY, 120, 187, 155, 210, searchVariation)
         if (vRet = 1) {
             CreateStatusMessage("Error message in " . scriptName . ". Clicking retry...",,,, false)
-            adbClick_wbb(82, 389)
-            Delay(1)
             adbClick_wbb(139, 386)
             Sleep, 1000
         }
@@ -1575,9 +1569,7 @@ FindImageAndClick(X1, Y1, X2, Y2, searchVariation := "", imageName := "DEFAULT",
         ; ImageSearch within the region
         vRet := Gdip_ImageSearch_wbb(pBitmap, pNeedle, vPosXY, 225, 300, 242, 314, searchVariation)
         if (vRet = 1) {
-            ;restartGameInstance("Stuck at " . imageName . "...")
-            LogToFile("Restarting game instance for " . scriptName . " due to stuck at " . imageName, "Restart.txt")
-            adbShell.StdIn.WriteLine("am start -n jp.pokemon.pokemontcgp/com.unity3d.player.UnityPlayerActivity")
+            restartGameInstance("*Stuck at " . imageName . "...")
         }
         if(imageName = "Social" || imageName = "Country" || imageName = "Account2" || imageName = "Account") { ;only look for deleted account on start up.
             Path = %imagePath%NoSave.png ; look for No Save Data error message > if loaded account > delete xml > reload
@@ -2513,18 +2505,18 @@ loadAccount() {
 
     ; OPTIMIZED ADB OPERATIONS - Reduced delays
     waitadb()
-    RunWait, % adbPath . " -s 127.0.0.1:" . adbPort . " push " . loadFile . " /sdcard/deviceAccount.xml",, Hide
-    waitadb()
     adbShell.StdIn.WriteLine("am force-stop jp.pokemon.pokemontcgp")
+    waitadb()
+    RunWait, % adbPath . " -s 127.0.0.1:" . adbPort . " push " . loadFile . " /sdcard/deviceAccount.xml",, Hide
     waitadb()
     adbShell.StdIn.WriteLine("cp /sdcard/deviceAccount.xml /data/data/jp.pokemon.pokemontcgp/shared_prefs/deviceAccount:.xml")
     waitadb()
     adbShell.StdIn.WriteLine("rm /sdcard/deviceAccount.xml")
     waitadb()
+    Sleep, 1000  ; Reduced from 3000
     adbShell.StdIn.WriteLine("am start -n jp.pokemon.pokemontcgp/com.unity3d.player.UnityPlayerActivity")
     waitadb()
-    Sleep, 5000
-
+    Sleep, 500   ; Reduced from 1000
     ; Parse account filename for pack info (unchanged)
     if (InStr(accountFileName, "P")) {
         accountFileNameParts := StrSplit(accountFileName, "P")
