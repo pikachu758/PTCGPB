@@ -19,6 +19,7 @@ CoordMode, Pixel, Screen
 DllCall("AllocConsole")
 WinHide % "ahk_id " DllCall("GetConsoleWindow", "ptr")
 
+global RESTART_LOOP_EXCEPTION := { message: "Restarting main loop" }
 global winTitle, changeDate, failSafe, openPack, Delay, failSafeTime, StartSkipTime, Columns, failSafe, scriptName, GPTest, StatusText, defaultLanguage, setSpeed, jsonFileName, pauseToggle, SelectedMonitorIndex, swipeSpeed, godPack, scaleParam, deleteMethod, packs, FriendID, friendIDs, Instances, username, friendCode, stopToggle, friended, runMain, Mains, showStatus, injectMethod, packMethod, loadDir, loadedAccount, nukeAccount, CheckShinyPackOnly, TrainerCheck, FullArtCheck, RainbowCheck, ShinyCheck, dateChange, foundGP, friendsAdded, PseudoGodPack, packArray, CrownCheck, ImmersiveCheck, InvalidCheck, slowMotion, screenShot, accountFile, invalid, starCount, keepAccount
 global Mewtwo, Charizard, Pikachu, Mew, Dialga, Palkia, Arceus, Shining, Solgaleo, Lunala, Buzzwole, Eevee
 global shinyPacks, minStars, minStarsShiny
@@ -37,9 +38,6 @@ global maxWaitHours := 24             ; Maximum hours to wait before giving up (
 avgtotalSeconds := 0
 
 global accountOpenPacks, accountFileName, accountFileNameOrig, accountFileNameTmp, accountHasPackInfo, ocrSuccess, packsInPool, packsThisRun, aminutes, aseconds, rerolls, rerollStartTime, maxAccountPackNum, cantOpenMorePacks, rerolls_local, rerollStartTime_local
-
-rerolls_local := 0
-rerollStartTime_local := A_TickCount
 
 cantOpenMorePacks := 0
 maxAccountPackNum := 40
@@ -253,6 +251,9 @@ initializeAdbShell()
 
 createAccountList(scriptName)
 
+rerolls_local := 0
+rerollStartTime_local := A_TickCount
+
 if(injectMethod && DeadCheck != 1) {
     loadedAccount := loadAccount()
     nukeAccount := false
@@ -274,312 +275,219 @@ adbSwipeY := Round((327 - 44) / 489 * 960)
 global adbSwipeParams := adbSwipeX1 . " " . adbSwipeY . " " . adbSwipeX2 . " " . adbSwipeY . " " . swipeSpeed
 
 Loop {
-    if(DeadCheck = 1 && deleteMethod != "13 Pack") {
-        CreateStatusMessage("Account is stuck! Restarting and unfriending...")
-        friended := true
-        CreateStatusMessage("Stuck account still has friends. Unfriending accounts...")
-        FindImageAndClick(25, 145, 70, 170, , "Platin", 18, 109, 2000) ; click mod settings
-        if(setSpeed = 3)
-            FindImageAndClick(182, 170, 194, 190, , "Three", 187, 180) ; click mod settings
-        else
-            FindImageAndClick(100, 170, 113, 190, , "Two", 107, 180) ; click mod settings
-        adbClick_wbb(41, 296)
-        Delay(1)
-        RemoveFriends()
-        DeadCheck := 0
-        IniWrite, 0, %A_ScriptDir%\%scriptName%.ini, UserSettings, DeadCheck
-        createAccountList(scriptName)
-        continue
-    } else if(DeadCheck = 1 && deleteMethod = "13 Pack") {
-        CreateStatusMessage("New account creation is stuck! Deleting account...")
-        menuDeleteStart()
-        continue
-    } else {
-        ; in injection mode, we dont need to reload
-        clearMissionCache()
-        Randmax := packArray.Length()
-        Random, rand, 1, Randmax
-        openPack := packArray[rand]
-        friended := false
-        IniWrite, 1, %A_ScriptDir%\..\HeartBeat.ini, HeartBeat, Instance%scriptName%
-
-        changeDate := getChangeDateTime() ; get server reset time
-
-        if (avgtotalSeconds > 0 ) {
-            StartTime := changeDate
-            StartTime += -(0.8*avgtotalSeconds), Seconds
-            EndTime := changeDate
-            EndTime += (0.2*avgtotalSeconds), Seconds
+    try{
+        if(DeadCheck = 1 && deleteMethod != "13 Pack") {
+            CreateStatusMessage("Account is stuck! Restarting and unfriending...")
+            friended := true
+            CreateStatusMessage("Stuck account still has friends. Unfriending accounts...")
+            FindImageAndClick(25, 145, 70, 170, , "Platin", 18, 109, 2000) ; click mod settings
+            if(setSpeed = 3)
+                FindImageAndClick(182, 170, 194, 190, , "Three", 187, 180) ; click mod settings
+            else
+                FindImageAndClick(100, 170, 113, 190, , "Two", 107, 180) ; click mod settings
+            adbClick_wbb(41, 296)
+            Delay(1)
+            RemoveFriends()
+            DeadCheck := 0
+            IniWrite, 0, %A_ScriptDir%\%scriptName%.ini, UserSettings, DeadCheck
+            createAccountList(scriptName)
+            continue
+        } else if(DeadCheck = 1 && deleteMethod = "13 Pack") {
+            CreateStatusMessage("New account creation is stuck! Deleting account...")
+            menuDeleteStart()
+            continue
         } else {
-            StartTime := changeDate
-            StartTime += -5, minutes
-            EndTime := changeDate
-            EndTime += 2, minutes
-        }
+            ; in injection mode, we dont need to reload
+            clearMissionCache()
+            Randmax := packArray.Length()
+            Random, rand, 1, Randmax
+            openPack := packArray[rand]
+            friended := false
+            IniWrite, 1, %A_ScriptDir%\..\HeartBeat.ini, HeartBeat, Instance%scriptName%
 
-        StartCurrentTimeDiff := A_Now
-        EnvSub, StartCurrentTimeDiff, %StartTime%, Seconds
-        EndCurrentTimeDiff := A_Now
-        EnvSub, EndCurrentTimeDiff, %EndTime%, Seconds
+            changeDate := getChangeDateTime() ; get server reset time
 
-        dateChange := false
-
-        while (StartCurrentTimeDiff > 0 && EndCurrentTimeDiff < 0) {
-            FormatTime, formattedEndTime, %EndTime%, HH:mm:ss
-            CreateStatusMessage("I need a break... Sleeping until " . formattedEndTime ,,,, false)
-            dateChange := true
-            Sleep, 5000
+            if (avgtotalSeconds > 0 ) {
+                StartTime := changeDate
+                StartTime += -(0.8*avgtotalSeconds), Seconds
+                EndTime := changeDate
+                EndTime += (0.2*avgtotalSeconds), Seconds
+            } else {
+                StartTime := changeDate
+                StartTime += -5, minutes
+                EndTime := changeDate
+                EndTime += 2, minutes
+            }
 
             StartCurrentTimeDiff := A_Now
             EnvSub, StartCurrentTimeDiff, %StartTime%, Seconds
             EndCurrentTimeDiff := A_Now
             EnvSub, EndCurrentTimeDiff, %EndTime%, Seconds
-        }
 
-        if(dateChange)
-            IniWrite, 5, %A_ScriptDir%\..\Settings.ini, UserSettings, showcaseLikes
+            dateChange := false
 
-        ; Only refresh account lists if we're not in injection mode or if no account is loaded
-        ; This prevents constant list regeneration during injection
-        if(!injectMethod || !loadedAccount) {
-            createAccountList(scriptName)
-        }
+            while (StartCurrentTimeDiff > 0 && EndCurrentTimeDiff < 0) {
+                FormatTime, formattedEndTime, %EndTime%, HH:mm:ss
+                CreateStatusMessage("I need a break... Sleeping until " . formattedEndTime ,,,, false)
+                dateChange := true
+                Sleep, 5000
 
-        ; For injection methods, load account only if we don't already have one
-        if(injectMethod) {
-            nukeAccount := false
-
-            ; Only load account if we don't already have one loaded
-            if(!loadedAccount) {
-                loadedAccount := loadAccount()
+                StartCurrentTimeDiff := A_Now
+                EnvSub, StartCurrentTimeDiff, %StartTime%, Seconds
+                EndCurrentTimeDiff := A_Now
+                EnvSub, EndCurrentTimeDiff, %EndTime%, Seconds
             }
 
-            ; If no account could be loaded for injection methods, handle appropriately
-            if(!loadedAccount) {
-                ; Check user setting for what to do when no eligible accounts
-                IniRead, waitForEligibleAccounts, %A_ScriptDir%\..\Settings.ini, UserSettings, waitForEligibleAccounts, 1
-                IniRead, maxWaitHours, %A_ScriptDir%\..\Settings.ini, UserSettings, maxWaitHours, 24
+            if(dateChange)
+                IniWrite, 5, %A_ScriptDir%\..\Settings.ini, UserSettings, showcaseLikes
 
-                if(waitForEligibleAccounts = 1) {
-                    ; Wait for eligible accounts to become available
-                    ; Simple approach - just show wait message and sleep
-                    CreateStatusMessage("No eligible accounts available for " . deleteMethod . ". Waiting 5 minutes before checking again...", "", 0, 0, false)
-                    LogToFile("No eligible accounts available for " . deleteMethod . ". Waiting 5 minutes...")
-
-                    ; Wait 5 minutes before checking again
-                    Sleep, 300000  ; 5 minutes
-                    continue  ; Go back to start of loop to check again
-                } else {
-                    ExitApp
-                }
+            ; Only refresh account lists if we're not in injection mode or if no account is loaded
+            ; This prevents constant list regeneration during injection
+            if(!injectMethod || !loadedAccount) {
+                createAccountList(scriptName)
             }
 
-            ; If we reach here, we have a valid loaded account for injection
-            LogToFile("Successfully loaded account for injection: " . accountFileName)
-        }
+            ; For injection methods, load account only if we don't already have one
+            if(injectMethod) {
+                nukeAccount := false
 
-        FindImageAndClick(25, 145, 70, 170, , "Platin", 18, 109, 2000) ; click mod settings
-        if(setSpeed = 3)
-            FindImageAndClick(182, 170, 194, 190, , "Three", 187, 180) ; click mod settings
-        else
-            FindImageAndClick(100, 170, 113, 190, , "Two", 107, 180) ; click mod settings
-        Delay(1)
-        adbClick_wbb(41, 296)
-        Delay(1)
-
-        cantOpenMorePacks := 0
-        packsInPool := 0
-        packsThisRun := 0
-        keepAccount := false
-
-        ; BallCity 2025.02.21 - Track monitor
-        now := A_NowUTC
-        IniWrite, %now%, %A_ScriptDir%\%scriptName%.ini, Metrics, LastStartTimeUTC
-        EnvSub, now, 1970, seconds
-        IniWrite, %now%, %A_ScriptDir%\%scriptName%.ini, Metrics, LastStartEpoch
-
-        if(!injectMethod || !loadedAccount) {
-            DoTutorial()
-            accountOpenPacks := 0 ;tutorial packs don't count
-        }
-        if(targetUsername = "No_targetname")
-            renameMode := 0
-
-        ; Taken from Josh, to rename the accounts
-        if (renameMode) {
-            failSafe := A_TickCount
-            failSafeTime := 0
-            ; Click for hamburger menu and wait for profile
-            Loop {
-                adbClick_wbb(140, 203) ;
-                Delay(1)
-                if(FindOrLoseImage(233, 400, 264, 428, , "Points", 0, failSafeTime)) {
-                    break
+                ; Only load account if we don't already have one loaded
+                if(!loadedAccount) {
+                    loadedAccount := loadAccount()
                 }
-                else if(!renew && !getFC) {
-                    if(FindOrLoseImage(241, 377, 269, 407, , "closeduringpack", 0)) {
-                        adbClick_wbb(139, 371)
+
+                ; If no account could be loaded for injection methods, handle appropriately
+                if(!loadedAccount) {
+                    ; Check user setting for what to do when no eligible accounts
+                    IniRead, waitForEligibleAccounts, %A_ScriptDir%\..\Settings.ini, UserSettings, waitForEligibleAccounts, 1
+                    IniRead, maxWaitHours, %A_ScriptDir%\..\Settings.ini, UserSettings, maxWaitHours, 24
+
+                    if(waitForEligibleAccounts = 1) {
+                        ; Wait for eligible accounts to become available
+                        ; Simple approach - just show wait message and sleep
+                        CreateStatusMessage("No eligible accounts available for " . deleteMethod . ". Waiting 5 minutes before checking again...", "", 0, 0, false)
+                        LogToFile("No eligible accounts available for " . deleteMethod . ". Waiting 5 minutes...")
+
+                        ; Wait 5 minutes before checking again
+                        Sleep, 300000  ; 5 minutes
+                        continue  ; Go back to start of loop to check again
+                    } else {
+                        ExitApp
                     }
                 }
-                else if(FindOrLoseImage(175, 165, 255, 235, , "Hourglass3", 0)) {
-                    ;TODO hourglass tutorial still broken after injection
-                    Delay(3)
-                    adbClick_wbb(146, 441) ; 146 440
-                    Delay(3)
-                    adbClick_wbb(146, 441)
-                    Delay(3)
-                    adbClick_wbb(146, 441)
-                    Delay(3)
 
-                    FindImageAndClick(98, 184, 151, 224, , "Hourglass1", 168, 438, 500, 5) ;stop at hourglasses tutorial 2
-                    Delay(1)
-
-                    adbClick_wbb(203, 436) ; 203 436
-                    FindImageAndClick(236, 198, 266, 226, , "Hourglass2", 180, 436, 500) ;stop at hourglasses tutorial 2 180 to 203?
-                }
-
-                failSafeTime := (A_TickCount - failSafe) // 1000
-                CreateStatusMessage("Waiting for Points`n(" . failSafeTime . "/90 seconds)")
-            }
-            Loop {
-                adbClick(240, 499)
-                if(FindOrLoseImage(230, 120, 260, 150, , "UserProfile", 0, failSafeTime)) {
-                    break
-                } else {
-                    clickButton := FindOrLoseImage(75, 340, 195, 530, 80, "Button", 0)
-                    if(clickButton) {
-                        StringSplit, pos, clickButton, `,  ; Split at ", "
-                        if (scaleParam = 287) {
-                            pos2 += 5
-                        }
-                        adbClick(pos1, pos2)
-                    }
-                }
-                levelUp()
-                Delay(1)
-                failSafeTime := (A_TickCount - failSafe) // 1000
+                ; If we reach here, we have a valid loaded account for injection
+                LogToFile("Successfully loaded account for injection: " . accountFileName)
             }
 
-            FindImageAndClick(203, 272, 237, 300, , "Profile", 210, 140, 200) ; Open profile/stats page and wait
+            FindImageAndClick(25, 145, 70, 170, , "Platin", 18, 109, 2000) ; click mod settings
+            if(setSpeed = 3)
+                FindImageAndClick(182, 170, 194, 190, , "Three", 187, 180) ; click mod settings
+            else
+                FindImageAndClick(100, 170, 113, 190, , "Two", 107, 180) ; click mod settings
+            Delay(1)
+            adbClick_wbb(41, 296)
+            Delay(1)
 
-            if(!renameXMLwithFC)
-                FindImageAndClick(249,70,260,82, , "profilecopyidbutton", 137, 78)
+            cantOpenMorePacks := 0
+            packsInPool := 0
+            packsThisRun := 0
+            keepAccount := false
 
-            else {
-                FindImageAndClick(249,70,260,82, , "profilecopyidbutton", 259, 79)
-                Delay(3)
-                userFriendCode := Clipboard
-                Delay(5)
-                adbClick(137, 78)
-                Delay(3)
+            ; BallCity 2025.02.21 - Track monitor
+            now := A_NowUTC
+            IniWrite, %now%, %A_ScriptDir%\%scriptName%.ini, Metrics, LastStartTimeUTC
+            EnvSub, now, 1970, seconds
+            IniWrite, %now%, %A_ScriptDir%\%scriptName%.ini, Metrics, LastStartEpoch
+
+            if(!injectMethod || !loadedAccount) {
+                DoTutorial()
+                accountOpenPacks := 0 ;tutorial packs don't count
             }
+            if(targetUsername = "No_targetname")
+                renameMode := 0
 
-            ; Take a screenshot of the profile page with the username
-            tempDir := A_ScriptDir . "\temp"
-            if !FileExist(tempDir)
-                FileCreateDir, %tempDir%
-
-            profileUsernameScreenshot := tempDir . "\" . winTitle . "_PlayerName.png"
-            adbTakeScreenshot(profileUsernameScreenshot)
-
-            ; OCR the area where the restriction message typically appears (adjust coordinates as needed)
-            if (ParseUsername(profileUsernameScreenshot, 105, 450, 295, 42, targetUsername)) {
-                LogToFile("Player name detected as " . targetUsername, "PlayerRename.txt")
-                CreateStatusMessage("Player name detected as " . targetUsername, , , , , true)
-                adbClick(143, 518)  ; Click OK button to dismiss the message
-                Delay(3)
-                adbClick(143, 518)  ; Click to close/go back
-                Delay(10)
-
-                ;newPlayerName := renameOcrText
-                ;setRenameData()
-
-                SplitPath, loadedAccount, fileName
-                LogToFile("New Player Name: " newPlayerName " | File: " fileName, "PlayerRename.txt")
-                ; Clean up temp file
-                if (FileExist(profileUsernameScreenshot))
-                    FileDelete, %profileUsernameScreenshot%
-                if(loadedAccount && renameAndSaveAndReload) {
-                    renamedDir := A_ScriptDir . "\..\Accounts\RenamedPlayer\"
-                    if !FileExist(renamedDir)
-                        FileCreateDir, %renamedDir%
-
-                    SplitPath, loadedAccount, fileName
-                    FileMove, %loadedAccount%, %renamedDir%%fileName%
-                    LogToFile("New Player Name: " newPlayerName " | File: " fileName, "PlayerRename.txt")
-                    canStopSafely := true
-                    Goto, EndOfRun
-                    ;if(stopToggle)
-                    ;ExitApp
-                    ;Reload
-                }
-            } else {
-                ; Clean up temp file if no restriction found
-                if (FileExist(profileUsernameScreenshot))
-                    FileDelete, %profileUsernameScreenshot%
-
+            ; Taken from Josh, to rename the accounts
+            if (renameMode) {
+                failSafe := A_TickCount
+                failSafeTime := 0
+                ; Click for hamburger menu and wait for profile
                 Loop {
-                    adbClick_wbb(217, 284)
-                    if(FindOrLoseImage(39, 240, 65, 284, , "renametextbar", 0, failSafeTime)){
-                        canRename := True
+                    adbClick_wbb(140, 203) ;
+                    Delay(1)
+                    if(FindOrLoseImage(233, 400, 264, 428, , "Points", 0, failSafeTime)) {
                         break
                     }
-                    else if(FindOrLoseImage(84, 349, 104, 391, , "renamed", 0, failSafeTime)) {
-                        canRename := False
-                        break
+                    else if(!renew && !getFC) {
+                        if(FindOrLoseImage(241, 377, 269, 407, , "closeduringpack", 0)) {
+                            adbClick_wbb(139, 371)
+                        }
                     }
+                    else if(FindOrLoseImage(175, 165, 255, 235, , "Hourglass3", 0)) {
+                        ;TODO hourglass tutorial still broken after injection
+                        Delay(3)
+                        adbClick_wbb(146, 441) ; 146 440
+                        Delay(3)
+                        adbClick_wbb(146, 441)
+                        Delay(3)
+                        adbClick_wbb(146, 441)
+                        Delay(3)
+
+                        FindImageAndClick(98, 184, 151, 224, , "Hourglass1", 168, 438, 500, 5) ;stop at hourglasses tutorial 2
+                        Delay(1)
+
+                        adbClick_wbb(203, 436) ; 203 436
+                        FindImageAndClick(236, 198, 266, 226, , "Hourglass2", 180, 436, 500) ;stop at hourglasses tutorial 2 180 to 203?
+                    }
+
+                    failSafeTime := (A_TickCount - failSafe) // 1000
+                    CreateStatusMessage("Waiting for Points`n(" . failSafeTime . "/90 seconds)")
+                }
+                Loop {
+                    adbClick(240, 499)
+                    if(FindOrLoseImage(230, 120, 260, 150, , "UserProfile", 0, failSafeTime)) {
+                        break
+                    } else {
+                        clickButton := FindOrLoseImage(75, 340, 195, 530, 80, "Button", 0)
+                        if(clickButton) {
+                            StringSplit, pos, clickButton, `,  ; Split at ", "
+                            if (scaleParam = 287) {
+                                pos2 += 5
+                            }
+                            adbClick(pos1, pos2)
+                        }
+                    }
+                    levelUp()
+                    Delay(1)
+                    failSafeTime := (A_TickCount - failSafe) // 1000
                 }
 
-                if(canRename){
-                    Delay(3)
-                    adbClick(138, 262)
-                    Delay(1)
-                    adbClick(138, 262)
-                    Delay(1)
-                    Loop 20 {
-                        adbInputEvent("67")
-                        Sleep, 10
-                    }
-                    Delay(1)
-                    ; Random, randomLetter, 65, 90
-                    Random, randomDigit1, 0, 9
-                    Random, randomDigit2, 0, 9
-                    Random, randomDigit3, 0, 9
-                    Random, randomDigit4, 0, 9
-                    newPlayerName := targetUsername . randomDigit1 . randomDigit2 . randomDigit3 . randomDigit4
-                    adbInput(newPlayerName)
-                    Sleep, 2000
-                    FindImageAndClick(209,277,224,292, , "playerrenamepencilicon", 193, 373)
-                    Sleep, 2000
-                    FindImageAndClick(209,277,224,292, , "playerrenamepencilicon", 193, 373)
-                    Sleep, 2000
-                    if(renameXML)
-                        setRenameData()
-                    SplitPath, loadedAccount, fileName
-                    LogToFile("New Player Name: " newPlayerName " | File: " fileName, "PlayerRename.txt")
-                    adbClick(143, 518)  ; Click OK button to dismiss the message
-                    Delay(3)
-                    adbClick(143, 518)  ; Click to close/go back
-                    Delay(10)
-                    if(loadedAccount && renameAndSaveAndReload) {
-                        renamedDir := A_ScriptDir . "\..\Accounts\RenamedPlayer\"
-                        if !FileExist(renamedDir)
-                            FileCreateDir, %renamedDir%
+                FindImageAndClick(203, 272, 237, 300, , "Profile", 210, 140, 200) ; Open profile/stats page and wait
 
-                        SplitPath, loadedAccount, fileName
-                        if(renameXML)
-                            setRenameData()
-                        FileMove, %loadedAccount%, %renamedDir%%fileName%
-                        LogToFile("New Player Name: " newPlayerName " | File: " fileName, "PlayerRename.txt")
-                        Goto, EndOfRun
-                        canStopSafely := true
-                        ;if(stopToggle)
-                        ;ExitApp
-                        ;Reload
-                    }
-                } else {
-                    adbClick_wbb(142, 370)
+                if(!renameXMLwithFC)
+                    FindImageAndClick(249,70,260,82, , "profilecopyidbutton", 137, 78)
+
+                else {
+                    FindImageAndClick(249,70,260,82, , "profilecopyidbutton", 259, 79)
                     Delay(3)
+                    userFriendCode := Clipboard
+                    Delay(5)
+                    adbClick(137, 78)
+                    Delay(3)
+                }
+
+                ; Take a screenshot of the profile page with the username
+                tempDir := A_ScriptDir . "\temp"
+                if !FileExist(tempDir)
+                    FileCreateDir, %tempDir%
+
+                profileUsernameScreenshot := tempDir . "\" . winTitle . "_PlayerName.png"
+                adbTakeScreenshot(profileUsernameScreenshot)
+
+                ; OCR the area where the restriction message typically appears (adjust coordinates as needed)
+                if (ParseUsername(profileUsernameScreenshot, 105, 450, 295, 42, targetUsername)) {
+                    LogToFile("Player name detected as " . targetUsername, "PlayerRename.txt")
+                    CreateStatusMessage("Player name detected as " . targetUsername, , , , , true)
                     adbClick(143, 518)  ; Click OK button to dismiss the message
                     Delay(3)
                     adbClick(143, 518)  ; Click to close/go back
@@ -587,9 +495,9 @@ Loop {
 
                     ;newPlayerName := renameOcrText
                     ;setRenameData()
-                    ;SplitPath, loadedAccount, fileName
-                    ;LogToFile("New Player Name: " newPlayerName " | File: " fileName, "PlayerRename.txt")
 
+                    SplitPath, loadedAccount, fileName
+                    LogToFile("New Player Name: " newPlayerName " | File: " fileName, "PlayerRename.txt")
                     ; Clean up temp file
                     if (FileExist(profileUsernameScreenshot))
                         FileDelete, %profileUsernameScreenshot%
@@ -603,133 +511,169 @@ Loop {
                         LogToFile("New Player Name: " newPlayerName " | File: " fileName, "PlayerRename.txt")
                         canStopSafely := true
                         Goto, EndOfRun
-                        ;if(stopToggle)
-                        ;ExitApp
-                        ;Reload
-                        ;return
                     }
+                } else {
+                    ; Clean up temp file if no restriction found
+                    if (FileExist(profileUsernameScreenshot))
+                        FileDelete, %profileUsernameScreenshot%
+
+                    Loop {
+                        adbClick_wbb(217, 284)
+                        if(FindOrLoseImage(39, 240, 65, 284, , "renametextbar", 0, failSafeTime)){
+                            canRename := True
+                            break
+                        }
+                        else if(FindOrLoseImage(84, 349, 104, 391, , "renamed", 0, failSafeTime)) {
+                            canRename := False
+                            break
+                        }
+                    }
+
+                    if(canRename){
+                        Delay(3)
+                        adbClick(138, 262)
+                        Delay(1)
+                        adbClick(138, 262)
+                        Delay(1)
+                        Loop 20 {
+                            adbInputEvent("67")
+                            Sleep, 10
+                        }
+                        Delay(1)
+                        ; Random, randomLetter, 65, 90
+                        Random, randomDigit1, 0, 9
+                        Random, randomDigit2, 0, 9
+                        Random, randomDigit3, 0, 9
+                        Random, randomDigit4, 0, 9
+                        newPlayerName := targetUsername . randomDigit1 . randomDigit2 . randomDigit3 . randomDigit4
+                        adbInput(newPlayerName)
+                        Sleep, 2000
+                        FindImageAndClick(209,277,224,292, , "playerrenamepencilicon", 193, 373)
+                        Sleep, 2000
+                        FindImageAndClick(209,277,224,292, , "playerrenamepencilicon", 193, 373)
+                        Sleep, 2000
+                        if(renameXML)
+                            setRenameData()
+                        SplitPath, loadedAccount, fileName
+                        LogToFile("New Player Name: " newPlayerName " | File: " fileName, "PlayerRename.txt")
+                        adbClick(143, 518)  ; Click OK button to dismiss the message
+                        Delay(3)
+                        adbClick(143, 518)  ; Click to close/go back
+                        Delay(10)
+                        if(loadedAccount && renameAndSaveAndReload) {
+                            renamedDir := A_ScriptDir . "\..\Accounts\RenamedPlayer\"
+                            if !FileExist(renamedDir)
+                                FileCreateDir, %renamedDir%
+
+                            SplitPath, loadedAccount, fileName
+                            if(renameXML)
+                                setRenameData()
+                            FileMove, %loadedAccount%, %renamedDir%%fileName%
+                            LogToFile("New Player Name: " newPlayerName " | File: " fileName, "PlayerRename.txt")
+                            Goto, EndOfRun
+                            canStopSafely := true
+                        }
+                    } else {
+                        adbClick_wbb(142, 370)
+                        Delay(3)
+                        adbClick(143, 518)  ; Click OK button to dismiss the message
+                        Delay(3)
+                        adbClick(143, 518)  ; Click to close/go back
+                        Delay(10)
+
+                        ;newPlayerName := renameOcrText
+                        ;setRenameData()
+                        ;SplitPath, loadedAccount, fileName
+                        ;LogToFile("New Player Name: " newPlayerName " | File: " fileName, "PlayerRename.txt")
+
+                        ; Clean up temp file
+                        if (FileExist(profileUsernameScreenshot))
+                            FileDelete, %profileUsernameScreenshot%
+                        if(loadedAccount && renameAndSaveAndReload) {
+                            renamedDir := A_ScriptDir . "\..\Accounts\RenamedPlayer\"
+                            if !FileExist(renamedDir)
+                                FileCreateDir, %renamedDir%
+
+                            SplitPath, loadedAccount, fileName
+                            FileMove, %loadedAccount%, %renamedDir%%fileName%
+                            LogToFile("New Player Name: " newPlayerName " | File: " fileName, "PlayerRename.txt")
+                            canStopSafely := true
+                            Goto, EndOfRun
+                        }
+                    }
+                }
+
+            }
+
+            if(deleteMethod = "5 Pack" || deleteMethod = "5 Pack (Fast)" || deleteMethod = "13 Pack")
+                wonderPicked := DoWonderPick()
+
+            friendsAdded := AddFriends()
+
+            SelectPack("First")
+            if(cantOpenMorePacks)
+                Goto, MidOfRun
+
+            PackOpening()
+            if(cantOpenMorePacks || (!friendIDs && friendID = "" && accountOpenPacks >= maxAccountPackNum))
+                Goto, MidOfRun
+
+            ; Pack method handling
+            if(packMethod) {
+                friendsAdded := AddFriends(true)
+                SelectPack()
+                if(cantOpenMorePacks)
+                    Goto, MidOfRun
+            }
+
+            PackOpening()
+            if(cantOpenMorePacks || (!friendIDs && friendID = "" && accountOpenPacks >= maxAccountPackNum))
+                Goto, MidOfRun
+
+            ; Hourglass opening for non-injection methods ONLY
+            if(!injectMethod)
+                HourglassOpening() ;deletemethod check in here at the start
+
+            ; Wonder pick additional handling - only for non-injection methods
+            if(wonderPicked && !injectMethod) {
+                if(deleteMethod = "5 Pack" || packMethod) {
+                    friendsAdded := AddFriends(true)
+                    SelectPack("HGPack")
+                    PackOpening()
+                } else {
+                    HourglassOpening(true)
+                }
+
+                if(packMethod) {
+                    friendsAdded := AddFriends(true)
+                    SelectPack("HGPack")
+                    PackOpening()
+                }
+                else {
+                    HourglassOpening(true)
                 }
             }
 
-        }
+            MidOfRun:
 
-        if(deleteMethod = "5 Pack" || deleteMethod = "5 Pack (Fast)" || deleteMethod = "13 Pack")
-            wonderPicked := DoWonderPick()
+            if(deleteMethod = "Inject" || deleteMethod = "Inject Missions" && accountOpenPacks >= maxAccountPackNum)
+                Goto, EndOfRun
 
-        friendsAdded := AddFriends()
-
-        SelectPack("First")
-        if(cantOpenMorePacks)
-            Goto, MidOfRun
-
-        PackOpening()
-        if(cantOpenMorePacks || (!friendIDs && friendID = "" && accountOpenPacks >= maxAccountPackNum))
-            Goto, MidOfRun
-
-        ; Pack method handling
-        if(packMethod) {
-            friendsAdded := AddFriends(true)
-            SelectPack()
-            if(cantOpenMorePacks)
-                Goto, MidOfRun
-        }
-
-        PackOpening()
-        if(cantOpenMorePacks || (!friendIDs && friendID = "" && accountOpenPacks >= maxAccountPackNum))
-            Goto, MidOfRun
-
-        ; Hourglass opening for non-injection methods ONLY
-        if(!injectMethod)
-            HourglassOpening() ;deletemethod check in here at the start
-
-        ; Wonder pick additional handling - only for non-injection methods
-        if(wonderPicked && !injectMethod) {
-            if(deleteMethod = "5 Pack" || packMethod) {
+            if(deleteMethod = "Inject for Reroll" && openExtraPack && packMethod) {
                 friendsAdded := AddFriends(true)
                 SelectPack("HGPack")
-                PackOpening()
-            } else {
                 HourglassOpening(true)
-            }
 
-            if(packMethod) {
-                friendsAdded := AddFriends(true)
-                SelectPack("HGPack")
-                PackOpening()
-            }
-            else {
+            } else if(deleteMethod = "Inject for Reroll" && !openExtraPack && !packMethod) {
+                Goto, EndOfRun
+
+            } else if(deleteMethod = "Inject for Reroll" && openExtraPack && !packMethod) {
                 HourglassOpening(true)
+                Goto, EndOfRun
             }
-        }
 
-        MidOfRun:
+            if (checkShouldDoMissions()) {
 
-        if(deleteMethod = "Inject" || deleteMethod = "Inject Missions" && accountOpenPacks >= maxAccountPackNum)
-            Goto, EndOfRun
-
-        if(deleteMethod = "Inject for Reroll" && openExtraPack && packMethod) {
-            friendsAdded := AddFriends(true)
-            SelectPack("HGPack")
-            HourglassOpening(true)
-
-        } else if(deleteMethod = "Inject for Reroll" && !openExtraPack && !packMethod) {
-            Goto, EndOfRun
-
-        } else if(deleteMethod = "Inject for Reroll" && openExtraPack && !packMethod) {
-            HourglassOpening(true)
-            Goto, EndOfRun
-        }
-
-        if (checkShouldDoMissions()) {
-
-            HomeAndMission()
-            if(beginnerMissionsDone)
-                Goto, EndOfRun
-
-            SelectPack("HGPack")
-            if(cantOpenMorePacks)
-                Goto, EndOfRun
-
-            PackOpening() ;6
-            if(cantOpenMorePacks || (!friendIDs && friendID = "" && accountOpenPacks >= maxAccountPackNum))
-                Goto, EndOfRun
-
-            HourglassOpening(true) ;7
-            if(cantOpenMorePacks || (!friendIDs && friendID = "" && accountOpenPacks >= maxAccountPackNum))
-                Goto, EndOfRun
-
-            HomeAndMission()
-            if(beginnerMissionsDone)
-                Goto, EndOfRun
-
-            SelectPack("HGPack")
-            if(cantOpenMorePacks)
-                Goto, EndOfRun
-            PackOpening() ;8
-            if(cantOpenMorePacks || (!friendIDs && friendID = "" && accountOpenPacks >= maxAccountPackNum))
-                Goto, EndOfRun
-
-            HourglassOpening(true) ;9
-            if(cantOpenMorePacks || (!friendIDs && friendID = "" && accountOpenPacks >= maxAccountPackNum))
-                Goto, EndOfRun
-
-            HomeAndMission()
-            if(beginnerMissionsDone)
-                Goto, EndOfRun
-
-            SelectPack("HGPack")
-            if(cantOpenMorePacks)
-                Goto, EndOfRun
-            PackOpening() ;10
-            if(cantOpenMorePacks || (!friendIDs && friendID = "" && accountOpenPacks >= maxAccountPackNum))
-                Goto, EndOfRun
-
-            HourglassOpening(true) ;11
-            if(cantOpenMorePacks || (!friendIDs && friendID = "" && accountOpenPacks >= maxAccountPackNum))
-                Goto, EndOfRun
-
-            ; Extended mission handling for Inject Missions
-            if(injectMethod && loadedAccount && deleteMethod = "Inject Missions") {
                 HomeAndMission()
                 if(beginnerMissionsDone)
                     Goto, EndOfRun
@@ -737,158 +681,211 @@ Loop {
                 SelectPack("HGPack")
                 if(cantOpenMorePacks)
                     Goto, EndOfRun
+
+                PackOpening() ;6
+                if(cantOpenMorePacks || (!friendIDs && friendID = "" && accountOpenPacks >= maxAccountPackNum))
+                    Goto, EndOfRun
+
+                HourglassOpening(true) ;7
+                if(cantOpenMorePacks || (!friendIDs && friendID = "" && accountOpenPacks >= maxAccountPackNum))
+                    Goto, EndOfRun
+
+                HomeAndMission()
+                if(beginnerMissionsDone)
+                    Goto, EndOfRun
+
+                SelectPack("HGPack")
+                if(cantOpenMorePacks)
+                    Goto, EndOfRun
+                PackOpening() ;8
+                if(cantOpenMorePacks || (!friendIDs && friendID = "" && accountOpenPacks >= maxAccountPackNum))
+                    Goto, EndOfRun
+
+                HourglassOpening(true) ;9
+                if(cantOpenMorePacks || (!friendIDs && friendID = "" && accountOpenPacks >= maxAccountPackNum))
+                    Goto, EndOfRun
+
+                HomeAndMission()
+                if(beginnerMissionsDone)
+                    Goto, EndOfRun
+
+                SelectPack("HGPack")
+                if(cantOpenMorePacks)
+                    Goto, EndOfRun
+                PackOpening() ;10
+                if(cantOpenMorePacks || (!friendIDs && friendID = "" && accountOpenPacks >= maxAccountPackNum))
+                    Goto, EndOfRun
+
+                HourglassOpening(true) ;11
+                if(cantOpenMorePacks || (!friendIDs && friendID = "" && accountOpenPacks >= maxAccountPackNum))
+                    Goto, EndOfRun
+
+                ; Extended mission handling for Inject Missions
+                if(injectMethod && loadedAccount && deleteMethod = "Inject Missions") {
+                    HomeAndMission()
+                    if(beginnerMissionsDone)
+                        Goto, EndOfRun
+
+                    SelectPack("HGPack")
+                    if(cantOpenMorePacks)
+                        Goto, EndOfRun
+                    PackOpening() ;12
+                    if(cantOpenMorePacks || (!friendIDs && friendID = "" && accountOpenPacks >= maxAccountPackNum))
+                        Goto, EndOfRun
+
+                    HourglassOpening(true) ;13
+                    if(cantOpenMorePacks || (!friendIDs && friendID = "" && accountOpenPacks >= maxAccountPackNum))
+                        Goto, EndOfRun
+                }
+
+                HomeAndMission(1)
+                SelectPack("HGPack")
+                if(cantOpenMorePacks)
+                    Goto, EndOfRun
                 PackOpening() ;12
                 if(cantOpenMorePacks || (!friendIDs && friendID = "" && accountOpenPacks >= maxAccountPackNum))
                     Goto, EndOfRun
 
-                HourglassOpening(true) ;13
+                HomeAndMission(1)
+                SelectPack("HGPack")
+                if(cantOpenMorePacks)
+                    Goto, EndOfRun
+                PackOpening() ;13
                 if(cantOpenMorePacks || (!friendIDs && friendID = "" && accountOpenPacks >= maxAccountPackNum))
                     Goto, EndOfRun
+
+                beginnerMissionsDone := 1
+                if(injectMethod && loadedAccount)
+                    setMetaData()
             }
 
-            HomeAndMission(1)
-            SelectPack("HGPack")
-            if(cantOpenMorePacks)
-                Goto, EndOfRun
-            PackOpening() ;12
-            if(cantOpenMorePacks || (!friendIDs && friendID = "" && accountOpenPacks >= maxAccountPackNum))
-                Goto, EndOfRun
+            EndOfRun:
 
-            HomeAndMission(1)
-            SelectPack("HGPack")
-            if(cantOpenMorePacks)
-                Goto, EndOfRun
-            PackOpening() ;13
-            if(cantOpenMorePacks || (!friendIDs && friendID = "" && accountOpenPacks >= maxAccountPackNum))
-                Goto, EndOfRun
-
-            beginnerMissionsDone := 1
-            if(injectMethod && loadedAccount)
-                setMetaData()
-        }
-
-        EndOfRun:
-
-        ; Special missions
-        IniRead, claimSpecialMissions, %A_ScriptDir%\..\Settings.ini, UserSettings, claimSpecialMissions, 0
-        if (claimSpecialMissions = 1 && !specialMissionsDone && !(deleteMethod = "Inject" && accountOpenPacks >= maxAccountPackNum || deleteMethod = "Inject Missions" && accountOpenPacks >= maxAccountPackNum)) {
-            GoToMain()
-            HomeAndMission(1)
-            GetEventRewards(true) ; collects all the Special mission hourglass
-            specialMissionsDone := 1
-            cantOpenMorePacks := 0
-            if (injectMethod && loadedAccount)
-                setMetaData()
-        }
-
-        ; Hourglass spending
-        IniRead, spendHourGlass, %A_ScriptDir%\..\Settings.ini, UserSettings, spendHourGlass, 0
-        if (spendHourGlass = 1 && !(deleteMethod = "Inject" && accountOpenPacks >= maxAccountPackNum || deleteMethod = "Inject Missions" && accountOpenPacks >= maxAccountPackNum)) {
-            SpendAllHourglass()
-        }
-
-        ; Friend removal for inject reroll
-        if (injectMethod && friended && !keepAccount) {
-            RemoveFriends()
-        }
-
-        ; Collect Daily Hourglasses - either separate setting? or will be currently part of openExtraPack
-        if(deleteMethod = "Inject for Reroll" && openExtraPack) {
-            GoToMain(true)
-            GetAllRewards(false, true)
-        }
-
-        if(deleteMethod = "Inject" && !renameAndSaveAndReload) {
-            GoToMain()
-            GetAllRewards(false, true)
-            Loop {
-                adbClick_wbb(143, 518)
-                if(FindOrLoseImage(120, 500, 155, 530, , "Social", 0, failSafeTime))
-                    break
+            ; Special missions
+            IniRead, claimSpecialMissions, %A_ScriptDir%\..\Settings.ini, UserSettings, claimSpecialMissions, 0
+            if (claimSpecialMissions = 1 && !specialMissionsDone && !(deleteMethod = "Inject" && accountOpenPacks >= maxAccountPackNum || deleteMethod = "Inject Missions" && accountOpenPacks >= maxAccountPackNum)) {
+                GoToMain()
+                HomeAndMission(1)
+                GetEventRewards(true) ; collects all the Special mission hourglass
+                specialMissionsDone := 1
+                cantOpenMorePacks := 0
+                if (injectMethod && loadedAccount)
+                    setMetaData()
             }
-            FindImageAndClick(226, 100, 270, 135, , "Add", 38, 460, 500)
-        }
 
-        ; BallCity 2025.02.21 - Track monitor
-        now := A_NowUTC
-        IniWrite, %now%, %A_ScriptDir%\%scriptName%.ini, Metrics, LastEndTimeUTC
-        EnvSub, now, 1970, seconds
-        IniWrite, %now%, %A_ScriptDir%\%scriptName%.ini, Metrics, LastEndEpoch
+            ; Hourglass spending
+            IniRead, spendHourGlass, %A_ScriptDir%\..\Settings.ini, UserSettings, spendHourGlass, 0
+            if (spendHourGlass = 1 && !(deleteMethod = "Inject" && accountOpenPacks >= maxAccountPackNum || deleteMethod = "Inject Missions" && accountOpenPacks >= maxAccountPackNum)) {
+                SpendAllHourglass()
+            }
 
-        rerolls++
-        rerolls_local++
-        IniWrite, %rerolls%, %A_ScriptDir%\%scriptName%.ini, Metrics, rerolls
+            ; Friend removal for inject reroll
+            if (injectMethod && friended && !keepAccount) {
+                RemoveFriends()
+            }
 
-        totalSeconds := Round((A_TickCount - rerollStartTime) / 1000) ; Total time in seconds
-        totalSeconds_local := Round((A_TickCount - rerollStartTime_local) / 1000) ; Total time in seconds
-        avgtotalSeconds := Round(totalSeconds_local / rerolls_local) ; Total time in seconds
-        aminutes := Floor(avgtotalSeconds / 60) ; Average minutes
-        aseconds := Mod(avgtotalSeconds, 60) ; Average remaining seconds
-        mminutes := Floor(totalSeconds / 60) ; Total minutes
-        sseconds := Mod(totalSeconds, 60) ; Total remaining seconds
+            ; Collect Daily Hourglasses - either separate setting? or will be currently part of openExtraPack
+            if(deleteMethod = "Inject for Reroll" && openExtraPack) {
+                GoToMain(true)
+                GetAllRewards(false, true)
+            }
 
-        ; Display the times
-        CreateStatusMessage("Avg: " . aminutes . "m " . aseconds . "s | Runs: " . rerolls . " | Account Packs " . accountOpenPacks, "AvgRuns", 0, 605, false, true)
+            if(deleteMethod = "Inject" && !renameAndSaveAndReload) {
+                GoToMain()
+                GetAllRewards(false, true)
+                Loop {
+                    adbClick_wbb(143, 518)
+                    if(FindOrLoseImage(120, 500, 155, 530, , "Social", 0, failSafeTime))
+                        break
+                }
+                FindImageAndClick(226, 100, 270, 135, , "Add", 38, 460, 500)
+            }
 
-        ; Log to file
-        LogToFile("Packs: " . packsThisRun . " | Total time: " . mminutes . "m " . sseconds . "s | Avg: " . aminutes . "m " . aseconds . "s | Runs: " . rerolls)
+            ; BallCity 2025.02.21 - Track monitor
+            now := A_NowUTC
+            IniWrite, %now%, %A_ScriptDir%\%scriptName%.ini, Metrics, LastEndTimeUTC
+            EnvSub, now, 1970, seconds
+            IniWrite, %now%, %A_ScriptDir%\%scriptName%.ini, Metrics, LastEndEpoch
 
-        if (nukeAccount && !keepAccount && !injectMethod) {
-            CreateStatusMessage("Deleting account...",,,, false)
-            menuDelete()
-        } else if (friended) {
-            CreateStatusMessage("Unfriending...",,,, false)
-            RemoveFriends()
-        }
+            rerolls++
+            rerolls_local++
+            IniWrite, %rerolls%, %A_ScriptDir%\%scriptName%.ini, Metrics, rerolls
 
-        AppendToJsonFile(packsThisRun)
+            totalSeconds := Round((A_TickCount - rerollStartTime) / 1000) ; Total time in seconds
+            totalSeconds_local := Round((A_TickCount - rerollStartTime_local) / 1000) ; Total time in seconds
+            avgtotalSeconds := Round(totalSeconds_local / rerolls_local) ; Total time in seconds
+            aminutes := Floor(avgtotalSeconds / 60) ; Average minutes
+            aseconds := Mod(avgtotalSeconds, 60) ; Average remaining seconds
+            mminutes := Floor(totalSeconds / 60) ; Total minutes
+            sseconds := Mod(totalSeconds, 60) ; Total remaining seconds
 
-        ; Check for 40 first to quit
-        if (deleteMethod = "Inject" || deleteMethod = "Inject Missions" && accountOpenPacks >= maxAccountPackNum) {
+            ; Display the times
+            CreateStatusMessage("Avg: " . aminutes . "m " . aseconds . "s | Runs: " . rerolls . " | Account Packs " . accountOpenPacks, "AvgRuns", 0, 605, false, true)
+
+            ; Log to file
+            LogToFile("Packs: " . packsThisRun . " | Total time: " . mminutes . "m " . sseconds . "s | Avg: " . aminutes . "m " . aseconds . "s | Runs: " . rerolls)
+
+            if (nukeAccount && !keepAccount && !injectMethod) {
+                CreateStatusMessage("Deleting account...",,,, false)
+                menuDelete()
+            } else if (friended) {
+                CreateStatusMessage("Unfriending...",,,, false)
+                RemoveFriends()
+            }
+
+            AppendToJsonFile(packsThisRun)
+
+            ; Check for 40 first to quit
+            if (deleteMethod = "Inject" || deleteMethod = "Inject Missions" && accountOpenPacks >= maxAccountPackNum) {
+                if (injectMethod && loadedAccount) {
+                    if (!keepAccount) {
+                        MarkAccountAsUsed()
+                    }
+                    loadedAccount := false
+                    continue
+                }
+            }
+
             if (injectMethod && loadedAccount) {
+                ; For injection methods, mark the account as used
                 if (!keepAccount) {
-                    MarkAccountAsUsed()
+                    MarkAccountAsUsed()  ; Remove account from queue
+                    if(verboseLogging)
+                        LogToFile("Marked injected account as used: " . accountFileName)
+                } else {
+                    if(verboseLogging)
+                        LogToFile("Keeping injected account: " . accountFileName)
                 }
+
+                ; Reset loadedAccount so it will be loaded fresh next iteration
                 loadedAccount := false
-                continue
-            }
-        }
 
-        if (injectMethod && loadedAccount) {
-            ; For injection methods, mark the account as used
-            if (!keepAccount) {
-                MarkAccountAsUsed()  ; Remove account from queue
-                if(verboseLogging)
-                    LogToFile("Marked injected account as used: " . accountFileName)
-            } else {
-                if(verboseLogging)
-                    LogToFile("Keeping injected account: " . accountFileName)
-            }
+            } else if (!injectMethod) {
+                ; For non-injection methods, handle account deletion/saving
+                if ((!injectMethod || !loadedAccount) && (!nukeAccount || keepAccount)) {
+                    ; Save account for non-injection or when keeping account
+                    saveAccount("All")
 
-            ; Reset loadedAccount so it will be loaded fresh next iteration
-            loadedAccount := false
-
-        } else if (!injectMethod) {
-            ; For non-injection methods, handle account deletion/saving
-            if ((!injectMethod || !loadedAccount) && (!nukeAccount || keepAccount)) {
-                ; Save account for non-injection or when keeping account
-                saveAccount("All")
-
-                beginnerMissionsDone := 0
-                soloBattleMissionDone := 0
-                intermediateMissionsDone := 0
-                specialMissionsDone := 0
-                accountHasPackInTesting := 0
-
-                restartGameInstance("New Run", false)
-            } else {
-                if (stopToggle) {
-                    CreateStatusMessage("Stopping...",,,, false)
-                    ExitApp
+                    beginnerMissionsDone := 0
+                    soloBattleMissionDone := 0
+                    intermediateMissionsDone := 0
+                    specialMissionsDone := 0
+                    accountHasPackInTesting := 0 
                 }
                 restartGameInstance("New Run", false)
             }
         }
+    }
+    catch e {
+         if (e == RESTART_LOOP_EXCEPTION) {
+            CreateStatusMessage("Restarting mission loop...",,,, false)
+            sleep, 1000
+            continue
+         }
+         else {
+            LogToFile("Error message : " . e.message, "Error.txt")
+            ExitApp
+         }
     }
 }
 
@@ -1401,7 +1398,7 @@ FindOrLoseImage(X1, Y1, X2, Y2, searchVariation := "", imageName := "DEFAULT", E
                 IniWrite, 0, %A_ScriptDir%\%scriptName%.ini, UserSettings, DeadCheck
             }
             LogToFile("Restarted game for instance " . scriptName . ". Reason: No save data found", "Restart.txt")
-            Reload
+            throw RESTART_LOOP_EXCEPTION
         }
     }
     if(imageName = "Points" || imageName = "Home") { ;look for level up ok "button"
@@ -1552,8 +1549,6 @@ FindImageAndClick(X1, Y1, X2, Y2, searchVariation := "", imageName := "DEFAULT",
                 if (injectMethod)
                     RemoveFriends()
                 restartGameInstance("Stuck at " . imageName . "...") ; change to reset the instance and delete data then reload script
-                StartSkipTime := A_TickCount
-                failSafe := A_TickCount
             }
         }
         Path = %imagePath%Error.png ; Search for communication error
@@ -1589,7 +1584,7 @@ FindImageAndClick(X1, Y1, X2, Y2, searchVariation := "", imageName := "DEFAULT",
                     IniWrite, 0, %A_ScriptDir%\%scriptName%.ini, UserSettings, DeadCheck
                 }
                 LogToFile("Restarted game for instance " . scriptName . ". Reason: No save data found", "Restart.txt")
-                Reload
+                throw RESTART_LOOP_EXCEPTION
             }
         }
 
@@ -1718,6 +1713,11 @@ restartGameInstance(reason, RL := true) {
 
     ;Screenshot("restartGameInstance")
 
+    if (stopToggle) {
+        CreateStatusMessage("Stopping...",,,, false)
+        ;TODO force stop, remove account
+        ExitApp
+    }
     if (Debug)
         CreateStatusMessage("Restarting game reason:`n" . reason)
     else if (InStr(reason, "Stuck"))
@@ -1728,31 +1728,21 @@ restartGameInstance(reason, RL := true) {
     if (RL = "GodPack") {
         LogToFile("Restarted game for instance " . scriptName . ". Reason: " reason, "Restart.txt")
         IniWrite, 0, %A_ScriptDir%\%scriptName%.ini, UserSettings, DeadCheck
-        AppendToJsonFile(packsThisRun)
-
-        if (stopToggle) {
-            CreateStatusMessage("Stopping...",,,, false)
-            ;TODO force stop, remove account
-            ExitApp
-        }
-
-        Reload
+        AppendToJsonFile(packsThisRun)   
     } else {
-        waitadb()
-        adbShell.StdIn.WriteLine("am force-stop jp.pokemon.pokemontcgp")
-        waitadb()
-        clearMissionCache()
         if (!RL && DeadCheck = 0) {
+            waitadb()
+            adbShell.StdIn.WriteLine("am force-stop jp.pokemon.pokemontcgp")
+            waitadb()
+            clearMissionCache()
             adbShell.StdIn.WriteLine("rm /data/data/jp.pokemon.pokemontcgp/shared_prefs/deviceAccount:.xml") ; delete account data
             ;TODO improve friend list cluter with deadcheck/stuck at, for injection. need to check also loadAccount at the beggining
+            waitadb()
+            adbShell.StdIn.WriteLine("am start -n jp.pokemon.pokemontcgp/com.unity3d.player.UnityPlayerActivity")
+            waitadb()
+            Sleep, 5000
         }
-        waitadb()
-        adbShell.StdIn.WriteLine("am start -n jp.pokemon.pokemontcgp/com.unity3d.player.UnityPlayerActivity")
-        waitadb()
-        Sleep, 5000
-        ;MsgBox, 4
-        if (RL) {
-
+        else {
             AppendToJsonFile(packsThisRun)
             ;if(!injectMethod || !loadedAccount)
             if(!injectMethod) {
@@ -1765,22 +1755,15 @@ restartGameInstance(reason, RL := true) {
                 }
             }
             LogToFile("Restarted game for instance " . scriptName . ". Reason: " reason, "Restart.txt")
-
-            if (stopToggle) {
-                CreateStatusMessage("Stopping...",,,, false)
-                ;TODO force stop, remove account
-                ExitApp
-            }
-
-            Reload
-        }
-
-        if (stopToggle) {
-            CreateStatusMessage("Stopping...",,,, false)
-            ;TODO force stop, remove account
-            ExitApp
+            waitadb()
+            adbShell.StdIn.WriteLine("am force-stop jp.pokemon.pokemontcgp")
+            waitadb()
+            adbShell.StdIn.WriteLine("am start -n jp.pokemon.pokemontcgp/com.unity3d.player.UnityPlayerActivity")
+            waitadb()
+            sleep, 5000
         }
     }
+    throw RESTART_LOOP_EXCEPTION
 }
 
 menuDelete() {
