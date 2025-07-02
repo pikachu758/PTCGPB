@@ -14,11 +14,11 @@ global STATIC_BRUSH := 0
 
 githubUser := "pikachu758"
 repoName := "PTCGPB"
-localVersion := "v6.4.25"
+localVersion := "v6.5.1"
 scriptFolder := A_ScriptDir
 zipPath := A_Temp . "\update.zip"
 extractPath := A_Temp . "\update"
-intro := "Event Battle!"
+intro := "No more flickering!"
 
 ; GUI dimensions
 global GUI_WIDTH := 377 
@@ -4722,7 +4722,7 @@ CheckForUpdate() {
         ; If the user clicks Yes (return value 6)
         IfMsgBox, Yes
         {
-            MsgBox, 64, Downloading..., % currentDictionary.downloading
+            MsgBox, 64, Downloading..., % currentDictionary.downloading, 3
             
             ; Proceed with downloading the update
             URLDownloadToFile, %zipDownloadURL%, %zipPath%
@@ -4732,7 +4732,7 @@ CheckForUpdate() {
                 return
             }
             else {
-                MsgBox, % currentDictionary.dl_complete
+                MsgBox,,, % currentDictionary.dl_complete, 5
                 
                 ; Create a temporary folder for extraction
                 tempExtractPath := A_Temp "\PTCGPB_Temp"
@@ -4780,7 +4780,7 @@ CheckForUpdate() {
     }
     else
     {
-        MsgBox, % currentDictionary.up_to_date
+        MsgBox,,, % currentDictionary.up_to_date , 5
     }
 }
 
