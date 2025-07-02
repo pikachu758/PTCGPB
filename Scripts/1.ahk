@@ -870,22 +870,22 @@ Loop {
                     soloBattleMissionDone := 0
                     intermediateMissionsDone := 0
                     specialMissionsDone := 0
-                    accountHasPackInTesting := 0 
+                    accountHasPackInTesting := 0
                 }
                 restartGameInstance("New Run", false)
             }
         }
     }
     catch e {
-         if (e == RESTART_LOOP_EXCEPTION) {
+        if (e = RESTART_LOOP_EXCEPTION) {
             CreateStatusMessage("Restarting mission loop...",,,, false)
             sleep, 1000
             continue
-         }
-         else {
+        }
+        else {
             LogToFile("Error message : " . e.message, "Error.txt")
             ExitApp
-         }
+        }
     }
 }
 
@@ -1728,7 +1728,8 @@ restartGameInstance(reason, RL := true) {
     if (RL = "GodPack") {
         LogToFile("Restarted game for instance " . scriptName . ". Reason: " reason, "Restart.txt")
         IniWrite, 0, %A_ScriptDir%\%scriptName%.ini, UserSettings, DeadCheck
-        AppendToJsonFile(packsThisRun)   
+        AppendToJsonFile(packsThisRun)
+        loadedAccount := loadAccount()
     } else {
         if (!RL && DeadCheck = 0) {
             waitadb()
@@ -2764,7 +2765,10 @@ DownloadFile(url, filename) {
 }
 
 ReadFile(filename, numbers := false) {
-    FileRead, content, %A_ScriptDir%\..\%filename%.txt
+    idsPath := A_ScriptDir "\..\" . fileName . ".txt"
+    if !FileExist(idsPath)
+        return false
+    FileRead, content, %idsPath%
 
     if (!content)
         return false
