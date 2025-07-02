@@ -7,7 +7,6 @@
 #Include *i %A_ScriptDir%\Include\OCR.ahk
 #Include *i %A_ScriptDir%\Include\Gdip_Extra.ahk
 
-
 #SingleInstance on
 SetMouseDelay, -1
 SetDefaultMouseSpeed, 0
@@ -149,8 +148,6 @@ IniRead, targetUsername, %A_ScriptDir%\..\Settings.ini, UserSettings, TargetUser
 IniRead, renameXML, %A_ScriptDir%\..\Settings.ini, UserSettings, renameXML, 0
 IniRead, renameXMLwithFC, %A_ScriptDir%\..\Settings.ini, UserSettings, renameXMLwithFC, 0
 
-
-
 pokemonList := ["Mewtwo", "Charizard", "Pikachu", "Mew", "Dialga", "Palkia", "Arceus", "Shining", "Solgaleo", "Lunala", "Buzzwole", "Eevee"]
 shinyPacks := {"Shining": 1, "Solgaleo": 1, "Lunala": 1, "Buzzwole": 1, "Eevee": 1}
 
@@ -202,7 +199,7 @@ Loop {
         if (scaleParam = 287)
             buttonWidth := buttonWidth + 5
 
-        Gui, New, +Owner%OwnerWND% -AlwaysOnTop +ToolWindow -Caption +LastFound -DPIScale 
+        Gui, New, +Owner%OwnerWND% -AlwaysOnTop +ToolWindow -Caption +LastFound -DPIScale
         Gui, Default
         Gui, Margin, 4, 4  ; Set margin for the GUI
         Gui, Font, s5 cGray Norm Bold, Segoe UI  ; Normal font for input labels
@@ -210,10 +207,10 @@ Loop {
         Gui, Add, Button, % "x" . (buttonWidth * 1) . " y0 w" . buttonWidth . " h25 gPauseScript", Pause (Shift+F6)
         Gui, Add, Button, % "x" . (buttonWidth * 2) . " y0 w" . buttonWidth . " h25 gResumeScript", Resume (Shift+F6)
         Gui, Add, Button, % "x" . (buttonWidth * 3) . " y0 w" . buttonWidth . " h25 gStopScript", Stop (Shift+F7)
-		;if(winTitle=1)
+        ;if(winTitle=1)
         Gui, Add, Button, % "x" . (buttonWidth * 4) . " y0 w" . buttonWidth . " h25 gDevMode", Dev Mode (Shift+F8)
         DllCall("SetWindowPos", "Ptr", WinExist(), "Ptr", 1  ; HWND_BOTTOM
-                , "Int", 0, "Int", 0, "Int", 0, "Int", 0, "UInt", 0x13)  ; SWP_NOSIZE, SWP_NOMOVE, SWP_NOACTIVATE
+            , "Int", 0, "Int", 0, "Int", 0, "Int", 0, "UInt", 0x13)  ; SWP_NOSIZE, SWP_NOMOVE, SWP_NOACTIVATE
         Gui, Show, NoActivate x%x4% y%y4%  w275 h30
         break
     }
@@ -351,24 +348,24 @@ Loop {
         ; For injection methods, load account only if we don't already have one
         if(injectMethod) {
             nukeAccount := false
-            
+
             ; Only load account if we don't already have one loaded
             if(!loadedAccount) {
                 loadedAccount := loadAccount()
             }
-            
+
             ; If no account could be loaded for injection methods, handle appropriately
             if(!loadedAccount) {
                 ; Check user setting for what to do when no eligible accounts
                 IniRead, waitForEligibleAccounts, %A_ScriptDir%\..\Settings.ini, UserSettings, waitForEligibleAccounts, 1
                 IniRead, maxWaitHours, %A_ScriptDir%\..\Settings.ini, UserSettings, maxWaitHours, 24
-                
+
                 if(waitForEligibleAccounts = 1) {
                     ; Wait for eligible accounts to become available
                     ; Simple approach - just show wait message and sleep
                     CreateStatusMessage("No eligible accounts available for " . deleteMethod . ". Waiting 5 minutes before checking again...", "", 0, 0, false)
                     LogToFile("No eligible accounts available for " . deleteMethod . ". Waiting 5 minutes...")
-                    
+
                     ; Wait 5 minutes before checking again
                     Sleep, 300000  ; 5 minutes
                     continue  ; Go back to start of loop to check again
@@ -376,7 +373,7 @@ Loop {
                     ExitApp
                 }
             }
-            
+
             ; If we reach here, we have a valid loaded account for injection
             LogToFile("Successfully loaded account for injection: " . accountFileName)
         }
@@ -405,16 +402,16 @@ Loop {
             DoTutorial()
             accountOpenPacks := 0 ;tutorial packs don't count
         }
-         if(targetUsername = "No_targetname")
+        if(targetUsername = "No_targetname")
             renameMode := 0
-        
+
         ; Taken from Josh, to rename the accounts
         if (renameMode) {
             failSafe := A_TickCount
-	        failSafeTime := 0
+            failSafeTime := 0
             ; Click for hamburger menu and wait for profile
             Loop {
-                adbClick_wbb(140, 203) ; 
+                adbClick_wbb(140, 203) ;
                 Delay(1)
                 if(FindOrLoseImage(233, 400, 264, 428, , "Points", 0, failSafeTime)) {
                     break
@@ -456,14 +453,14 @@ Loop {
                             pos2 += 5
                         }
                         adbClick(pos1, pos2)
-			        }
-		        }
-		        levelUp()
+                    }
+                }
+                levelUp()
                 Delay(1)
-		        failSafeTime := (A_TickCount - failSafe) // 1000
+                failSafeTime := (A_TickCount - failSafe) // 1000
             }
 
-	        FindImageAndClick(203, 272, 237, 300, , "Profile", 210, 140, 200) ; Open profile/stats page and wait
+            FindImageAndClick(203, 272, 237, 300, , "Profile", 210, 140, 200) ; Open profile/stats page and wait
 
             if(!renameXMLwithFC)
                 FindImageAndClick(249,70,260,82, , "profilecopyidbutton", 137, 78)
@@ -472,7 +469,7 @@ Loop {
                 FindImageAndClick(249,70,260,82, , "profilecopyidbutton", 259, 79)
                 Delay(3)
                 userFriendCode := Clipboard
-                    Delay(5)
+                Delay(5)
                 adbClick(137, 78)
                 Delay(3)
             }
@@ -493,11 +490,11 @@ Loop {
                 Delay(3)
                 adbClick(143, 518)  ; Click to close/go back
                 Delay(10)
-                
-		        ;newPlayerName := renameOcrText
-                ;setRenameData() 
 
-		        SplitPath, loadedAccount, fileName
+                ;newPlayerName := renameOcrText
+                ;setRenameData()
+
+                SplitPath, loadedAccount, fileName
                 LogToFile("New Player Name: " newPlayerName " | File: " fileName, "PlayerRename.txt")
                 ; Clean up temp file
                 if (FileExist(profileUsernameScreenshot))
@@ -506,14 +503,14 @@ Loop {
                     renamedDir := A_ScriptDir . "\..\Accounts\RenamedPlayer\"
                     if !FileExist(renamedDir)
                         FileCreateDir, %renamedDir%
-			
+
                     SplitPath, loadedAccount, fileName
                     FileMove, %loadedAccount%, %renamedDir%%fileName%
                     LogToFile("New Player Name: " newPlayerName " | File: " fileName, "PlayerRename.txt")
                     canStopSafely := true
                     Goto, EndOfRun
                     ;if(stopToggle)
-                        ;ExitApp
+                    ;ExitApp
                     ;Reload
                 }
             } else {
@@ -521,19 +518,17 @@ Loop {
                 if (FileExist(profileUsernameScreenshot))
                     FileDelete, %profileUsernameScreenshot%
 
-
                 Loop {
                     adbClick_wbb(217, 284)
-                        if(FindOrLoseImage(39, 240, 65, 284, , "renametextbar", 0, failSafeTime)){
-                            canRename := True
-                            break
-                        }
-                        else if(FindOrLoseImage(84, 349, 104, 391, , "renamed", 0, failSafeTime)) {
-                            canRename := False
-                            break
-                        }
+                    if(FindOrLoseImage(39, 240, 65, 284, , "renametextbar", 0, failSafeTime)){
+                        canRename := True
+                        break
+                    }
+                    else if(FindOrLoseImage(84, 349, 104, 391, , "renamed", 0, failSafeTime)) {
+                        canRename := False
+                        break
+                    }
                 }
-                
 
                 if(canRename){
                     Delay(3)
@@ -551,7 +546,7 @@ Loop {
                     Random, randomDigit2, 0, 9
                     Random, randomDigit3, 0, 9
                     Random, randomDigit4, 0, 9
-                    newPlayerName := targetUsername . randomDigit1 . randomDigit2 . randomDigit3 . randomDigit4 
+                    newPlayerName := targetUsername . randomDigit1 . randomDigit2 . randomDigit3 . randomDigit4
                     adbInput(newPlayerName)
                     Sleep, 2000
                     FindImageAndClick(209,277,224,292, , "playerrenamepencilicon", 193, 373)
@@ -559,7 +554,7 @@ Loop {
                     FindImageAndClick(209,277,224,292, , "playerrenamepencilicon", 193, 373)
                     Sleep, 2000
                     if(renameXML)
-                        setRenameData() 
+                        setRenameData()
                     SplitPath, loadedAccount, fileName
                     LogToFile("New Player Name: " newPlayerName " | File: " fileName, "PlayerRename.txt")
                     adbClick(143, 518)  ; Click OK button to dismiss the message
@@ -573,27 +568,26 @@ Loop {
 
                         SplitPath, loadedAccount, fileName
                         if(renameXML)
-                            setRenameData() 
+                            setRenameData()
                         FileMove, %loadedAccount%, %renamedDir%%fileName%
                         LogToFile("New Player Name: " newPlayerName " | File: " fileName, "PlayerRename.txt")
                         Goto, EndOfRun
                         canStopSafely := true
                         ;if(stopToggle)
-                            ;ExitApp
-                            ;Reload
+                        ;ExitApp
+                        ;Reload
                     }
                 } else {
                     adbClick_wbb(142, 370)
                     Delay(3)
-		            adbClick(143, 518)  ; Click OK button to dismiss the message
+                    adbClick(143, 518)  ; Click OK button to dismiss the message
                     Delay(3)
                     adbClick(143, 518)  ; Click to close/go back
                     Delay(10)
 
-                    
                     ;newPlayerName := renameOcrText
-                    ;setRenameData() 
-		            ;SplitPath, loadedAccount, fileName
+                    ;setRenameData()
+                    ;SplitPath, loadedAccount, fileName
                     ;LogToFile("New Player Name: " newPlayerName " | File: " fileName, "PlayerRename.txt")
 
                     ; Clean up temp file
@@ -610,24 +604,24 @@ Loop {
                         canStopSafely := true
                         Goto, EndOfRun
                         ;if(stopToggle)
-                            ;ExitApp
+                        ;ExitApp
                         ;Reload
                         ;return
-		    }
+                    }
                 }
             }
-    
+
         }
-        
+
         if(deleteMethod = "5 Pack" || deleteMethod = "5 Pack (Fast)" || deleteMethod = "13 Pack")
             wonderPicked := DoWonderPick()
-            
+
         friendsAdded := AddFriends()
-        
+
         SelectPack("First")
         if(cantOpenMorePacks)
             Goto, MidOfRun
-            
+
         PackOpening()
         if(cantOpenMorePacks || (!friendIDs && friendID = "" && accountOpenPacks >= maxAccountPackNum))
             Goto, MidOfRun
@@ -669,7 +663,7 @@ Loop {
         }
 
         MidOfRun:
-		
+
         if(deleteMethod = "Inject" || deleteMethod = "Inject Missions" && accountOpenPacks >= maxAccountPackNum)
             Goto, EndOfRun
 
@@ -695,11 +689,11 @@ Loop {
             SelectPack("HGPack")
             if(cantOpenMorePacks)
                 Goto, EndOfRun
-                
+
             PackOpening() ;6
             if(cantOpenMorePacks || (!friendIDs && friendID = "" && accountOpenPacks >= maxAccountPackNum))
                 Goto, EndOfRun
-                
+
             HourglassOpening(true) ;7
             if(cantOpenMorePacks || (!friendIDs && friendID = "" && accountOpenPacks >= maxAccountPackNum))
                 Goto, EndOfRun
@@ -707,14 +701,14 @@ Loop {
             HomeAndMission()
             if(beginnerMissionsDone)
                 Goto, EndOfRun
-                
+
             SelectPack("HGPack")
             if(cantOpenMorePacks)
                 Goto, EndOfRun
             PackOpening() ;8
             if(cantOpenMorePacks || (!friendIDs && friendID = "" && accountOpenPacks >= maxAccountPackNum))
                 Goto, EndOfRun
-                
+
             HourglassOpening(true) ;9
             if(cantOpenMorePacks || (!friendIDs && friendID = "" && accountOpenPacks >= maxAccountPackNum))
                 Goto, EndOfRun
@@ -722,36 +716,36 @@ Loop {
             HomeAndMission()
             if(beginnerMissionsDone)
                 Goto, EndOfRun
-                
+
             SelectPack("HGPack")
             if(cantOpenMorePacks)
                 Goto, EndOfRun
             PackOpening() ;10
             if(cantOpenMorePacks || (!friendIDs && friendID = "" && accountOpenPacks >= maxAccountPackNum))
                 Goto, EndOfRun
-                
+
             HourglassOpening(true) ;11
             if(cantOpenMorePacks || (!friendIDs && friendID = "" && accountOpenPacks >= maxAccountPackNum))
                 Goto, EndOfRun
-                
+
             ; Extended mission handling for Inject Missions
-            if(injectMethod && loadedAccount && deleteMethod = "Inject Missions") {                
+            if(injectMethod && loadedAccount && deleteMethod = "Inject Missions") {
                 HomeAndMission()
                 if(beginnerMissionsDone)
                     Goto, EndOfRun
-                    
+
                 SelectPack("HGPack")
                 if(cantOpenMorePacks)
                     Goto, EndOfRun
                 PackOpening() ;12
                 if(cantOpenMorePacks || (!friendIDs && friendID = "" && accountOpenPacks >= maxAccountPackNum))
                     Goto, EndOfRun
-                
+
                 HourglassOpening(true) ;13
                 if(cantOpenMorePacks || (!friendIDs && friendID = "" && accountOpenPacks >= maxAccountPackNum))
                     Goto, EndOfRun
             }
-            
+
             HomeAndMission(1)
             SelectPack("HGPack")
             if(cantOpenMorePacks)
@@ -759,7 +753,7 @@ Loop {
             PackOpening() ;12
             if(cantOpenMorePacks || (!friendIDs && friendID = "" && accountOpenPacks >= maxAccountPackNum))
                 Goto, EndOfRun
-            
+
             HomeAndMission(1)
             SelectPack("HGPack")
             if(cantOpenMorePacks)
@@ -767,7 +761,7 @@ Loop {
             PackOpening() ;13
             if(cantOpenMorePacks || (!friendIDs && friendID = "" && accountOpenPacks >= maxAccountPackNum))
                 Goto, EndOfRun
-                
+
             beginnerMissionsDone := 1
             if(injectMethod && loadedAccount)
                 setMetaData()
@@ -786,7 +780,7 @@ Loop {
             if (injectMethod && loadedAccount)
                 setMetaData()
         }
-        
+
         ; Hourglass spending
         IniRead, spendHourGlass, %A_ScriptDir%\..\Settings.ini, UserSettings, spendHourGlass, 0
         if (spendHourGlass = 1 && !(deleteMethod = "Inject" && accountOpenPacks >= maxAccountPackNum || deleteMethod = "Inject Missions" && accountOpenPacks >= maxAccountPackNum)) {
@@ -797,7 +791,7 @@ Loop {
         if (injectMethod && friended && !keepAccount) {
             RemoveFriends()
         }
-        
+
         ; Collect Daily Hourglasses - either separate setting? or will be currently part of openExtraPack
         if(deleteMethod = "Inject for Reroll" && openExtraPack) {
             GoToMain(true)
@@ -811,8 +805,8 @@ Loop {
                 adbClick_wbb(143, 518)
                 if(FindOrLoseImage(120, 500, 155, 530, , "Social", 0, failSafeTime))
                     break
-                }
-                FindImageAndClick(226, 100, 270, 135, , "Add", 38, 460, 500)
+            }
+            FindImageAndClick(226, 100, 270, 135, , "Add", 38, 460, 500)
         }
 
         ; BallCity 2025.02.21 - Track monitor
@@ -848,38 +842,38 @@ Loop {
         }
 
         AppendToJsonFile(packsThisRun)
-		
-        ; Check for 40 first to quit	
+
+        ; Check for 40 first to quit
         if (deleteMethod = "Inject" || deleteMethod = "Inject Missions" && accountOpenPacks >= maxAccountPackNum) {
             if (injectMethod && loadedAccount) {
                 if (!keepAccount) {
-                    MarkAccountAsUsed() 
+                    MarkAccountAsUsed()
                 }
                 loadedAccount := false
                 continue
             }
-        }		
+        }
 
         if (injectMethod && loadedAccount) {
             ; For injection methods, mark the account as used
             if (!keepAccount) {
-            MarkAccountAsUsed()  ; Remove account from queue
-            if(verboseLogging)
-                LogToFile("Marked injected account as used: " . accountFileName)
+                MarkAccountAsUsed()  ; Remove account from queue
+                if(verboseLogging)
+                    LogToFile("Marked injected account as used: " . accountFileName)
             } else {
-            if(verboseLogging)
-                LogToFile("Keeping injected account: " . accountFileName)
+                if(verboseLogging)
+                    LogToFile("Keeping injected account: " . accountFileName)
             }
-            
+
             ; Reset loadedAccount so it will be loaded fresh next iteration
             loadedAccount := false
-            
+
         } else if (!injectMethod) {
             ; For non-injection methods, handle account deletion/saving
             if ((!injectMethod || !loadedAccount) && (!nukeAccount || keepAccount)) {
                 ; Save account for non-injection or when keeping account
                 saveAccount("All")
-                
+
                 beginnerMissionsDone := 0
                 soloBattleMissionDone := 0
                 intermediateMissionsDone := 0
@@ -935,7 +929,7 @@ HomeAndMission(homeonly := 0, completeSecondMisson=false) {
         if(!homeonly){
             FindImageAndClick(191, 393, 211, 411, , "Shop", 142, 488, 500)
             FindImageAndClick(180, 498, 190, 508, , "Mission_dino1", 261, 478, 1000)
-            
+
             wonderpicked := 0
             failSafe := A_TickCount
             failSafeTime := 0
@@ -943,7 +937,7 @@ HomeAndMission(homeonly := 0, completeSecondMisson=false) {
                 Delay(1)
                 ; ADD LEVEL UP CHECK HERE
                 LevelUp()
-                
+
                 if (completeSecondMisson){
                     adbClick_wbb(150, 390)
                 }
@@ -951,29 +945,29 @@ HomeAndMission(homeonly := 0, completeSecondMisson=false) {
                     adbClick_wbb(150, 286)
                 }
                 Delay(1)
-                
+
                 if(FindOrLoseImage(136, 158, 156, 190, , "Mission_dino2", 0, failSafeTime))
                     break
-                
+
                 if(FindOrLoseImage(108, 180, 177, 208, , "1solobattlemission", 0, failSafeTime)) {
                     beginnerMissionsDone := 1
                     if(injectMethod && loadedAccount)
                         setMetaData()
                     return
-                }  
-                
+                }
+
                 if (FindOrLoseImage(150, 159, 176, 206, , "missionwonder", 0, failSafeTime)){
                     adbClick_wbb(141, 396) ; click try it and go to wonderpick page
                     DoWonderPickOnly()
                     wonderpicked := 1
                     break
                 }
-                
+
                 failSafeTime := (A_TickCount - failSafe) // 1000
             }
             if(!wonderpicked)
                 break
-        } else 
+        } else
             break
     }
 
@@ -983,7 +977,7 @@ HomeAndMission(homeonly := 0, completeSecondMisson=false) {
         Delay(1)
         ; ADD LEVEL UP CHECK HERE TOO
         LevelUp()
-        
+
         adbClick_wbb(139, 424) ;clicks complete mission
         Delay(1)
         clickButton := FindOrLoseImage(145, 447, 258, 480, 80, "Button", 0, failSafeTime)
@@ -1005,19 +999,19 @@ HomeAndMission(homeonly := 0, completeSecondMisson=false) {
 clearMissionCache() {
     adbShell.StdIn.WriteLine("rm /data/data/jp.pokemon.pokemontcgp/files/UserPreferences/v1/MissionUserPrefs")
     waitadb()
-	Sleep, 500
-	;TODO delete all user preferences?
+    Sleep, 500
+    ;TODO delete all user preferences?
 }
 
 RemoveFriends() {
     global friendIDs, friended, friendID, packsInPool
-	friendIDs := ReadFile("ids")
+    friendIDs := ReadFile("ids")
 
     if(!friendIDs && friendID = "") {
         friended := false
         return false
     }
-    
+
     packsInPool := 0 ; if friends are removed, clear the pool
 
     CreateStatusMessage("Starting friend removal process...",,,, false)
@@ -1055,7 +1049,7 @@ RemoveFriends() {
         failSafeTime := (A_TickCount - failSafe) // 1000
         CreateStatusMessage("Waiting for Social`n(" . failSafeTime . "/90 seconds)")
     }
-    
+
     FindImageAndClick(226, 100, 270, 135, , "Add", 38, 460)
     FindImageAndClick(97, 452, 104, 476, 10, "requests", 174, 467)
     failSafe := A_TickCount
@@ -1090,7 +1084,7 @@ RemoveFriends() {
                     break
                 }
             }
-            else if(FindOrLoseImage(70, 395, 100, 420, , "Send2", 0, failSafeTime)) 
+            else if(FindOrLoseImage(70, 395, 100, 420, , "Send2", 0, failSafeTime))
                 break
             failSafeTime := (A_TickCount - failSafe) // 1000
             CreateStatusMessage("Waiting for Accepted2`n(" . failSafeTime . "/45 seconds)")
@@ -1108,7 +1102,7 @@ RemoveFriends() {
 
     ; Exit friend removal process
     CreateStatusMessage("Friend removal completed. Processed " . friendsProcessed . " friends. Returning to main...",,,, false)
-	IniWrite, 0, %A_ScriptDir%\%scriptName%.ini, UserSettings, DeadCheck
+    IniWrite, 0, %A_ScriptDir%\%scriptName%.ini, UserSettings, DeadCheck
     friended := false
     CreateStatusMessage("Friends removed successfully!",,,, false)
 
@@ -1123,11 +1117,11 @@ TradeTutorial() {
         Loop{
             adbClick_wbb(167,437)
             Delay(1)
-            if(FindOrLoseImage(15, 455, 40, 475, ,"Add2", 0))          
+            if(FindOrLoseImage(15, 455, 40, 475, ,"Add2", 0))
                 break
             if(FindOrLoseImage(226, 100, 270, 135, ,"Add", 0))
-            break
-	        adbClick_wbb(38,460)
+                break
+            adbClick_wbb(38,460)
             Delay(1)
         }
 
@@ -1140,8 +1134,8 @@ AddFriends(renew := false, getFC := false) {
     global FriendID, friendIds, waitTime, friendCode, scriptName, friended
     friendIDs := ReadFile("ids")
     friended := true
-	if(!getFC && !friendIDs && friendID = "")
-		return false
+    if(!getFC && !friendIDs && friendID = "")
+        return false
 
     failSafe := A_TickCount
     failSafeTime := 0
@@ -1204,7 +1198,7 @@ AddFriends(renew := false, getFC := false) {
     if(!friendIDs)
         friendIDs := [friendID]  ; Use an array to hold the single friend ID
     FindImageAndClick(0, 475, 25, 495, , "OK2", 138, 454)
-    
+
     ;randomize friend id list to not back up mains if running in groups since they'll be sent in a random order.
     n := friendIDs.MaxIndex()
     Loop % n
@@ -1264,9 +1258,9 @@ AddFriends(renew := false, getFC := false) {
             EraseInput(index, n)
         }
     }
-    
+
     FindImageAndClick(120, 500, 155, 530, , "Social", 143, 518, 500)
-    
+
     FindImageAndClick(20, 500, 55, 530, , "Home", 40, 516, 500)
 
     Loop %waitTime% {
@@ -1277,28 +1271,28 @@ AddFriends(renew := false, getFC := false) {
 }
 
 showcaseLikes() {
-	; Liking showcase script
+    ; Liking showcase script
     FindImageAndClick(174, 464, 189, 479, , "CommunityShowcase", 75, 410, 200)
-	Loop, Read, %A_ScriptDir%\..\showcase_ids.txt
-		{
-			showcaseID := Trim(A_LoopReadLine)        
-			FindImageAndClick(215, 252, 240, 277, , "FriendIDSearch", 224, 472, 200)
-			FindImageAndClick(157, 498, 225, 522, , "ShowcaseInput", 143, 273, 200)
-			Delay(3)
-			adbInput(showcaseID)					; Pasting ID
-			Delay(1)
-			adbClick(212, 384)						; Pressing OK
-			FindImageAndClick(98, 187, 125, 214, ,"ShowcaseLiked", 175, 200, 200)
-			FindImageAndClick(174, 464, 189, 479, , "CommunityShowcase", 140, 495, 200)
-		}
+    Loop, Read, %A_ScriptDir%\..\showcase_ids.txt
+    {
+        showcaseID := Trim(A_LoopReadLine)
+        FindImageAndClick(215, 252, 240, 277, , "FriendIDSearch", 224, 472, 200)
+        FindImageAndClick(157, 498, 225, 522, , "ShowcaseInput", 143, 273, 200)
+        Delay(3)
+        adbInput(showcaseID)					; Pasting ID
+        Delay(1)
+        adbClick(212, 384)						; Pressing OK
+        FindImageAndClick(98, 187, 125, 214, ,"ShowcaseLiked", 175, 200, 200)
+        FindImageAndClick(174, 464, 189, 479, , "CommunityShowcase", 140, 495, 200)
+    }
 }
 
 EraseInput(num := 0, total := 0) {
     global Delay
-    
+
     if(num)
         CreateStatusMessage("Removing friend ID " . num . "/" . total,,,, false)
-    
+
     failSafe := A_TickCount
     failSafeTime := 0
 
@@ -1330,7 +1324,6 @@ FindOrLoseImage(X1, Y1, X2, Y2, searchVariation := "", imageName := "DEFAULT", E
         lastStatusTime := A_TickCount
         CreateStatusMessage("Finding " . imageName . "...")
     }
-
 
     pBitmap := from_window(WinExist(winTitle))
     Path = %imagePath%%imageName%.png
@@ -1414,7 +1407,7 @@ FindOrLoseImage(X1, Y1, X2, Y2, searchVariation := "", imageName := "DEFAULT", E
     if(imageName = "Points" || imageName = "Home") { ;look for level up ok "button"
         LevelUp()
     }
-	;country for new accounts, social for inject with friend id, points for inject without friend id
+    ;country for new accounts, social for inject with friend id, points for inject without friend id
     if(imageName = "Country" || imageName = "Social" || imageName = "Points")
         FSTime := 90
     else
@@ -1556,8 +1549,8 @@ FindImageAndClick(X1, Y1, X2, Y2, searchVariation := "", imageName := "DEFAULT",
             }
             if (ElapsedTime >= FSTime || safeTime >= FSTime) {
                 CreateStatusMessage("Instance " . scriptName . " has been stuck for 90s. Killing it...")
-					if (injectMethod)
-						RemoveFriends()
+                if (injectMethod)
+                    RemoveFriends()
                 restartGameInstance("Stuck at " . imageName . "...") ; change to reset the instance and delete data then reload script
                 StartSkipTime := A_TickCount
                 failSafe := A_TickCount
@@ -1610,28 +1603,28 @@ FindImageAndClick(X1, Y1, X2, Y2, searchVariation := "", imageName := "DEFAULT",
                 Delay(1)
             }
         }
-		if(imageName = "Skip2" || imageName = "Pack" || imageName = "Hourglass2") {
-			Path = %imagePath%notenoughitems.png
+        if(imageName = "Skip2" || imageName = "Pack" || imageName = "Hourglass2") {
+            Path = %imagePath%notenoughitems.png
             pNeedle := GetNeedle(Path)
             vRet := Gdip_ImageSearch_wbb(pBitmap, pNeedle, vPosXY, 92, 299, 115, 317, 0)
-			if(vRet = 1) {
-				cantOpenMorePacks := 1
-				return 0
-				;restartGameInstance("Not Enough Items")
-			}
-		}
-		if(imageName = "Mission_dino2") {
-			Path = %imagePath%1solobattlemission.png
+            if(vRet = 1) {
+                cantOpenMorePacks := 1
+                return 0
+                ;restartGameInstance("Not Enough Items")
+            }
+        }
+        if(imageName = "Mission_dino2") {
+            Path = %imagePath%1solobattlemission.png
             pNeedle := GetNeedle(Path)
             vRet := Gdip_ImageSearch_wbb(pBitmap, pNeedle, vPosXY, 108, 180, 177, 208, 0)
-			if(vRet = 1) {
-				beginnerMissionsDone := 1
-				if(injectMethod && loadedAccount)
-					setMetaData()
-				return
-				;restartGameInstance("beginner missions done except solo battle")
-			}
-		}
+            if(vRet = 1) {
+                beginnerMissionsDone := 1
+                if(injectMethod && loadedAccount)
+                    setMetaData()
+                return
+                ;restartGameInstance("beginner missions done except solo battle")
+            }
+        }
 
         Gdip_DisposeImage(pBitmap)
         if(imageName = "Points" || imageName = "Home") { ;look for level up ok "button"
@@ -1676,54 +1669,54 @@ LevelUp() {
 
 resetWindows() {
     global Columns, winTitle, SelectedMonitorIndex, scaleParam, defaultLanguage, rowGap
-    
+
     ; Simply call our direct positioning function
     DirectlyPositionWindow()
-    
+
     return true
 }
 
 DirectlyPositionWindow() {
     global Columns, runMain, Mains, scaleParam, winTitle, SelectedMonitorIndex, rowGap
-    
+
     ; Make sure rowGap is defined
     if (!rowGap)
         rowGap := 100
-        
+
     ; Get monitor information
     SelectedMonitorIndex := RegExReplace(SelectedMonitorIndex, ":.*$")
     SysGet, Monitor, Monitor, %SelectedMonitorIndex%
-    
+
     ; Calculate position based on instance number
     Title := winTitle
-    
+
     if (runMain) {
         instanceIndex := (Mains - 1) + Title + 1
     } else {
         instanceIndex := Title
     }
-    
+
     rowHeight := 533
     currentRow := Floor((instanceIndex - 1) / Columns)
-    
+
     ; Calculate absolute coordinates with MonitorTop/Left
     y := MonitorTop + (currentRow * rowHeight) + (currentRow * rowGap)
     x := MonitorLeft + (Mod((instanceIndex - 1), Columns) * scaleParam)
-    
+
     ; Position window directly without any additional checks
     WinSet, Style, -0xC00000, %Title% ; Remove title bar temporarily
     WinMove, %Title%, , %x%, %y%, %scaleParam%, 537
     WinSet, Style, +0xC00000, %Title% ; Restore title bar
     WinSet, Redraw, , %Title% ; Force redraw
-    
+
     CreateStatusMessage("Positioned window at x:" . x . " y:" . y,,,, false)
-    
+
     return true
 }
 restartGameInstance(reason, RL := true) {
     global friended, scriptName, packsThisRun, injectMethod, loadedAccount, DeadCheck, starCount, packsInPool, openPack, invalid, accountFile, username, stopToggle
-	
-	;Screenshot("restartGameInstance")
+
+    ;Screenshot("restartGameInstance")
 
     if (Debug)
         CreateStatusMessage("Restarting game reason:`n" . reason)
@@ -1736,7 +1729,7 @@ restartGameInstance(reason, RL := true) {
         LogToFile("Restarted game for instance " . scriptName . ". Reason: " reason, "Restart.txt")
         IniWrite, 0, %A_ScriptDir%\%scriptName%.ini, UserSettings, DeadCheck
         AppendToJsonFile(packsThisRun)
-        
+
         if (stopToggle) {
             CreateStatusMessage("Stopping...",,,, false)
             ;TODO force stop, remove account
@@ -1759,9 +1752,9 @@ restartGameInstance(reason, RL := true) {
         Sleep, 5000
         ;MsgBox, 4
         if (RL) {
-            
+
             AppendToJsonFile(packsThisRun)
-            ;if(!injectMethod || !loadedAccount) 
+            ;if(!injectMethod || !loadedAccount)
             if(!injectMethod) {
                 if (menuDeleteStart()) {
                     IniWrite, 0, %A_ScriptDir%\%scriptName%.ini, UserSettings, DeadCheck
@@ -1778,7 +1771,7 @@ restartGameInstance(reason, RL := true) {
                 ;TODO force stop, remove account
                 ExitApp
             }
-            
+
             Reload
         }
 
@@ -1923,22 +1916,21 @@ menuDeleteStart() {
         CreateStatusMessage("Waiting for Country/Menu`n(" . failSafeTime . "/45 seconds)")
     }
     if(loadedAccount) {
-    ;    FileDelete, %loadedAccount%
+        ;    FileDelete, %loadedAccount%
     }
 }
 
 CheckPack() {
     ; Update pack count.
-	accountOpenPacks += 1
-	if (injectMethod && loadedAccount)
-		UpdateAccount()
-		
-	
+    accountOpenPacks += 1
+    if (injectMethod && loadedAccount)
+        UpdateAccount()
+
     packsInPool += 1
     packsThisRun += 1
-		
-	if(!friendIDs && friendID = "" && !s4tEnabled && !ImmersiveCheck && !CrownCheck && !ShinyCheck)
-		return false
+
+    if(!friendIDs && friendID = "" && !s4tEnabled && !ImmersiveCheck && !CrownCheck && !ShinyCheck)
+        return false
 
     ; Wait for cards to render before checking.
     Loop {
@@ -1958,9 +1950,9 @@ CheckPack() {
 
     if (foundInvalid) {
         ; Pack is invalid...
-		foundInvalidGP := FindGodPack(true) ; GP is never ignored
+        foundInvalidGP := FindGodPack(true) ; GP is never ignored
         if (!foundInvalidGP && !InvalidCheck) {
-			; If not a GP and not "ignore invalid packs" , check what cards the current pack contains which make it invalid, and if user want to save them.
+            ; If not a GP and not "ignore invalid packs" , check what cards the current pack contains which make it invalid, and if user want to save them.
             if (ShinyCheck && foundShiny && !foundLabel)
                 foundLabel := "Shiny"
             if (ImmersiveCheck && foundImmersive && !foundLabel)
@@ -1986,8 +1978,8 @@ CheckPack() {
     if (foundGP) {
         if (loadedAccount) {
             ;accountFoundGP()
-            accountHasPackInTesting := 1 
-            setMetaData()               
+            accountHasPackInTesting := 1
+            setMetaData()
             IniWrite, 0, %A_ScriptDir%\%scriptName%.ini, UserSettings, DeadCheck
         }
 
@@ -2011,20 +2003,20 @@ CheckPack() {
                 foundLabel := "Double two star"
         }
         if (TrainerCheck && !foundLabel) {
-			if(!PseudoGodPack)
-				foundTrainer := FindBorders("trainer")
+            if(!PseudoGodPack)
+                foundTrainer := FindBorders("trainer")
             if (foundTrainer)
                 foundLabel := "Trainer"
         }
         if (RainbowCheck && !foundLabel) {
             if(!PseudoGodPack)
-				foundRainbow := FindBorders("rainbow")
+                foundRainbow := FindBorders("rainbow")
             if (foundRainbow)
                 foundLabel := "Rainbow"
         }
         if (FullArtCheck && !foundLabel) {
             if(!PseudoGodPack)
-				foundFullArt := FindBorders("fullart")
+                foundFullArt := FindBorders("fullart")
             if (foundFullArt)
                 foundLabel := "Full Art"
         }
@@ -2151,7 +2143,6 @@ FoundTradeable(found3Dmnd := 0, found4Dmnd := 0, found1Star := 0, foundGimmighou
     if (friendCode)
         statusMessage .= " (" . friendCode . ")"
 
-
     if (!s4tWP || (s4tWP && foundTradeable < s4tWPMinCards)) {
         CreateStatusMessage("Tradeable cards found! Continuing...",,,, false)
 
@@ -2177,7 +2168,7 @@ FoundTradeable(found3Dmnd := 0, found4Dmnd := 0, found1Star := 0, foundGimmighou
             ; Region: x32, y120, 175x26
             playerName := ""
             if(RefinedOCRText(fcScreenshot, 32, 120, 175, 26, "", "", playerName)) {
-            username := playerName
+                username := playerName
             }
         }
     } catch e {
@@ -2227,8 +2218,8 @@ FoundStars(star) {
             if (injectMethod && IsFunc("ocr")) {
                 ; Region: x32, y120, 175x26
                 playerName := ""
-               if(RefinedOCRText(fcScreenshot, 32, 120, 175, 26, "", "", playerName)) {
-                username := playerName
+                if(RefinedOCRText(fcScreenshot, 32, 120, 175, 26, "", "", playerName)) {
+                    username := playerName
                 }
             }
         } catch e {
@@ -2244,12 +2235,11 @@ FoundStars(star) {
     if (friendCode)
         statusMessage .= " (" . friendCode . ")"
 
-
     logMessage := statusMessage . " in instance: " . scriptName . " (" . packsInPool . " packs, " . openPack . ")\nFile name: " . accountFile . "\nBacking up to the Accounts\\SpecificCards folder and continuing..."
     LogToDiscord(logMessage, screenShot, true, (sendAccountXml ? accountFullPath : ""), fcScreenshot)
     LogToFile(StrReplace(logMessage, "\n", " "), "GPlog.txt")
     ;if(star != "Crown" && star != "Immersive" && star != "Shiny")
-        ;ChooseTag()
+    ;ChooseTag()
 }
 
 FindBorders(prefix) {
@@ -2262,25 +2252,25 @@ FindBorders(prefix) {
         ,[155, 399, 208, 401]]
     if (prefix = "shiny1star" || prefix = "shiny2star") {
         borderCoords := [[90, 261, 93, 283]
-        ,[173, 261, 176, 283]
-        ,[255, 261, 258, 283]
-        ,[130, 376, 133, 398]
-        ,[215, 376, 218, 398]]
+            ,[173, 261, 176, 283]
+            ,[255, 261, 258, 283]
+            ,[130, 376, 133, 398]
+            ,[215, 376, 218, 398]]
     }
     ; 100% scale changes
     if (scaleParam = 287) {
         if (prefix = "shiny1star" || prefix = "shiny2star") {
             borderCoords := [[91, 253, 95, 278]
-            ,[175, 253, 179, 278]
-            ,[259, 253, 263, 278]
-            ,[132, 370, 136, 395]
-            ,[218, 371, 222, 394]]
+                ,[175, 253, 179, 278]
+                ,[259, 253, 263, 278]
+                ,[132, 370, 136, 395]
+                ,[218, 371, 222, 394]]
         } else {
             borderCoords := [[26, 278, 84, 280]
-            ,[110, 278, 168, 280]
-            ,[194, 278, 252, 280]
-            ,[67, 395, 125, 397]
-            ,[153, 395, 211, 397]]
+                ,[110, 278, 168, 280]
+                ,[194, 278, 252, 280]
+                ,[67, 395, 125, 397]
+                ,[153, 395, 211, 397]]
         }
     }
     pBitmap := from_window(WinExist(winTitle))
@@ -2399,7 +2389,7 @@ GodPackFound(validity) {
             ; Region: x32, y120, 175x26
             playerName := ""
             if(RefinedOCRText(fcScreenshot, 32, 120, 175, 26, "", "", playerName)) {
-            username := playerName
+                username := playerName
             }
         }
     } catch e {
@@ -2425,7 +2415,7 @@ loadAccount() {
     soloBattleMissionDone := 0
     intermediateMissionsDone := 0
     specialMissionsDone := 0
-    accountHasPackInTesting := 0 
+    accountHasPackInTesting := 0
     resetSpecialMissionsDone := 0
 
     if (stopToggle) {
@@ -2437,38 +2427,38 @@ loadAccount() {
 
     saveDir := A_ScriptDir "\..\Accounts\Saved\" . winTitle
     outputTxt := saveDir . "\list_current.txt"
-    
+
     accountFileName := ""
     accountOpenPacks := 0
     accountFileNameTmp := ""
     accountFileNameOrig := ""
     accountHasPackInfo := 0
     currentLoadedAccountIndex := 0
-    
+
     if FileExist(outputTxt) {
         cycle := 0
         Loop {
             FileRead, fileContent, %outputTxt%
             fileLines := StrSplit(fileContent, "`n", "`r")
-                
+
             if (fileLines.MaxIndex() >= 1) {
                 CreateStatusMessage("Loading first available account from list: " . cycle . " attempts")
                 loadFile := ""
                 foundValidAccount := false
                 foundIndex := 0
-                
+
                 Loop, % fileLines.MaxIndex() {
                     currentFile := fileLines[A_Index]
                     if (StrLen(currentFile) < 5)
                         continue
-                        
+
                     testFile := saveDir . "\" . currentFile
                     if (!FileExist(testFile))
                         continue
-                        
+
                     if (!InStr(currentFile, "xml"))
                         continue
-                    
+
                     loadFile := testFile
                     accountFileName := currentFile
                     foundValidAccount := true
@@ -2477,28 +2467,28 @@ loadAccount() {
                     break
                 }
 
-				if(InStr(fileLines[1], "T")) {
-					; account has a pack under test
-					
-				}
-				if (accountModifiedTimeDiff >= 24){
-					if(!InStr(fileLines[1], "T") || accountModifiedTimeDiff >= 5*24) {
-						; otherwise account has a pack under test
-						accountFileName := fileLines[1]
-						break
-					}
-				}
-                
+                if(InStr(fileLines[1], "T")) {
+                    ; account has a pack under test
+
+                }
+                if (accountModifiedTimeDiff >= 24){
+                    if(!InStr(fileLines[1], "T") || accountModifiedTimeDiff >= 5*24) {
+                        ; otherwise account has a pack under test
+                        accountFileName := fileLines[1]
+                        break
+                    }
+                }
+
                 if (foundValidAccount)
                     break
-                    
+
                 cycle++
-                
+
                 if (cycle > 5) {  ; Reduced from 10 to 5 for faster failure
                     LogToFile("No valid accounts found in list_current.txt after " . cycle . " attempts")
                     return false
                 }
-                
+
                 ; Reduced delay between attempts
                 Sleep, 500  ; Reduced from Delay(1) which could be 250ms+
             } else {
@@ -2534,42 +2524,42 @@ loadAccount() {
     } else {
         accountFileNameOrig := accountFileName
     }
-    
+
     getMetaData()
-    
+
     return loadFile
 }
 
 ; NEW function to mark account as successfully used and remove from queue
 MarkAccountAsUsed() {
     global currentLoadedAccountIndex, accountFileName, winTitle
-    
+
     if (!currentLoadedAccountIndex || !accountFileName) {
         LogToFile("Warning: MarkAccountAsUsed called but no current account tracked")
         return
     }
-    
+
     saveDir := A_ScriptDir "\..\Accounts\Saved\" . winTitle
     outputTxt := saveDir . "\list_current.txt"
-    
+
     ; Remove the account from list_current.txt
     if FileExist(outputTxt) {
         FileRead, fileContent, %outputTxt%
         fileLines := StrSplit(fileContent, "`n", "`r")
-        
+
         newListContent := ""
         Loop, % fileLines.MaxIndex() {
             if (A_Index != currentLoadedAccountIndex)
                 newListContent .= fileLines[A_Index] "`r`n"
         }
-        
+
         FileDelete, %outputTxt%
         FileAppend, %newListContent%, %outputTxt%
     }
-    
+
     ; Track as used with timestamp
     TrackUsedAccount(accountFileName)
-    
+
     ; Reset tracking
     currentLoadedAccountIndex := 0
 }
@@ -2579,18 +2569,18 @@ saveAccount(file := "Valid", ByRef filePath := "", packDetails := "") {
     filePath := ""
 
     if (file = "All") {
-		metadata := ""
-		if(beginnerMissionsDone)
-			metadata .= "B"
-		if(soloBattleMissionDone)
-			metadata .= "S"
-		if(intermediateMissionsDone)
-			metadata .= "I"
-		if(specialMissionsDone)
-			metadata .= "X"
+        metadata := ""
+        if(beginnerMissionsDone)
+            metadata .= "B"
+        if(soloBattleMissionDone)
+            metadata .= "S"
+        if(intermediateMissionsDone)
+            metadata .= "I"
+        if(specialMissionsDone)
+            metadata .= "X"
         if(accountHasPackInTesting)
             metadata .= "T"
-			
+
         saveDir := A_ScriptDir "\..\Accounts\Saved\" . winTitle
         filePath := saveDir . "\" . accountOpenPacks . "P_" . A_Now . "_" . winTitle . "(" . metadata . ").xml"
     } else if (file = "Valid" || file = "Invalid") {
@@ -2599,7 +2589,7 @@ saveAccount(file := "Valid", ByRef filePath := "", packDetails := "") {
         filePath := saveDir . xmlFile
     } else if (file = "Tradeable") {
         saveDir := A_ScriptDir "\..\Accounts\Trades\"
-		;packsInPool doesn't make sense but nothing does, really.
+        ;packsInPool doesn't make sense but nothing does, really.
         xmlFile := A_Now . "_" . winTitle . (packDetails ? "_" . packDetails : "") . "_" . packsInPool . "_packs.xml"
         filePath := saveDir . xmlFile
     } else {
@@ -2647,7 +2637,7 @@ saveAccount(file := "Valid", ByRef filePath := "", packDetails := "") {
     now := A_NowUTC
     IniWrite, %now%, %A_ScriptDir%\%scriptName%.ini, Metrics, LastEndTimeUTC
     EnvSub, now, 1970, seconds
-    IniWrite, %now%, %A_ScriptDir%\%scriptName%.ini, Metrics, LastEndEpoch    
+    IniWrite, %now%, %A_ScriptDir%\%scriptName%.ini, Metrics, LastEndEpoch
 
     return xmlFile
 }
@@ -2657,7 +2647,7 @@ TrackUsedAccount(fileName) {
     global winTitle
     saveDir := A_ScriptDir "\..\Accounts\Saved\" . winTitle
     usedAccountsLog := saveDir . "\used_accounts.txt"
-    
+
     ; Append with timestamp only (no epoch needed)
     currentTime := A_Now
     FileAppend, % fileName . "|" . currentTime . "`n", %usedAccountsLog%
@@ -2668,37 +2658,37 @@ CleanupUsedAccounts() {
     global winTitle, verboseLogging
     saveDir := A_ScriptDir "\..\Accounts\Saved\" . winTitle
     usedAccountsLog := saveDir . "\used_accounts.txt"
-    
+
     if (!FileExist(usedAccountsLog)) {
         return
     }
-    
+
     ; Read current used accounts
     FileRead, usedAccountsContent, %usedAccountsLog%
     if (!usedAccountsContent) {
         return
     }
-    
+
     ; Calculate current time for comparison (24 hours ago instead of 48)
     cutoffTime := A_Now
     cutoffTime += -24, Hours  ; Reduced from 48 to 24 hours
-    
+
     ; Keep accounts used within last 24 hours
     cleanedContent := ""
     removedCount := 0
     keptCount := 0
-    
+
     ; Also check if the account files still exist
     Loop, Parse, usedAccountsContent, `n, `r
     {
         if (!A_LoopField)
             continue
-            
+
         parts := StrSplit(A_LoopField, "|")
         if (parts.Length() >= 2) {
             fileName := parts[1]
             timestamp := parts[2]
-            
+
             ; Check if account file still exists
             accountFilePath := saveDir . "\" . fileName
             if (!FileExist(accountFilePath)) {
@@ -2707,7 +2697,7 @@ CleanupUsedAccounts() {
                     LogToFile("Removed used account entry (file no longer exists): " . fileName)
                 continue
             }
-            
+
             ; Compare timestamps directly (YYYYMMDDHHMISS format)
             if (timestamp > cutoffTime) {
                 ; Account was used within last 24 hours, keep it
@@ -2721,13 +2711,13 @@ CleanupUsedAccounts() {
             }
         }
     }
-    
+
     ; Write cleaned content back
     FileDelete, %usedAccountsLog%
     if (cleanedContent) {
         FileAppend, %cleanedContent%, %usedAccountsLog%
     }
-    
+
     if(verboseLogging)
         LogToFile("Cleanup complete: Kept " . keptCount . " recent entries, removed " . removedCount . " stale entries")
 }
@@ -2735,11 +2725,11 @@ CleanupUsedAccounts() {
 UpdateAccount() {
     global accountOpenPacks, accountFileName, accountFileNameParts, accountFileNameOrig, ocrSuccess, winTitle
     global aminutes, aseconds, rerolls
-    
+
     accountOpenPacksStr := accountOpenPacks
     if(accountOpenPacks<10)
         accountOpenPacksStr := "0" . accountOpenPacks ; add a trailing 0 for sorting
-        
+
     if(InStr(accountFileName, "P_")){
         AccountName := StrSplit(accountFileName , "P_")
         accountFileNameParts := StrSplit(accountFileName, "P_")  ; Split at P
@@ -2748,8 +2738,8 @@ UpdateAccount() {
         AccountNewName := accountOpenPacksStr . "P_" . accountFileNameOrig
     else
         return ; if OCR is not successful, don't modify account file
-    
-    if(!InStr(accountFileName, "P") || accountOpenPacks > 0) {          
+
+    if(!InStr(accountFileName, "P") || accountOpenPacks > 0) {
         saveDir := A_ScriptDir "\..\Accounts\Saved\" . winTitle
         accountFile := saveDir . "\" . accountFileName
         accountNewFile := saveDir . "\" . AccountNewName
@@ -2757,7 +2747,7 @@ UpdateAccount() {
         FileSetTime,, %accountNewFile%
         accountFileName := AccountNewName
     }
-    
+
     ; Direct display of metrics rather than calling function
     CreateStatusMessage("Avg: " . aminutes . "m " . aseconds . "s | Runs: " . rerolls . " | Account Packs " . accountOpenPacks, "AvgRuns", 0, 605, false, true)
 }
@@ -2770,13 +2760,13 @@ ControlClick(X, Y) {
 DownloadFile(url, filename) {
     url := url  ; Change to your hosted .txt URL "https://pastebin.com/raw/vYxsiqSs"
     RegRead, proxyEnabled, HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Internet Settings, ProxyEnable
-	RegRead, proxyServer, HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Internet Settings, ProxyServer
+    RegRead, proxyServer, HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Internet Settings, ProxyServer
     localPath = %A_ScriptDir%\..\%filename% ; Change to the folder you want to save the file
     errored := false
     try {
         whr := ComObjCreate("WinHttp.WinHttpRequest.5.1")
         if (proxyEnabled)
-			whr.SetProxy(2, proxyServer)
+            whr.SetProxy(2, proxyServer)
         whr.Open("GET", url, true)
         whr.Send()
         whr.WaitForResponse()
@@ -2807,107 +2797,106 @@ ReadFile(filename, numbers := false) {
 }
 
 Screenshot_dev(fileType := "Dev",subDir := "") {
-	global adbShell, scriptName, ocrLanguage, loadDir
+    global adbShell, scriptName, ocrLanguage, loadDir
 
-	SetWorkingDir %A_ScriptDir%  ; Ensures the working directory is the script's directory
+    SetWorkingDir %A_ScriptDir%  ; Ensures the working directory is the script's directory
 
-	; Define folder and file paths
-	fileDir := A_ScriptDir "\..\Screenshots"
-	if !FileExist(fileDir)
-		FileCreateDir, %fileDir%
+    ; Define folder and file paths
+    fileDir := A_ScriptDir "\..\Screenshots"
+    if !FileExist(fileDir)
+        FileCreateDir, %fileDir%
     if (subDir) {
         fileDir .= "\" . subDir
     }
-	if !FileExist(fileDir)
-		FileCreateDir, %fileDir%
-		
-	; File path for saving the screenshot locally
+    if !FileExist(fileDir)
+        FileCreateDir, %fileDir%
+
+    ; File path for saving the screenshot locally
     fileName := A_Now . "_" . winTitle . "_" . fileType . ".png"
     filePath := fileDir "\" . fileName
 
-	pBitmapW := from_window(WinExist(winTitle))
-	Gdip_SaveBitmapToFile(pBitmapW, filePath) 
-	
-	sleep 100
-	
+    pBitmapW := from_window(WinExist(winTitle))
+    Gdip_SaveBitmapToFile(pBitmapW, filePath)
+
+    sleep 100
+
     try {
         OwnerWND := WinExist(winTitle)
         buttonWidth := 40
 
         Gui, DevMode_ss%winTitle%:New, +LastFound -DPIScale
-		Gui, DevMode_ss%winTitle%:Add, Picture, x0 y0 w275 h534, %filePath%
-		Gui, DevMode_ss%winTitle%:Show, w275 h534, Screensho %winTitle%
-		
-		sleep 100
-		msgbox click on top-left corner and bottom-right corners
-		
-		KeyWait, LButton, D
-		MouseGetPos , X1, Y1, OutputVarWin, OutputVarControl
-		KeyWait, LButton, U
-		Y1 -= 31
-		;MsgBox, The cursor is at X%X1% Y%Y1%.
-		
-		KeyWait, LButton, D
-		MouseGetPos , X2, Y2, OutputVarWin, OutputVarControl
-		KeyWait, LButton, U
-		Y2 -= 31
-		;MsgBox, The cursor is at X%X2% Y%Y2%.
-		
-		W:=X2-X1
-		H:=Y2-Y1
-		
-		pBitmap := Gdip_CloneBitmapArea(pBitmapW, X1, Y1, W, H)
-		
-		InputBox, fileName, ,"Enter the name of the needle to save"
-		
-		fileDir := A_ScriptDir . "\Scale125"
-		filePath := fileDir "\" . fileName . ".png"
-		Gdip_SaveBitmapToFile(pBitmap, filePath) 
-		
-		msgbox click on coordinate for adbClick
-		
-		KeyWait, LButton, D
-		MouseGetPos , X3, Y3, OutputVarWin, OutputVarControl
-		KeyWait, LButton, U
-		Y3 -= 31
-		
-		
-		MsgBox, 	
-		(LTrim
-			ctrl+C to copy: 
-			FindOrLoseImage(%X1%, %Y1%, %X2%, %Y2%, , "%fileName%", 0, failSafeTime)
+        Gui, DevMode_ss%winTitle%:Add, Picture, x0 y0 w275 h534, %filePath%
+        Gui, DevMode_ss%winTitle%:Show, w275 h534, Screensho %winTitle%
+
+        sleep 100
+        msgbox click on top-left corner and bottom-right corners
+
+        KeyWait, LButton, D
+        MouseGetPos , X1, Y1, OutputVarWin, OutputVarControl
+        KeyWait, LButton, U
+        Y1 -= 31
+        ;MsgBox, The cursor is at X%X1% Y%Y1%.
+
+        KeyWait, LButton, D
+        MouseGetPos , X2, Y2, OutputVarWin, OutputVarControl
+        KeyWait, LButton, U
+        Y2 -= 31
+        ;MsgBox, The cursor is at X%X2% Y%Y2%.
+
+        W:=X2-X1
+        H:=Y2-Y1
+
+        pBitmap := Gdip_CloneBitmapArea(pBitmapW, X1, Y1, W, H)
+
+        InputBox, fileName, ,"Enter the name of the needle to save"
+
+        fileDir := A_ScriptDir . "\Scale125"
+        filePath := fileDir "\" . fileName . ".png"
+        Gdip_SaveBitmapToFile(pBitmap, filePath)
+
+        msgbox click on coordinate for adbClick
+
+        KeyWait, LButton, D
+        MouseGetPos , X3, Y3, OutputVarWin, OutputVarControl
+        KeyWait, LButton, U
+        Y3 -= 31
+
+        MsgBox,
+        (LTrim
+            ctrl+C to copy:
+            FindOrLoseImage(%X1%, %Y1%, %X2%, %Y2%, , "%fileName%", 0, failSafeTime)
             FindImageAndClick(%X1%, %Y1%, %X2%, %Y2%, , "%fileName%", %X3%, %Y3%, sleepTime)
-			adbClick_wbb(%X3%, %Y3%)
-		)
+            adbClick_wbb(%X3%, %Y3%)
+        )
     }
     catch {
-            msgbox Failed to create screenshot GUI
-    }	
-	return filePath
+        msgbox Failed to create screenshot GUI
+    }
+    return filePath
 }
 
 Screenshot(fileType := "Valid", subDir := "", ByRef fileName := "") {
     global adbShell, adbPath, packs
     SetWorkingDir %A_ScriptDir%  ; Ensures the working directory is the script's directory
-		
+
     ; Define folder and file paths
     fileDir := A_ScriptDir "\..\Screenshots"
     if !FileExist(fileDir)
         FileCreateDir, fileDir
     if (subDir) {
         fileDir .= "\" . subDir
-		if !FileExist(fileDir)
-			FileCreateDir, fileDir
+        if !FileExist(fileDir)
+            FileCreateDir, fileDir
     }
-	if (filename = "PACKSTATS") {
+    if (filename = "PACKSTATS") {
         fileDir .= "\temp"
-		if !FileExist(fileDir)
-			FileCreateDir, fileDir
-	}
+        if !FileExist(fileDir)
+            FileCreateDir, fileDir
+    }
 
     ; File path for saving the screenshot locally
     fileName := A_Now . "_" . winTitle . "_" . fileType . "_" . packsInPool . "_packs.png"
-    if (filename = "PACKSTATS") 
+    if (filename = "PACKSTATS")
         fileName := "packstats_temp.png"
     filePath := fileDir "\" . fileName
 
@@ -2923,9 +2912,9 @@ Screenshot(fileType := "Valid", subDir := "", ByRef fileName := "") {
     ; Don't dispose pBitmap if it's a PACKSTATS screenshot
     if (filename != "PACKSTATS") {
         Gdip_DisposeImage(pBitmap)
-		return filePath
+        return filePath
     }
-    
+
     ; For PACKSTATS, return both values and delete temp file after OCR is done
     return {filepath: filePath, bitmap: pBitmap, deleteAfterUse: true}
 }
@@ -2950,7 +2939,7 @@ StopScript:
 return
 
 DevMode:
-	ToggleDevMode()
+    ToggleDevMode()
 return
 
 ShowStatusMessages:
@@ -3058,11 +3047,11 @@ from_window(ByRef image) {
 ; ===== TIMER FUNCTIONS =====
 RefreshAccountLists:
     createAccountList(scriptName)
-    Return
+Return
 
 CleanupUsedAccountsTimer:
     CleanupUsedAccounts()
-    Return
+Return
 
 ; ===== HOTKEYS =====
 ~+F5::Reload
@@ -3073,7 +3062,7 @@ CleanupUsedAccountsTimer:
 ;~F9::restartGameInstance("F9")
 
 ToggleDevMode() {
-	
+
     try {
         OwnerWND := WinExist(winTitle)
         x4 := x + 5
@@ -3083,21 +3072,21 @@ ToggleDevMode() {
         Gui, DevMode%winTitle%:New, +LastFound
         Gui, DevMode%winTitle%:Font, s5 cGray Norm Bold, Segoe UI  ; Normal font for input labels
         Gui, DevMode%winTitle%:Add, Button, % "x" . (buttonWidth * 0) . " y0 w" . buttonWidth . " h25 gbboxScript", bound box
-		
-		Gui, DevMode%winTitle%:Add, Button, % "x" . (buttonWidth * 1) . " y0 w" . buttonWidth . " h25 gbboxNpauseScript", bbox pause
-		
-		Gui, DevMode%winTitle%:Add, Button, % "x" . (buttonWidth * 2) . " y0 w" . buttonWidth . " h25 gscreenshotscript", screen grab
-		
-		Gui, DevMode%winTitle%:Show, w250 h100, Dev Mode %winTitle%
-		
+
+        Gui, DevMode%winTitle%:Add, Button, % "x" . (buttonWidth * 1) . " y0 w" . buttonWidth . " h25 gbboxNpauseScript", bbox pause
+
+        Gui, DevMode%winTitle%:Add, Button, % "x" . (buttonWidth * 2) . " y0 w" . buttonWidth . " h25 gscreenshotscript", screen grab
+
+        Gui, DevMode%winTitle%:Show, w250 h100, Dev Mode %winTitle%
+
     }
     catch {
-            CreateStatusMessage("Failed to create button GUI.",,,, false)
-    }	
+        CreateStatusMessage("Failed to create button GUI.",,,, false)
+    }
 }
 
 screenshotscript:
-	Screenshot_dev()
+    Screenshot_dev()
 return
 
 bboxScript:
@@ -3105,7 +3094,7 @@ bboxScript:
 return
 
 ToggleBBox() {
-	dbg_bbox := !dbg_bbox
+    dbg_bbox := !dbg_bbox
 }
 
 bboxNpauseScript:
@@ -3113,7 +3102,7 @@ bboxNpauseScript:
 return
 
 TogglebboxNpause() {
-	dbg_bboxNpause := !dbg_bboxNpause
+    dbg_bboxNpause := !dbg_bboxNpause
 }
 
 dbg_bbox :=0
@@ -3129,7 +3118,7 @@ ToggleStatusMessages() {
 }
 
 bboxDraw(X1, Y1, X2, Y2, color) {
-	WinGetPos, xwin, ywin, Width, Height, %winTitle%
+    WinGetPos, xwin, ywin, Width, Height, %winTitle%
     BoxWidth := X2-X1
     BoxHeight := Y2-Y1
     ; Create a GUI
@@ -3139,32 +3128,31 @@ bboxDraw(X1, Y1, X2, Y2, color) {
     WinSet, TransColor, 123456 ; Makes that specific color transparent in the gui
 
     ; Create the borders and show
-	Gui, BoundingBox%winTitle%:Add, Progress, x0 y0 w%BoxWidth% h2 %color%
-	Gui, BoundingBox%winTitle%:Add, Progress, x0 y0 w2 h%BoxHeight% %color%
-	Gui, BoundingBox%winTitle%:Add, Progress, x%BoxWidth% y0 w2 h%BoxHeight% %color%
-	Gui, BoundingBox%winTitle%:Add, Progress, x0 y%BoxHeight% w%BoxWidth% h2 %color%
-	
-	xshow := X1+xwin
-	yshow := Y1+ywin
-	Gui, BoundingBox%winTitle%:Show, x%xshow% y%yshow% NoActivate
+    Gui, BoundingBox%winTitle%:Add, Progress, x0 y0 w%BoxWidth% h2 %color%
+    Gui, BoundingBox%winTitle%:Add, Progress, x0 y0 w2 h%BoxHeight% %color%
+    Gui, BoundingBox%winTitle%:Add, Progress, x%BoxWidth% y0 w2 h%BoxHeight% %color%
+    Gui, BoundingBox%winTitle%:Add, Progress, x0 y%BoxHeight% w%BoxWidth% h2 %color%
+
+    xshow := X1+xwin
+    yshow := Y1+ywin
+    Gui, BoundingBox%winTitle%:Show, x%xshow% y%yshow% NoActivate
     Sleep, 100
 
 }
 
-
 bboxDraw2(X1, Y1, X2, Y2, color) {
-	WinGetPos, xwin, ywin, Width, Height, %winTitle%
+    WinGetPos, xwin, ywin, Width, Height, %winTitle%
     BoxWidth := 10
     BoxHeight := 10
-	Xm1:=X1-(BoxWidth/2)
-	Xm2:=X2-(BoxWidth/2)
-	Ym1:=Y1-(BoxWidth/2)
-	Ym2:=Y2-(BoxWidth/2)
-	Xh1:=Xm1+BoxWidth
-	Xh2:=Xm2+BoxWidth
-	Yh1:=Ym1+BoxHeight
-	Yh2:=Ym2+BoxHeight
-	
+    Xm1:=X1-(BoxWidth/2)
+    Xm2:=X2-(BoxWidth/2)
+    Ym1:=Y1-(BoxWidth/2)
+    Ym2:=Y2-(BoxWidth/2)
+    Xh1:=Xm1+BoxWidth
+    Xh2:=Xm2+BoxWidth
+    Yh1:=Ym1+BoxHeight
+    Yh2:=Ym2+BoxHeight
+
     ; Create a GUI
     Gui, BoundingBox%winTitle%:+AlwaysOnTop +ToolWindow -Caption +E0x20
     Gui, BoundingBox%winTitle%:Color, 123456
@@ -3172,69 +3160,69 @@ bboxDraw2(X1, Y1, X2, Y2, color) {
     WinSet, TransColor, 123456 ; Makes that specific color transparent in the gui
 
     ; Create the borders and show
-	Gui, BoundingBox%winTitle%:Add, Progress, x%Xm1% y%Ym1% w%BoxWidth% h2 %color%
-	Gui, BoundingBox%winTitle%:Add, Progress, x%Xm1% y%Ym1% w2 h%BoxHeight% %color%
-	Gui, BoundingBox%winTitle%:Add, Progress, x%Xh1% y%Ym1% w2 h%BoxHeight% %color%
-	Gui, BoundingBox%winTitle%:Add, Progress, x%Xm1% y%Yh1% w%BoxWidth% h2 %color%
-	
+    Gui, BoundingBox%winTitle%:Add, Progress, x%Xm1% y%Ym1% w%BoxWidth% h2 %color%
+    Gui, BoundingBox%winTitle%:Add, Progress, x%Xm1% y%Ym1% w2 h%BoxHeight% %color%
+    Gui, BoundingBox%winTitle%:Add, Progress, x%Xh1% y%Ym1% w2 h%BoxHeight% %color%
+    Gui, BoundingBox%winTitle%:Add, Progress, x%Xm1% y%Yh1% w%BoxWidth% h2 %color%
+
     ; Create the borders and show
-	Gui, BoundingBox%winTitle%:Add, Progress, x%Xm2% y%Ym2% w%BoxWidth% h2 %color%
-	Gui, BoundingBox%winTitle%:Add, Progress, x%Xm2% y%Ym2% w2 h%BoxHeight% %color%
-	Gui, BoundingBox%winTitle%:Add, Progress, x%Xh2% y%Ym2% w2 h%BoxHeight% %color%
-	Gui, BoundingBox%winTitle%:Add, Progress, x%Xm2% y%Yh2% w%BoxWidth% h2 %color%
-	
-	xshow := xwin
-	yshow := ywin
-	Gui, BoundingBox%winTitle%:Show, x%xshow% y%yshow% NoActivate
+    Gui, BoundingBox%winTitle%:Add, Progress, x%Xm2% y%Ym2% w%BoxWidth% h2 %color%
+    Gui, BoundingBox%winTitle%:Add, Progress, x%Xm2% y%Ym2% w2 h%BoxHeight% %color%
+    Gui, BoundingBox%winTitle%:Add, Progress, x%Xh2% y%Ym2% w2 h%BoxHeight% %color%
+    Gui, BoundingBox%winTitle%:Add, Progress, x%Xm2% y%Yh2% w%BoxWidth% h2 %color%
+
+    xshow := xwin
+    yshow := ywin
+    Gui, BoundingBox%winTitle%:Show, x%xshow% y%yshow% NoActivate
     Sleep, 100
 
 }
 
 adbSwipe_wbb(params) {
-	if(dbg_bbox)
-		bboxAndPause_swipe(params, dbg_bboxNpause)
+    if(dbg_bbox)
+        bboxAndPause_swipe(params, dbg_bboxNpause)
     adbSwipe(params)
 }
 
 bboxAndPause_swipe(params, doPause := False) {
-	paramsplit := StrSplit(params , " ")
-	X1:=round(paramsplit[1] / 535 * 277)
-	Y1:=round((paramsplit[2] / 960 * 489) + 44)
-	X2:=round(paramsplit[3] / 535 * 277)
-	Y2:=round((paramsplit[4] / 960 * 489) + 44)
-	speed:=paramsplit[5]
-	CreateStatusMessage("Swiping (" . X1 . "," . Y1 . ") to (" . X2 . "," . Y2 . ") speed " . speed,,,, false)
-	
-	color := "BackgroundYellow"
-	
-	;bboxDraw2(X1, Y1, X2, Y2, color)
-	
-	bboxDraw(X1-5, Y1-5, X1+5, Y1+5, color)
+    paramsplit := StrSplit(params , " ")
+    X1:=round(paramsplit[1] / 535 * 277)
+    Y1:=round((paramsplit[2] / 960 * 489) + 44)
+    X2:=round(paramsplit[3] / 535 * 277)
+    Y2:=round((paramsplit[4] / 960 * 489) + 44)
+    speed:=paramsplit[5]
+    CreateStatusMessage("Swiping (" . X1 . "," . Y1 . ") to (" . X2 . "," . Y2 . ") speed " . speed,,,, false)
+
+    color := "BackgroundYellow"
+
+    ;bboxDraw2(X1, Y1, X2, Y2, color)
+
+    bboxDraw(X1-5, Y1-5, X1+5, Y1+5, color)
     if (doPause) {
         Pause
     }
     Gui, BoundingBox%winTitle%:Destroy
-	
-	bboxDraw(X2-5, Y2-5, X2+5, Y2+5, color)
+
+    bboxDraw(X2-5, Y2-5, X2+5, Y2+5, color)
     if (doPause) {
         Pause
     }
-	Gui, BoundingBox%winTitle%:Destroy
+    Gui, BoundingBox%winTitle%:Destroy
 }
 
 adbClick_wbb(X,Y)  {
-	if(dbg_bbox)
-		bboxAndPause_click(X, Y, dbg_bboxNpause)
-	adbClick(X,Y)
+    if(dbg_bbox)
+        bboxAndPause_click(X, Y, dbg_bboxNpause)
+    adbClick(X,Y)
 }
 
 bboxAndPause_click(X, Y, doPause := False) {
-	CreateStatusMessage("Clicking X " . X . " Y " . Y,,,, false)
-	
-	color := "BackgroundBlue"
-	
-	bboxDraw(X-5, Y-5, X+5, Y+5, color)
-	
+    CreateStatusMessage("Clicking X " . X . " Y " . Y,,,, false)
+
+    color := "BackgroundBlue"
+
+    bboxDraw(X-5, Y-5, X+5, Y+5, color)
+
     if (doPause) {
         Pause
     }
@@ -3246,16 +3234,16 @@ bboxAndPause_click(X, Y, doPause := False) {
 }
 
 bboxAndPause_immage(X1, Y1, X2, Y2, pNeedleObj, vret := False, doPause := False) {
-	CreateStatusMessage("Searching " . pNeedleObj.Name . " returns " . vret,,,, false)
-	
-	if(vret>0) {
-		color := "BackgroundGreen"
-	} else {
-		color := "BackgroundRed"
-	}
-	
-	bboxDraw(X1, Y1, X2, Y2, color)
-	
+    CreateStatusMessage("Searching " . pNeedleObj.Name . " returns " . vret,,,, false)
+
+    if(vret>0) {
+        color := "BackgroundGreen"
+    } else {
+        color := "BackgroundRed"
+    }
+
+    bboxDraw(X1, Y1, X2, Y2, color)
+
     if (doPause && vret) {
         Pause
     }
@@ -3266,33 +3254,32 @@ bboxAndPause_immage(X1, Y1, X2, Y2, pNeedleObj, vret := False, doPause := False)
     Gui, BoundingBox%winTitle%:Destroy
 }
 
-
 Gdip_ImageSearch_wbb(pBitmapHaystack,pNeedle,ByRef OutputList=""
-,OuterX1=0,OuterY1=0,OuterX2=0,OuterY2=0,Variation=0,Trans=""
-,SearchDirection=1,Instances=1,LineDelim="`n",CoordDelim=",") {
+    ,OuterX1=0,OuterY1=0,OuterX2=0,OuterY2=0,Variation=0,Trans=""
+    ,SearchDirection=1,Instances=1,LineDelim="`n",CoordDelim=",") {
 
-	vret := Gdip_ImageSearch(pBitmapHaystack,pNeedle.needle,OutputList,OuterX1,OuterY1,OuterX2,OuterY2,Variation,Trans,SearchDirection,Instances,LineDelim,CoordDelim)
-	if(dbg_bbox)
-		bboxAndPause_immage(OuterX1, OuterY1, OuterX2, OuterY2, pNeedle, vret, dbg_bboxNpause)
-	return vret
+    vret := Gdip_ImageSearch(pBitmapHaystack,pNeedle.needle,OutputList,OuterX1,OuterY1,OuterX2,OuterY2,Variation,Trans,SearchDirection,Instances,LineDelim,CoordDelim)
+    if(dbg_bbox)
+        bboxAndPause_immage(OuterX1, OuterY1, OuterX2, OuterY2, pNeedle, vret, dbg_bboxNpause)
+    return vret
 }
 
 GetNeedle(Path) {
     static NeedleBitmaps := Object()
-	
+
     if (NeedleBitmaps.HasKey(Path)) {
         return NeedleBitmaps[Path]
     } else {
         pNeedle := Gdip_CreateBitmapFromFile(Path)
-		needleObj := Object()
-		needleObj.Path := Path
-		pathsplit := StrSplit(Path , "\")
-		needleObj.Name := pathsplit[pathsplit.MaxIndex()]
-		needleObj.needle := pNeedle
+        needleObj := Object()
+        needleObj.Path := Path
+        pathsplit := StrSplit(Path , "\")
+        needleObj.Name := pathsplit[pathsplit.MaxIndex()]
+        needleObj.needle := pNeedle
         NeedleBitmaps[Path] := needleObj
         return needleObj
     }
-		
+
     if (NeedleBitmaps.HasKey(Path)) {
         return NeedleBitmaps[Path]
     } else {
@@ -3387,7 +3374,7 @@ DoTutorial() {
             if(countryOK)
                 adbClick_wbb(124, 250)
             else if(!birthFound)
-                    adbClick_wbb(140, 474)
+                adbClick_wbb(140, 474)
             else if(birthFound)
                 break
             Delay(2)
@@ -3444,45 +3431,45 @@ DoTutorial() {
     Delay(1)
     failSafe := A_TickCount
     failSafeTime := 0
-        Loop {
-            if(FindOrLoseImage(51, 335, 107, 359, , "Link", 0, failSafeTime)) {
-                adbClick_wbb(140, 460)
-                Loop {
-                    Delay(1)
-                    if(FindOrLoseImage(51, 335, 107, 359, , "Link", 1, failSafeTime)) {
-                        adbClick_wbb(140, 380) ; click ok on the interrupted while opening pack prompt
-                        break
-                    }
-                    failSafeTime := (A_TickCount - failSafe) // 1000
+    Loop {
+        if(FindOrLoseImage(51, 335, 107, 359, , "Link", 0, failSafeTime)) {
+            adbClick_wbb(140, 460)
+            Loop {
+                Delay(1)
+                if(FindOrLoseImage(51, 335, 107, 359, , "Link", 1, failSafeTime)) {
+                    adbClick_wbb(140, 380) ; click ok on the interrupted while opening pack prompt
+                    break
                 }
-            } else if(FindOrLoseImage(110, 350, 150, 404, , "Confirm", 0, failSafeTime)) {
-                adbClick_wbb(203, 364)
-            } else if(FindOrLoseImage(215, 371, 264, 418, , "Complete", 0, failSafeTime)) {
-                adbClick_wbb(140, 370)
-            } else if(FindOrLoseImage(0, 46, 20, 70, , "Cinematic", 0, failSafeTime)) {
-                break
+                failSafeTime := (A_TickCount - failSafe) // 1000
             }
-            Delay(1)
-            failSafeTime := (A_TickCount - failSafe) // 1000
+        } else if(FindOrLoseImage(110, 350, 150, 404, , "Confirm", 0, failSafeTime)) {
+            adbClick_wbb(203, 364)
+        } else if(FindOrLoseImage(215, 371, 264, 418, , "Complete", 0, failSafeTime)) {
+            adbClick_wbb(140, 370)
+        } else if(FindOrLoseImage(0, 46, 20, 70, , "Cinematic", 0, failSafeTime)) {
+            break
         }
+        Delay(1)
+        failSafeTime := (A_TickCount - failSafe) // 1000
+    }
 
-        if(setSpeed = 3) {
-            FindImageAndClick(25, 145, 70, 170, , "Platin", 18, 109, 2000) ; click mod settings
-            FindImageAndClick(9, 170, 25, 190, , "One", 26, 180) ; click mod settings
-            Delay(1)
-            adbClick_wbb(41, 296)
-            Delay(1)
-        }
+    if(setSpeed = 3) {
+        FindImageAndClick(25, 145, 70, 170, , "Platin", 18, 109, 2000) ; click mod settings
+        FindImageAndClick(9, 170, 25, 190, , "One", 26, 180) ; click mod settings
+        Delay(1)
+        adbClick_wbb(41, 296)
+        Delay(1)
+    }
 
-        FindImageAndClick(110, 230, 182, 257, , "Welcome", 253, 506, 110) ;click through cutscene until welcome page
+    FindImageAndClick(110, 230, 182, 257, , "Welcome", 253, 506, 110) ;click through cutscene until welcome page
 
-        if(setSpeed = 3) {
-            FindImageAndClick(25, 145, 70, 170, , "Platin", 18, 109, 2000) ; click mod settings
+    if(setSpeed = 3) {
+        FindImageAndClick(25, 145, 70, 170, , "Platin", 18, 109, 2000) ; click mod settings
 
-            FindImageAndClick(182, 170, 194, 190, , "Three", 187, 180) ; click mod settings
-            Delay(1)
-            adbClick_wbb(41, 296)
-        }
+        FindImageAndClick(182, 170, 194, 190, , "Three", 187, 180) ; click mod settings
+        Delay(1)
+        adbClick_wbb(41, 296)
+    }
     FindImageAndClick(190, 241, 225, 270, , "Name", 189, 438) ;wait for name input screen
     /* ; Picks Erika at creation - disabled
     Delay(1)
@@ -3499,7 +3486,7 @@ DoTutorial() {
     failSafe := A_TickCount
     failSafeTime := 0
     Loop {
-    ; Check for AccountName in Settings.ini
+        ; Check for AccountName in Settings.ini
         IniRead, accountNameValue, %A_ScriptDir%\..\Settings.ini, UserSettings, AccountName, ERROR
 
         ; Use AccountName if it exists and isn't empty
@@ -3509,7 +3496,7 @@ DoTutorial() {
             username := SubStr(username, 1, 14)  ; max character limit
             if(verboseLogging)
                 LogToFile("Using AccountName: " . username)
-            } else {
+        } else {
             fileName := A_ScriptDir . "\..\usernames.txt"
             if(FileExist(fileName))
                 name := ReadFile("usernames")
@@ -3521,7 +3508,7 @@ DoTutorial() {
             username := SubStr(username, 1, 14)  ; max character limit
             if(verboseLogging)
                 LogToFile("Using random username: " . username)
-            }
+        }
 
         adbInput(username)
         Delay(1)
@@ -3539,7 +3526,6 @@ DoTutorial() {
         if(failSafeTime > 45)
             restartGameInstance("Stuck at name")
     }
-
 
     Delay(1)
 
@@ -3559,12 +3545,12 @@ DoTutorial() {
         if (FindOrLoseImage(225, 273, 235, 290, , "Pack", 1, failSafeTime)){
             if(setSpeed > 1) {
                 if(setSpeed = 3)
-                        FindImageAndClick(182, 170, 194, 190, , "Three", 187, 180) ; click 3x
+                    FindImageAndClick(182, 170, 194, 190, , "Three", 187, 180) ; click 3x
                 else
-                        FindImageAndClick(100, 170, 113, 190, , "Two", 107, 180) ; click 2x
+                    FindImageAndClick(100, 170, 113, 190, , "Two", 107, 180) ; click 2x
             }
             adbClick_wbb(41, 296)
-                break
+            break
         }
         failSafeTime := (A_TickCount - failSafe) // 1000
         CreateStatusMessage("Waiting for Pack`n(" . failSafeTime . "/45 seconds)")
@@ -3584,9 +3570,9 @@ DoTutorial() {
         if (FindOrLoseImage(120, 70, 150, 95, , "SwipeUp", 0, failSafeTime)){
             if(setSpeed > 1) {
                 if(setSpeed = 3)
-                        FindImageAndClick(182, 170, 194, 190, , "Three", 187, 180) ; click mod settings
+                    FindImageAndClick(182, 170, 194, 190, , "Three", 187, 180) ; click mod settings
                 else
-                        FindImageAndClick(100, 170, 113, 190, , "Two", 107, 180) ; click mod settings
+                    FindImageAndClick(100, 170, 113, 190, , "Two", 107, 180) ; click mod settings
             }
             adbClick_wbb(41, 296)
             break
@@ -3748,27 +3734,27 @@ DoTutorial() {
 
 SelectPack(HG := false) {
     global openPack, packArray
-	
-	; define constants
-	MiddlePackX := 140
-	RightPackX := 215
-	LeftPackX := 60
-	HomeScreenAllPackY := 203
-	
-	PackScreenAllPackY := 320
-	
-	SelectExpansionFirstRowY := 275
-	SelectExpansionSecondRowY := 410
-	
-	SelectExpansionRightCollumnMiddleX := 210
-	SelectExpansionLeftCollumnMiddleX := 73
-	3PackExpansionLeft := -40
-	3PackExpansionRight := 40
-	2PackExpansionLeft := -20
-	2PackExpansionRight := 20
-	
-	inselectexpansionscreen := 0
-	
+
+    ; define constants
+    MiddlePackX := 140
+    RightPackX := 215
+    LeftPackX := 60
+    HomeScreenAllPackY := 203
+
+    PackScreenAllPackY := 320
+
+    SelectExpansionFirstRowY := 275
+    SelectExpansionSecondRowY := 410
+
+    SelectExpansionRightCollumnMiddleX := 210
+    SelectExpansionLeftCollumnMiddleX := 73
+    3PackExpansionLeft := -40
+    3PackExpansionRight := 40
+    2PackExpansionLeft := -20
+    2PackExpansionRight := 20
+
+    inselectexpansionscreen := 0
+
     packy := HomeScreenAllPackY
     if (openPack == "Eevee") {
         packx := MiddlePackX
@@ -3777,105 +3763,103 @@ SelectPack(HG := false) {
     } else {
         packx := LeftPackX
     }
-	
-	if(openPack == "Eevee" || openPack == "Buzzwole" || openPack == "Solgaleo") {
-		PackIsInHomeScreen := 1
-	} else {
-		PackIsInHomeScreen := 0
-	}
-	
-	if(openPack == "Eevee") {
-		PackIsLatest := 1
-	} else {
-		PackIsLatest := 0
-	}
-		
-	if (openPack == "Eevee" || openPack == "Buzzwole" || openPack == "Solgaleo") {
-		packInTopRowsOfSelectExpansion := 1
-	} else {
-		packInTopRowsOfSelectExpansion := 0
-	}
-	
-	
 
-	if(HG = "First" && injectMethod && loadedAccount ){
-		; when First and injection, if there are free packs, we don't land/start in home screen, 
-		; and we have also to search for closed during pack, hourglass, etc.
-		
-		failSafe := A_TickCount
-		failSafeTime := 0
-		Loop {
-			adbClick_wbb(packx, HomeScreenAllPackY) ; click until points appear (if free packs, will land in pack scree, if no free packs, this will select the middle pack and go to same screen as if there were free packs)
-			Delay(1)
-			if(FindOrLoseImage(233, 400, 264, 428, , "Points", 0, failSafeTime)) {
-				break
-			}
-			else if(!renew && !getFC) {
-				if(FindOrLoseImage(241, 377, 269, 407, , "closeduringpack", 0)) {
-					adbClick_wbb(139, 371)
-				}
-			}
-			else if(FindOrLoseImage(175, 165, 255, 235, , "Hourglass3", 0)) {
-				;TODO hourglass tutorial still broken after injection
-				Delay(3)
-				adbClick_wbb(146, 441) ; 146 440
-				Delay(3)
-				adbClick_wbb(146, 441)
-				Delay(3)
-				adbClick_wbb(146, 441)
-				Delay(3)
+    if(openPack == "Eevee" || openPack == "Buzzwole" || openPack == "Solgaleo") {
+        PackIsInHomeScreen := 1
+    } else {
+        PackIsInHomeScreen := 0
+    }
 
-				FindImageAndClick(98, 184, 151, 224, , "Hourglass1", 168, 438, 500, 5) ;stop at hourglasses tutorial 2
-				Delay(1)
+    if(openPack == "Eevee") {
+        PackIsLatest := 1
+    } else {
+        PackIsLatest := 0
+    }
 
-				adbClick_wbb(203, 436) ; 203 436
-				FindImageAndClick(236, 198, 266, 226, , "Hourglass2", 180, 436, 500) ;stop at hourglasses tutorial 2 180 to 203?
-			}
+    if (openPack == "Eevee" || openPack == "Buzzwole" || openPack == "Solgaleo") {
+        packInTopRowsOfSelectExpansion := 1
+    } else {
+        packInTopRowsOfSelectExpansion := 0
+    }
 
-			failSafeTime := (A_TickCount - failSafe) // 1000
-			CreateStatusMessage("Waiting for Points`n(" . failSafeTime . "/90 seconds)")
-		}
-		
-		if(!friendIDs && friendID = "") {
-			; if we don't need to add any friends we can select directly the latest packs, or go directly to select other booster screen, 
-				
-			if(PackIsLatest) {   ; if selected pack is the latest pack select directly from the pack select screen
-				packy := PackScreenAllPackY ; Y coordinate is lower when in pack select screen then in home screen
-				
-				if(packx != MiddlePackX) { ; if it is already the middle Pack, no need to click again
-					Delay(10)
-					adbClick_wbb(packx, packy) 
-					Delay(10)
-				}
-			} else {
-				FindImageAndClick(115, 140, 160, 155, , "SelectExpansion", 248, 459, 1000) ; if selected pack is not the latest pack click directly select other boosters
-				
-				if(PackIsInHomeScreen) {
-					; the only one that is not handled below because should show in home page
-					inselectexpansionscreen := 1
-				}
-			} 
-		}
-	} else {
-		; if not first or not injected, or friends were added, always start from home page
-		FindImageAndClick(233, 400, 264, 428, , "Points", packx, packy, 1000)  ; open selected pack from home page
-	}
+    if(HG = "First" && injectMethod && loadedAccount ){
+        ; when First and injection, if there are free packs, we don't land/start in home screen,
+        ; and we have also to search for closed during pack, hourglass, etc.
 
-	; if not the ones showing in home screen, click select other booster packs
+        failSafe := A_TickCount
+        failSafeTime := 0
+        Loop {
+            adbClick_wbb(packx, HomeScreenAllPackY) ; click until points appear (if free packs, will land in pack scree, if no free packs, this will select the middle pack and go to same screen as if there were free packs)
+            Delay(1)
+            if(FindOrLoseImage(233, 400, 264, 428, , "Points", 0, failSafeTime)) {
+                break
+            }
+            else if(!renew && !getFC) {
+                if(FindOrLoseImage(241, 377, 269, 407, , "closeduringpack", 0)) {
+                    adbClick_wbb(139, 371)
+                }
+            }
+            else if(FindOrLoseImage(175, 165, 255, 235, , "Hourglass3", 0)) {
+                ;TODO hourglass tutorial still broken after injection
+                Delay(3)
+                adbClick_wbb(146, 441) ; 146 440
+                Delay(3)
+                adbClick_wbb(146, 441)
+                Delay(3)
+                adbClick_wbb(146, 441)
+                Delay(3)
+
+                FindImageAndClick(98, 184, 151, 224, , "Hourglass1", 168, 438, 500, 5) ;stop at hourglasses tutorial 2
+                Delay(1)
+
+                adbClick_wbb(203, 436) ; 203 436
+                FindImageAndClick(236, 198, 266, 226, , "Hourglass2", 180, 436, 500) ;stop at hourglasses tutorial 2 180 to 203?
+            }
+
+            failSafeTime := (A_TickCount - failSafe) // 1000
+            CreateStatusMessage("Waiting for Points`n(" . failSafeTime . "/90 seconds)")
+        }
+
+        if(!friendIDs && friendID = "") {
+            ; if we don't need to add any friends we can select directly the latest packs, or go directly to select other booster screen,
+
+            if(PackIsLatest) {   ; if selected pack is the latest pack select directly from the pack select screen
+                packy := PackScreenAllPackY ; Y coordinate is lower when in pack select screen then in home screen
+
+                if(packx != MiddlePackX) { ; if it is already the middle Pack, no need to click again
+                    Delay(10)
+                    adbClick_wbb(packx, packy)
+                    Delay(10)
+                }
+            } else {
+                FindImageAndClick(115, 140, 160, 155, , "SelectExpansion", 248, 459, 1000) ; if selected pack is not the latest pack click directly select other boosters
+
+                if(PackIsInHomeScreen) {
+                    ; the only one that is not handled below because should show in home page
+                    inselectexpansionscreen := 1
+                }
+            }
+        }
+    } else {
+        ; if not first or not injected, or friends were added, always start from home page
+        FindImageAndClick(233, 400, 264, 428, , "Points", packx, packy, 1000)  ; open selected pack from home page
+    }
+
+    ; if not the ones showing in home screen, click select other booster packs
     if (!PackIsInHomeScreen && !inselectexpansionscreen) {
         FindImageAndClick(115, 140, 160, 155, , "SelectExpansion", 248, 459, 1000)
-		inselectexpansionscreen := 1
-	}
-	
-	if(inselectexpansionscreen) {
+        inselectexpansionscreen := 1
+    }
+
+    if(inselectexpansionscreen) {
         if (openPack = "Arceus" || openPack = "Dialga" || openPack = "Palkia") {
             ; One swipe
             adbSwipe("266 770 266 355 160")
             Sleep, 500
 
             packy := 490
-			
-			if (openPack = "Arceus") {
+
+            if (openPack = "Arceus") {
                 packx := SelectExpansionLeftCollumnMiddleX
             } else if (openPack = "Dialga") {
                 packx := SelectExpansionRightCollumnMiddleX + 2PackExpansionLeft
@@ -3890,7 +3874,7 @@ SelectPack(HG := false) {
             Sleep, 500
 
             packy := 450
-			if (openPack = "Mew") {
+            if (openPack = "Mew") {
                 packx := SelectExpansionLeftCollumnMiddleX
             } else if (openPack = "Charizard") {
                 packx := SelectExpansionRightCollumnMiddleX + 3PackExpansionLeft
@@ -3902,32 +3886,30 @@ SelectPack(HG := false) {
         } else {
             ; No swipe, top row
             if (openPack == "Eevee") {
-				packy := SelectExpansionFirstRowY
+                packy := SelectExpansionFirstRowY
                 packx := SelectExpansionLeftCollumnMiddleX
             } else if (openPack == "Buzzwole") {
-				packy := SelectExpansionFirstRowY
+                packy := SelectExpansionFirstRowY
                 packx := SelectExpansionRightCollumnMiddleX
             } else if (openPack == "Solgaleo") {
-				packy := SelectExpansionSecondRowY
+                packy := SelectExpansionSecondRowY
                 packx := SelectExpansionLeftCollumnMiddleX + 2PackExpansionLeft
             } else if (openPack == "Lunala") {
-				packy := SelectExpansionSecondRowY
+                packy := SelectExpansionSecondRowY
                 packx := SelectExpansionLeftCollumnMiddleX + 2PackExpansionRight
             } else if (openPack = "Shining") {
-				packy := SelectExpansionSecondRowY
+                packy := SelectExpansionSecondRowY
                 packx := SelectExpansionRightCollumnMiddleX
             }
         }
 
         FindImageAndClick(233, 400, 264, 428, , "Points", packx, packy)
     }
-	
-	
-	if(HG = "First" && injectMethod && loadedAccount && !accountHasPackInfo) {
-		FindPackStats()
-	}
-	
-	
+
+    if(HG = "First" && injectMethod && loadedAccount && !accountHasPackInfo) {
+        FindPackStats()
+    }
+
     if(HG = "Tutorial") {
         FindImageAndClick(236, 198, 266, 226, , "Hourglass2", 180, 436, 500) ;stop at hourglasses tutorial 2 180 to 203?
     }
@@ -3944,8 +3926,8 @@ SelectPack(HG := false) {
             }else if(FindOrLoseImage(92, 299, 115, 317, , "notenoughitems", 0)) {
                 cantOpenMorePacks := 1
             }
-			if(cantOpenMorePacks)
-				return
+            if(cantOpenMorePacks)
+                return
             adbClick_wbb(146, 439)
             Delay(1)
             failSafeTime := (A_TickCount - failSafe) // 1000
@@ -3964,51 +3946,51 @@ SelectPack(HG := false) {
         }
     }
     ;if(HG != "Tutorial")
-        failSafe := A_TickCount
-        failSafeTime := 0
-        Loop {
-            if(FindImageAndClick(233, 486, 272, 519, , "Skip2", 172, 430, , 2)) { ;click on open button until skip button appears
-                break
-			} else if(FindOrLoseImage(92, 299, 115, 317, , "notenoughitems", 0)) {
-				cantOpenMorePacks := 1
-			}
-			if(cantOpenMorePacks)
-				return
-            Delay(1)
-            adbClick_wbb(200, 451) ;for hourglass???
-            failSafeTime := (A_TickCount - failSafe) // 1000
-            CreateStatusMessage("Waiting for Skip2`n(" . failSafeTime . "/45 seconds)")
+    failSafe := A_TickCount
+    failSafeTime := 0
+    Loop {
+        if(FindImageAndClick(233, 486, 272, 519, , "Skip2", 172, 430, , 2)) { ;click on open button until skip button appears
+            break
+        } else if(FindOrLoseImage(92, 299, 115, 317, , "notenoughitems", 0)) {
+            cantOpenMorePacks := 1
         }
+        if(cantOpenMorePacks)
+            return
+        Delay(1)
+        adbClick_wbb(200, 451) ;for hourglass???
+        failSafeTime := (A_TickCount - failSafe) // 1000
+        CreateStatusMessage("Waiting for Skip2`n(" . failSafeTime . "/45 seconds)")
+    }
 }
 PackOpening() {
     failSafe := A_TickCount
     failSafeTime := 0
     Loop {
         adbClick_wbb(146, 439)
-		;stuck here if not enough items for the second pack
+        ;stuck here if not enough items for the second pack
         Delay(1)
         if(FindOrLoseImage(225, 273, 235, 290, , "Pack", 0, failSafeTime)) {
             break ;wait for pack to be ready to Trace and click skip
-		} else if(FindOrLoseImage(92, 299, 115, 317, , "notenoughitems", 0)) {
-			cantOpenMorePacks := 1
-		} else {
+        } else if(FindOrLoseImage(92, 299, 115, 317, , "notenoughitems", 0)) {
+            cantOpenMorePacks := 1
+        } else {
             adbClick_wbb(239, 497)
-		}
-		
-		if(cantOpenMorePacks)
-			return
-		
+        }
+
+        if(cantOpenMorePacks)
+            return
+
         failSafeTime := (A_TickCount - failSafe) // 1000
         CreateStatusMessage("Waiting for Pack`n(" . failSafeTime . "/45 seconds)")
         if(failSafeTime > 45){
-			RemoveFriends()
+            RemoveFriends()
             restartGameInstance("Stuck at Pack")
-		}
+        }
     }
 
     if(setSpeed > 1) {
-    FindImageAndClick(25, 145, 70, 170, , "Platin", 18, 109, 2000) ; click mod settings
-    FindImageAndClick(9, 170, 25, 190, , "One", 26, 180) ; click mod settings
+        FindImageAndClick(25, 145, 70, 170, , "Platin", 18, 109, 2000) ; click mod settings
+        FindImageAndClick(9, 170, 25, 190, , "One", 26, 180) ; click mod settings
         Delay(1)
     }
     failSafe := A_TickCount
@@ -4017,12 +3999,12 @@ PackOpening() {
         adbSwipe_wbb(adbSwipeParams)
         Sleep, 10
         if (FindOrLoseImage(225, 273, 235, 290, , "Pack", 1, failSafeTime)){
-        if(setSpeed > 1) {
-            if(setSpeed = 3)
+            if(setSpeed > 1) {
+                if(setSpeed = 3)
                     FindImageAndClick(182, 170, 194, 190, , "Three", 187, 180) ; click mod settings
-            else
+                else
                     FindImageAndClick(100, 170, 113, 190, , "Two", 107, 180) ; click mod settings
-        }
+            }
             adbClick_wbb(41, 296)
             break
         }
@@ -4034,9 +4016,9 @@ PackOpening() {
     FindImageAndClick(0, 98, 116, 125, 5, "Opening", 239, 497) ;skip through cards until results opening screen
 
     CheckPack()
-	
-	if(!friendIDs && friendID = "" && accountOpenPacks >= maxAccountPackNum) 
-		return
+
+    if(!friendIDs && friendID = "" && accountOpenPacks >= maxAccountPackNum)
+        return
 
     ;FindImageAndClick(233, 486, 272, 519, , "Skip", 146, 494) ;click on next until skip button appears
 
@@ -4054,9 +4036,9 @@ PackOpening() {
             break
         } else if(FindOrLoseImage(178, 193, 251, 282, , "Hourglass", 0, failSafeTime)) {
             break
-		} else {
-			adbClick_wbb(146, 494) ;146, 494
-		} 
+        } else {
+            adbClick_wbb(146, 494) ;146, 494
+        }
         failSafeTime := (A_TickCount - failSafe) // 1000
         CreateStatusMessage("Waiting for Home`n(" . failSafeTime . "/45 seconds)")
         if(failSafeTime > 45)
@@ -4085,9 +4067,9 @@ HourglassOpening(HG := false, NEIRestart := true) {
         }
         else {
             FindImageAndClick(236, 198, 266, 226, , "Hourglass2", 180, 436, 500) ;stop at hourglasses tutorial 2 180 to 203?
-			
-			if(cantOpenMorePacks)
-				return
+
+            if(cantOpenMorePacks)
+                return
         }
     }
     if(!packMethod) {
@@ -4103,8 +4085,8 @@ HourglassOpening(HG := false, NEIRestart := true) {
             }else if(FindOrLoseImage(92, 299, 115, 317, , "notenoughitems", 0)) {
                 cantOpenMorePacks := 1
             }
-			if(cantOpenMorePacks)
-				return
+            if(cantOpenMorePacks)
+                return
             adbClick_wbb(146, 439)
             Delay(1)
             failSafeTime := (A_TickCount - failSafe) // 1000
@@ -4129,14 +4111,14 @@ HourglassOpening(HG := false, NEIRestart := true) {
             break ;wait for pack to be ready to Trace and click skip
         else
             adbClick_wbb(239, 497)
-			
-		if(cantOpenMorePacks)
-			return
-        
+
+        if(cantOpenMorePacks)
+            return
+
         if(FindOrLoseImage(100, 240, 185, 275, , "Error", 0, failSafeTime)){
             SelectPack("HGPack")
         }
-		
+
         clickButton := FindOrLoseImage(145, 440, 258, 480, 80, "Button", 0, failSafeTime)
         if(clickButton) {
             StringSplit, pos, clickButton, `,  ; Split at ", "
@@ -4152,8 +4134,8 @@ HourglassOpening(HG := false, NEIRestart := true) {
     }
 
     if(setSpeed > 1) {
-    FindImageAndClick(25, 145, 70, 170, , "Platin", 18, 109, 2000) ; click mod settings
-    FindImageAndClick(9, 170, 25, 190, , "One", 26, 180) ; click mod settings
+        FindImageAndClick(25, 145, 70, 170, , "Platin", 18, 109, 2000) ; click mod settings
+        FindImageAndClick(9, 170, 25, 190, , "One", 26, 180) ; click mod settings
         Delay(1)
     }
     failSafe := A_TickCount
@@ -4162,12 +4144,12 @@ HourglassOpening(HG := false, NEIRestart := true) {
         adbSwipe_wbb(adbSwipeParams)
         Sleep, 10
         if (FindOrLoseImage(225, 273, 235, 290, , "Pack", 1, failSafeTime)){
-        if(setSpeed > 1) {
-            if(setSpeed = 3)
+            if(setSpeed > 1) {
+                if(setSpeed = 3)
                     FindImageAndClick(182, 170, 194, 190, , "Three", 187, 180) ; click mod settings
-            else
+                else
                     FindImageAndClick(100, 170, 113, 190, , "Two", 107, 180) ; click mod settings
-        }
+            }
             adbClick_wbb(41, 296)
             break
         }
@@ -4179,9 +4161,9 @@ HourglassOpening(HG := false, NEIRestart := true) {
     FindImageAndClick(0, 98, 116, 125, 5, "Opening", 239, 497) ;skip through cards until results opening screen
 
     CheckPack()
-	
-	if(!friendIDs && friendID = "" && accountOpenPacks >= maxAccountPackNum) 
-		return
+
+    if(!friendIDs && friendID = "" && accountOpenPacks >= maxAccountPackNum)
+        return
 
     ;FindImageAndClick(233, 486, 272, 519, , "Skip", 146, 494) ;click on next until skip button appears
 
@@ -4198,8 +4180,8 @@ HourglassOpening(HG := false, NEIRestart := true) {
         } else if(FindOrLoseImage(121, 465, 140, 485, , "ConfirmPack", 0, failSafeTime)) {
             break
         } else {
-			adbClick_wbb(146, 494) ;146, 494
-		} 
+            adbClick_wbb(146, 494) ;146, 494
+        }
         failSafeTime := (A_TickCount - failSafe) // 1000
         CreateStatusMessage("Waiting for ConfirmPack`n(" . failSafeTime . "/45 seconds)")
         if(failSafeTime > 45)
@@ -4241,13 +4223,13 @@ getFriendCode() {
 
 SortArraysByProperty(fileNames, fileTimes, packCounts, property, ascending) {
     n := fileNames.MaxIndex()
-    
+
     ; Create an array of indices for sorting
     indices := []
     Loop, %n% {
         indices.Push(A_Index)
     }
-    
+
     ; Sort the indices based on the specified property
     if (property == "time") {
         if (ascending) {
@@ -4266,12 +4248,12 @@ SortArraysByProperty(fileNames, fileTimes, packCounts, property, ascending) {
             Sort(indices, Func("CompareIndicesByPacksDesc").Bind(packCounts))
         }
     }
-    
+
     ; Create temporary arrays for sorted values
     sortedFileNames := []
     sortedFileTimes := []
     sortedPackCounts := []
-    
+
     ; Populate sorted arrays based on sorted indices
     Loop, %n% {
         idx := indices[A_Index]
@@ -4279,7 +4261,7 @@ SortArraysByProperty(fileNames, fileTimes, packCounts, property, ascending) {
         sortedFileTimes.Push(fileTimes[idx])
         sortedPackCounts.Push(packCounts[idx])
     }
-    
+
     ; Copy sorted values back to original arrays
     Loop, %n% {
         fileNames[A_Index] := sortedFileNames[A_Index]
@@ -4298,23 +4280,23 @@ QuickSort(array, left, right, compareFunc) {
     ; Create a manual stack to avoid deep recursion
     stack := []
     stack.Push([left, right])
-    
+
     ; Process all partitions iteratively
     while (stack.Length() > 0) {
         current := stack.Pop()
         currentLeft := current[1]
         currentRight := current[2]
-        
+
         if (currentLeft < currentRight) {
             ; Use middle element as pivot
             pivotIndex := Floor((currentLeft + currentRight) / 2)
             pivotValue := array[pivotIndex]
-            
+
             ; Move pivot to end
             temp := array[pivotIndex]
             array[pivotIndex] := array[currentRight]
             array[currentRight] := temp
-            
+
             ; Move all elements smaller than pivot to the left
             storeIndex := currentLeft
             i := currentLeft
@@ -4328,12 +4310,12 @@ QuickSort(array, left, right, compareFunc) {
                 }
                 i++
             }
-            
+
             ; Move pivot to its final place
             temp := array[storeIndex]
             array[storeIndex] := array[currentRight]
             array[currentRight] := temp
-            
+
             ; Push the larger partition first (optimization)
             if (storeIndex - currentLeft < currentRight - storeIndex) {
                 stack.Push([storeIndex + 1, currentRight])
@@ -4373,19 +4355,19 @@ CompareIndicesByPacksDesc(packs, a, b) {
 
 CreateAccountList(instance) {
     global injectSortMethod, deleteMethod, winTitle, verboseLogging
-    
+
     ; Clean up stale used accounts first
     CleanupUsedAccounts()
-    
+
     saveDir := A_ScriptDir "\..\Accounts\Saved\" . instance
     outputTxt := saveDir . "\list.txt"
     outputTxt_current := saveDir . "\list_current.txt"
     lastGeneratedFile := saveDir . "\list_last_generated.txt"
-    
+
     ; Check if we need to regenerate the lists
     needRegeneration := false
     forceRegeneration := false
-    
+
     ; First check: Do list files exist and are they not empty?
     if (!FileExist(outputTxt) || !FileExist(outputTxt_current)) {
         needRegeneration := true
@@ -4395,14 +4377,14 @@ CreateAccountList(instance) {
         FileRead, currentListContent, %outputTxt_current%
         currentListLines := StrSplit(Trim(currentListContent), "`n", "`r")
         eligibleAccountsInList := 0
-        
+
         ; Count non-empty lines
         for index, line in currentListLines {
             if (StrLen(Trim(line)) > 5) {
                 eligibleAccountsInList++
             }
         }
-        
+
         ; If list is empty or has very few accounts, force regeneration
         if (eligibleAccountsInList <= 1) {
             LogToFile("Current list is empty or nearly empty, forcing regeneration...")
@@ -4414,10 +4396,10 @@ CreateAccountList(instance) {
             if (FileExist(lastGeneratedFile)) {
                 FileRead, lastGenTime, %lastGeneratedFile%
             }
-            
+
             timeDiff := A_Now
             EnvSub, timeDiff, %lastGenTime%, Minutes
-            
+
             regenerationInterval := 60  ; in minutes
             if (timeDiff > regenerationInterval || !lastGenTime) {
                 needRegeneration := true
@@ -4426,23 +4408,23 @@ CreateAccountList(instance) {
             }
         }
     }
-    
+
     if (!needRegeneration) {
         return
     }
-    
+
     ; If we're forcing regeneration due to empty lists, clear used accounts log
     if (forceRegeneration) {
         usedAccountsLog := saveDir . "\used_accounts.txt"
         LogToFile("Forcing regeneration - clearing used accounts log to recover all accounts")
-        
+
         ; Backup the used accounts log before clearing
         if (FileExist(usedAccountsLog)) {
             backupLog := saveDir . "\used_accounts_backup_" . A_Now . ".txt"
             FileCopy, %usedAccountsLog%, %backupLog%
             LogToFile("Backed up used accounts log to: " . backupLog)
         }
-        
+
         ; Clear the used accounts log
         FileDelete, %usedAccountsLog%
         LogToFile("Cleared used accounts log - all accounts now available again")
@@ -4450,9 +4432,9 @@ CreateAccountList(instance) {
 
     if (!injectSortMethod)
         injectSortMethod := "ModifiedAsc"
-    
+
     parseInjectType := "Inject"  ; Default
-    
+
     ; Determine injection type and pack ranges
     if (deleteMethod = "Inject") {
         parseInjectType := "Inject"
@@ -4469,7 +4451,7 @@ CreateAccountList(instance) {
         minPacks := 35
         maxPacks := 9999
     }
-    
+
     ; Load used accounts from cleaned up log (will be empty if we just cleared it)
     usedAccountsLog := saveDir . "\used_accounts.txt"
     usedAccounts := {}
@@ -4485,33 +4467,33 @@ CreateAccountList(instance) {
             }
         }
     }
-    
+
     ; Delete existing list files before regenerating
     if FileExist(outputTxt)
         FileDelete, %outputTxt%
     if FileExist(outputTxt_current)
         FileDelete, %outputTxt_current%
-    
+
     ; Create arrays to store files with their timestamps
     fileNames := []
     fileTimes := []
     packCounts := []
-    
+
     ; First pass: gather all eligible files with their timestamps
     Loop, %saveDir%\*.xml {
         xml := saveDir . "\" . A_LoopFileName
-        
+
         ; Skip if this account was recently used (unless we just cleared the log)
         if (usedAccounts.HasKey(A_LoopFileName)) {
             if (verboseLogging)
                 LogToFile("Skipping recently used account: " . A_LoopFileName)
             continue
         }
-        
+
         ; Get file modification time
         modTime := ""
         FileGetTime, modTime, %xml%, M
-        
+
         ; Calculate hours difference properly
         hoursDiff := A_Now
         timeVar := modTime
@@ -4532,10 +4514,10 @@ CreateAccountList(instance) {
                 continue
             }
         }
-        
+
         ; Extract pack count from filename
         packCount := 0
-        
+
         ; Extract the number before P
         if (RegExMatch(A_LoopFileName, "^(\d+)P", packMatch)) {
             packCount := packMatch1 + 0  ; Force numeric conversion
@@ -4544,14 +4526,14 @@ CreateAccountList(instance) {
             if (verboseLogging)
                 LogToFile("Unknown filename format: " . A_LoopFileName . ", assigned default pack count: 10")
         }
-        
+
         ; Check if pack count fits the current injection range
         if (packCount < minPacks || packCount > maxPacks) {
             if (verboseLogging)
                 LogToFile("  - SKIPPING: " . A_LoopFileName . " - Pack count " . packCount . " outside range " . minPacks . "-" . maxPacks)
             continue
         }
-        
+
         ; Store filename, modification time, and pack count
         fileNames.Push(A_LoopFileName)
         fileTimes.Push(modTime)
@@ -4559,20 +4541,20 @@ CreateAccountList(instance) {
         if (verboseLogging)
             LogToFile("  - KEEPING: " . A_LoopFileName . " - Pack count " . packCount . " inside range " . minPacks . "-" . maxPacks . " (age: " . hoursDiff . " hours)")
     }
-    
+
     ; Log counts
     totalEligible := (fileNames.MaxIndex() ? fileNames.MaxIndex() : 0)
-    
+
     if (forceRegeneration) {
         LogToFile("FORCED REGENERATION: Found " . totalEligible . " eligible files (cleared used accounts, maintained strict age requirements)")
     } else {
         LogToFile("Found " . totalEligible . " eligible files (>= 24 hours old, not recently used, packs: " . minPacks . "-" . maxPacks . ")")
     }
-    
+
     ; Sort files based on selected method
     if (fileNames.MaxIndex() > 0) {
         sortMethod := (injectSortMethod) ? injectSortMethod : "ModifiedAsc"
-        
+
         if (sortMethod == "ModifiedAsc") {
             SortArraysByProperty(fileNames, fileTimes, packCounts, "time", 1)
         } else if (sortMethod == "ModifiedDesc") {
@@ -4585,12 +4567,12 @@ CreateAccountList(instance) {
             ; Default to ModifiedAsc if unknown sort method
             SortArraysByProperty(fileNames, fileTimes, packCounts, "time", 1)
         }
-        
+
         ; Prepare content for output files
         outputContent := ""
         For i, fileName in fileNames {
             outputContent .= fileName . "`n"
-            
+
             ; Log first 10 files for verification
             if (i <= 10) {
                 if(verboseLogging) {
@@ -4602,24 +4584,24 @@ CreateAccountList(instance) {
                     LogToFile("  ... (showing first 10 files only)")
             }
         }
-        
+
         ; Write sorted files to output files
         FileAppend, %outputContent%, %outputTxt%
         FileAppend, %outputContent%, %outputTxt_current%
-        
+
         LogToFile("Successfully wrote " . fileNames.MaxIndex() . " files to lists")
-        } else {
+    } else {
         ; Create empty files to prevent repeated regeneration attempts
         FileAppend, "", %outputTxt%
         FileAppend, "", %outputTxt_current%
         LogToFile("Created empty list files")
     }
-    
+
     ; Create a file that tracks when the list was last regenerated
     FileDelete, % lastGeneratedFile
     FileAppend, % A_Now, % lastGeneratedFile
     LogToFile("List generation completed at: " . A_Now)
-    
+
     ; Log summary statistics
     if (totalEligible > 0) {
         LogToFile("=== ACCOUNT LIST SUMMARY ===")
@@ -4635,11 +4617,11 @@ CreateAccountList(instance) {
 
 checkShouldDoMissions() {
     global beginnerMissionsDone, deleteMethod, injectMethod, loadedAccount, friendIDs, friendID, accountOpenPacks, maxAccountPackNum, verboseLogging
-    
+
     if (beginnerMissionsDone) {
         return false
     }
-    
+
     if (deleteMethod = "13 Pack") {
         return (!friendIDs && friendID = "" && accountOpenPacks < maxAccountPackNum) || (friendIDs || friendID != "")
     }
@@ -4675,11 +4657,11 @@ DoWonderPickOnly() {
             clickButton := FindOrLoseImage(100, 367, 190, 480, 100, "Button", 0, failSafeTime)
             if(clickButton) {
                 StringSplit, pos, clickButton, `,  ; Split at ", "
-                    ; Adjust pos2 if scaleParam is 287 for 100%
-                    if (scaleParam = 287) {
-                        pos2 += 5
-                    }
-                    adbClick_wbb(pos1, pos2)
+                ; Adjust pos2 if scaleParam is 287 for 100%
+                if (scaleParam = 287) {
+                    pos2 += 5
+                }
+                adbClick_wbb(pos1, pos2)
                 Delay(3)
             }
             if(FindOrLoseImage(160, 330, 200, 370, , "Card", 0, failSafeTime))
@@ -4705,7 +4687,7 @@ DoWonderPickOnly() {
     }
     failSafe := A_TickCount
     failSafeTime := 0
-	;TODO thanks and wonder pick 5 times for missions
+    ;TODO thanks and wonder pick 5 times for missions
     Loop {
         adbClick_wbb(146, 494)
         if(FindOrLoseImage(233, 486, 272, 519, , "Skip", 0, failSafeTime) || FindOrLoseImage(240, 80, 265, 100, , "WonderPick", 0, failSafeTime))
@@ -4717,7 +4699,7 @@ DoWonderPickOnly() {
         failSafeTime := (A_TickCount - failSafe) // 1000
         CreateStatusMessage("Waiting for Shop`n(" . failSafeTime . "/45 seconds)")
     }
-	
+
     failSafe := A_TickCount
     failSafeTime := 0
     Loop {
@@ -4736,9 +4718,9 @@ DoWonderPickOnly() {
 DoWonderPick() {
     FindImageAndClick(191, 393, 211, 411, , "Shop", 40, 515) ;click until at main menu
     FindImageAndClick(240, 80, 265, 100, , "WonderPick", 59, 429) ;click until in wonderpick Screen
-	
-	DoWonderPickOnly()
-	
+
+    DoWonderPickOnly()
+
     FindImageAndClick(2, 85, 34, 120, , "Missions", 261, 478, 500)
     ;FindImageAndClick(130, 170, 170, 205, , "WPMission", 150, 286, 1000)
     FindImageAndClick(120, 185, 150, 215, , "FirstMission", 150, 286, 1000)
@@ -4754,7 +4736,7 @@ DoWonderPick() {
         }
         else if(FindOrLoseImage(191, 393, 211, 411, , "Shop", 1, failSafeTime))
             ;adbInputEvent("111") ;send ESC
-			adbClick_wbb(139, 492)
+            adbClick_wbb(139, 492)
         else
             break
         failSafeTime := (A_TickCount - failSafe) // 1000
@@ -4764,22 +4746,22 @@ DoWonderPick() {
 }
 
 getChangeDateTime() {
-	offset := A_Now
-	currenttimeutc := A_NowUTC
-	EnvSub, offset, %currenttimeutc%, Hours   ;offset from local timezone to UTC
+    offset := A_Now
+    currenttimeutc := A_NowUTC
+    EnvSub, offset, %currenttimeutc%, Hours   ;offset from local timezone to UTC
 
     resetTime := SubStr(A_Now, 1, 8) "060000" ;today at 6am [utc] zero seconds is the reset time at UTC
-	resetTime += offset, Hours                ;reset time in local timezone
+    resetTime += offset, Hours                ;reset time in local timezone
 
-	;find the closest reset time
-	currentTime := A_Now
-	timeToReset := resetTime
-	EnvSub, timeToReset, %currentTime%, Hours
-	if(timeToReset > 12) {
-		resetTime += -1, Days
-	} else if (timeToReset < -12) {
-		resetTime += 1, Days
-	}
+    ;find the closest reset time
+    currentTime := A_Now
+    timeToReset := resetTime
+    EnvSub, timeToReset, %currentTime%, Hours
+    if(timeToReset > 12) {
+        resetTime += -1, Days
+    } else if (timeToReset < -12) {
+        resetTime += 1, Days
+    }
 
     return resetTime
 }
@@ -4821,7 +4803,7 @@ getMetaData() {
             }
         }
     }
-    
+
     if(resetSpecialMissionsDone)
         specialMissionsDone := 0
 }
@@ -4830,7 +4812,7 @@ setMetaData() {
     hasMetaData := 0
     NamePartRightOfMeta := ""
     NamePartLeftOfMeta := ""
-    
+
     ; check if account file has metadata information
     if(InStr(accountFileName, "(")) {
         accountFileNameParts1 := StrSplit(accountFileName, "(")  ; Split at (
@@ -4840,11 +4822,11 @@ setMetaData() {
             accountFileNameParts2 := StrSplit(accountFileNameParts1[2], ")")  ; Split at )
             NamePartRightOfMeta := accountFileNameParts2[2]
             ;metadata := accountFileNameParts2[1]
-            
+
             hasMetaData := 1
         }
     }
-    
+
     metadata := ""
     if(beginnerMissionsDone)
         metadata .= "B"
@@ -4856,7 +4838,7 @@ setMetaData() {
         metadata .= "X"
     if(accountHasPackInTesting)
         metadata .= "T"
-    
+
     ; Remove parentheses if no flags remain, helpful if there is only a T flag or manual removal of X flag
     if(hasMetaData) {
         if (metadata = "") {
@@ -4866,34 +4848,34 @@ setMetaData() {
         }
     } else {
         if (metadata = "") {
-            NameAndExtension := StrSplit(accountFileName, ".")  
+            NameAndExtension := StrSplit(accountFileName, ".")
             AccountNewName := NameAndExtension[1] . ".xml"
         } else {
-            NameAndExtension := StrSplit(accountFileName, ".")  
+            NameAndExtension := StrSplit(accountFileName, ".")
             AccountNewName := NameAndExtension[1] . "(" . metadata . ").xml"
         }
     }
 
     ;MsgBox, %AccountNewName% ;debug check for filename
-    
+
     saveDir := A_ScriptDir "\..\Accounts\Saved\" . winTitle
     accountFile := saveDir . "\" . accountFileName
     accountNewFile := saveDir . "\" . AccountNewName
-    FileMove, %accountFile% , %accountNewFile% 
+    FileMove, %accountFile% , %accountNewFile%
     accountFileName := AccountNewName
 }
 
 SpendAllHourglass() {
     HomeAndMission(1)
-    
+
     SelectPack("HGPack")
     if(cantOpenMorePacks)
         return
-    
+
     PackOpening()
     if(cantOpenMorePacks || (!friendIDs && friendID = "" && accountOpenPacks >= maxAccountPackNum))
         return
-    
+
     ; Keep opening packs until we can't anymore
     while (!cantOpenMorePacks && (friendIDs || friendID != "" || accountOpenPacks < maxAccountPackNum)) {
         HourglassOpening(true)
@@ -4913,10 +4895,10 @@ GetEventRewards(frommain := true){
         FindImageAndClick(2, 85, 34, 120, , "Missions", 261, 478, 500)
     }
     Delay(4)
-    
+
     ; ADD LEVEL UP CHECK
     LevelUp()
-    
+
     if(setSpeed > 1) {
         FindImageAndClick(25, 145, 70, 170, , "Platin", 18, 109, 2000) ; click mod settings
         FindImageAndClick(9, 170, 25, 190, , "One", 26, 180) ; click mod settings
@@ -4930,13 +4912,13 @@ GetEventRewards(frommain := true){
         if (FindOrLoseImage(225, 444, 272, 470, , "Premium", 0, failSafeTime)){
             if(setSpeed > 1) {
                 if(setSpeed = 3)
-                        FindImageAndClick(182, 170, 194, 190, , "Three", 187, 180) ; click mod settings
+                    FindImageAndClick(182, 170, 194, 190, , "Three", 187, 180) ; click mod settings
                 else
-                        FindImageAndClick(100, 170, 113, 190, , "Two", 107, 180) ; click mod settings
+                    FindImageAndClick(100, 170, 113, 190, , "Two", 107, 180) ; click mod settings
             }
-                adbClick_wbb(41, 296)
-                break
-            }
+            adbClick_wbb(41, 296)
+            break
+        }
         failSafeTime := (A_TickCount - failSafe) // 1000
         CreateStatusMessage("Waiting for Trace`n(" . failSafeTime . "/45 seconds)")
         Delay(1)
@@ -4973,11 +4955,11 @@ GetAllRewards(tomain := true, dailies := false) {
     Loop {
         Delay(2)
         adbClick(172, 427)
-        
+
         if(dailies) {
             FindImageAndClick(73, 151, 210, 173, , "CollectDailies", 250, 135, 500)
         }
-        
+
         if(FindOrLoseImage(244, 406, 273, 449, , "GotAllMissions", 0, 0)) {
             break
         }
@@ -5034,8 +5016,8 @@ return
 FindPackStats() {
     global adbShell, scriptName, ocrLanguage, loadDir
 
-	failSafe := A_TickCount
-	failSafeTime := 0
+    failSafe := A_TickCount
+    failSafeTime := 0
     ; Click for hamburger menu and wait for profile
     Loop {
         adbClick(240, 499)
@@ -5049,76 +5031,76 @@ FindPackStats() {
                     pos2 += 5
                 }
                 adbClick(pos1, pos2)
-			}
-		}
-		levelUp()
+            }
+        }
+        levelUp()
         Delay(1)
-		failSafeTime := (A_TickCount - failSafe) // 1000
+        failSafeTime := (A_TickCount - failSafe) // 1000
     }
-	
-	FindImageAndClick(203, 272, 237, 300, , "Profile", 210, 140, 200) ; Open profile/stats page and wait
-	
+
+    FindImageAndClick(203, 272, 237, 300, , "Profile", 210, 140, 200) ; Open profile/stats page and wait
+
     ; Swipe until you get to trophy
-	failSafe := A_TickCount
-	failSafeTime := 0
+    failSafe := A_TickCount
+    failSafeTime := 0
     Loop {
         adbSwipe("266 770 266 355 300")
-		if(FindOrLoseImage(13, 110, 31, 129, , "trophy", 0, failSafeTime)) 
-			break
-		failSafeTime := (A_TickCount - failSafe) // 1000
-			
+        if(FindOrLoseImage(13, 110, 31, 129, , "trophy", 0, failSafeTime))
+            break
+        failSafeTime := (A_TickCount - failSafe) // 1000
+
     }
 
-	FindImageAndClick(122, 375, 161, 390, , "trophyPage", 50, 107, 200) ; Open pack trophy page
-	
+    FindImageAndClick(122, 375, 161, 390, , "trophyPage", 50, 107, 200) ; Open pack trophy page
+
     ; Take screenshot and prepare for OCR
     Sleep, 100
-	
-	tempDir := A_ScriptDir . "\temp"
+
+    tempDir := A_ScriptDir . "\temp"
     if !FileExist(tempDir)
         FileCreateDir, %tempDir%
-		
-	fullScreenshotFile := tempDir . "\" .  winTitle . "_AccountPacks.png"
-	adbTakeScreenshot(fullScreenshotFile)
-    
-	Sleep, 100
-    
-    packValue := 0
-	trophyOCR := ""
-    
-	;214, 438, 111x30
-	;214, 434, 111x38
-	;214, 441, 111x24
-	ocrSuccess := 0 
-    if(RefinedOCRText(fullScreenshotFile, 214, 438, 111, 30, "0123456789,/", "^\d{1,3}(,\d{3})?\/\d{1,3}(,\d{3})?$", trophyOCR)) {
-		;MsgBox, %trophyOCR%
-		ocrParts := StrSplit(trophyOCR, "/")
-		accountOpenPacks := ocrParts[1]
-		;MsgBox, %accountOpenPacks%
-		ocrSuccess := 1
-		
-		UpdateAccount()
-	}
 
-	if (FileExist(fullScreenshotFile))
-		FileDelete, %fullScreenshotFile%
-	
-	FindImageAndClick(230, 120, 260, 150, , "UserProfile", 140, 496, 200) ; go back to hamburger menu
-	
+    fullScreenshotFile := tempDir . "\" .  winTitle . "_AccountPacks.png"
+    adbTakeScreenshot(fullScreenshotFile)
+
+    Sleep, 100
+
+    packValue := 0
+    trophyOCR := ""
+
+    ;214, 438, 111x30
+    ;214, 434, 111x38
+    ;214, 441, 111x24
+    ocrSuccess := 0
+    if(RefinedOCRText(fullScreenshotFile, 214, 438, 111, 30, "0123456789,/", "^\d{1,3}(,\d{3})?\/\d{1,3}(,\d{3})?$", trophyOCR)) {
+        ;MsgBox, %trophyOCR%
+        ocrParts := StrSplit(trophyOCR, "/")
+        accountOpenPacks := ocrParts[1]
+        ;MsgBox, %accountOpenPacks%
+        ocrSuccess := 1
+
+        UpdateAccount()
+    }
+
+    if (FileExist(fullScreenshotFile))
+        FileDelete, %fullScreenshotFile%
+
+    FindImageAndClick(230, 120, 260, 150, , "UserProfile", 140, 496, 200) ; go back to hamburger menu
+
     Loop {
         adbClick(34,65)
-			Delay(1)
+        Delay(1)
         adbClick(34,65)
-			Delay(1)
+        Delay(1)
         adbClick(34,65)
-			Delay(1)
+        Delay(1)
         if(FindOrLoseImage(233, 400, 264, 428, , "Points", 0, failSafeTime)) {
             break
         } else {
-			adbClick_wbb(141, 480)
-			Delay(1)
-		}
-		failSafeTime := (A_TickCount - failSafe) // 1000
+            adbClick_wbb(141, 480)
+            Delay(1)
+        }
+        failSafeTime := (A_TickCount - failSafe) // 1000
     }
 }
 
@@ -5151,10 +5133,10 @@ CropAndFormatForOcr(inputFile, x := 0, y := 0, width := 200, height := 200, scal
     pBitmapOrignal := Gdip_CreateBitmapFromFile(inputFile)
     ; Crop to region, Scale up the image, Convert to greyscale, Increase contrast
     pBitmapFormatted := Gdip_CropResizeGreyscaleContrast(pBitmapOrignal, x, y, width, height, scaleUpPercent, 75)
-    
-	filePath := A_ScriptDir . "\temp\" .  winTitle . "_AccountPacks_crop.png"
+
+    filePath := A_ScriptDir . "\temp\" .  winTitle . "_AccountPacks_crop.png"
     Gdip_SaveBitmapToFile(pBitmap, filePath)
-	; Cleanup references
+    ; Cleanup references
     Gdip_DisposeImage(pBitmapOrignal)
     return pBitmapFormatted
 }
@@ -5178,7 +5160,7 @@ GetTextFromBitmap(pBitmap, charAllowList := "") {
     return Trim(ocrText, " `t`r`n")
 }
 
-; Escapes special characters in a string for use in a regular expression. 
+; Escapes special characters in a string for use in a regular expression.
 RegExEscape(str) {
     return RegExReplace(str, "([-[\]{}()*+?.,\^$|#\s])", "\$1")
 }
@@ -5189,7 +5171,7 @@ setRenameData() {
         LogToFile("Warning: setRenameData called but newPlayerName is empty.", "RenameLog.txt")
         return false
     }
-    
+
     SplitPath, loadedAccount, fileName
     originalFileName := fileName
     if (originalFileName = "") {
@@ -5198,12 +5180,12 @@ setRenameData() {
     }
 
     renamedFileName := ""
-    
+
     ; Check if the filename contains "P_"
     if (InStr(originalFileName, "P_")) {
         ; Scenario 1: Filename contains "P_" (e.g., 42P_20250205154233_1.xml)
         parts := StrSplit(originalFileName, "P_")
-        
+
         if (parts.Length() >= 2) {
             newNameWithoutExt := ""
             fileExtension := ""
@@ -5212,25 +5194,25 @@ setRenameData() {
             ; Split filename and extension
             SplitPath, tempParts2 , , , fileExtension, newNameWithoutExt
 
-        if (userFriendCode) {
-            if (InStr(originalFileName, "2025")) {
-                fileparts := StrSplit(originalFileName, "2025")
-                fullStringAfter2025 := fileparts[2] 
-                dates := "_" . SubStr(fullStringAfter2025, 1, 4) 
-                newNameWithoutExt := userFriendCode . dates
-                if RegExMatch(originalFileName, "\(([A-Z]+)\)", match){ 
-                    extractedContent := match1 
-                    newNameWithoutExt := newNameWithoutExt . "(" . match1 . ")"
-            }
-            } else {
-                newNameWithoutExt := userFriendCode 
-                if RegExMatch(originalFileName, "\(([A-Z]+)\)", match){ 
-                    extractedContent := match1 
-                    newNameWithoutExt := newNameWithoutExt . "(" . match1 . ")"
+            if (userFriendCode) {
+                if (InStr(originalFileName, "2025")) {
+                    fileparts := StrSplit(originalFileName, "2025")
+                    fullStringAfter2025 := fileparts[2]
+                    dates := "_" . SubStr(fullStringAfter2025, 1, 4)
+                    newNameWithoutExt := userFriendCode . dates
+                    if RegExMatch(originalFileName, "\(([A-Z]+)\)", match){
+                        extractedContent := match1
+                        newNameWithoutExt := newNameWithoutExt . "(" . match1 . ")"
+                    }
+                } else {
+                    newNameWithoutExt := userFriendCode
+                    if RegExMatch(originalFileName, "\(([A-Z]+)\)", match){
+                        extractedContent := match1
+                        newNameWithoutExt := newNameWithoutExt . "(" . match1 . ")"
+                    }
                 }
             }
-        }
-            
+
             ; Combine the new filename: XXP_NewPlayerName_YYYYMMDDHHMMSS_INSTANCE.xml
             renamedFileName := parts[1] . "P_" . newPlayerName . "_" . newNameWithoutExt . "." . fileExtension
         } else {
@@ -5243,29 +5225,29 @@ setRenameData() {
         ; Scenario 2: Filename does not contain "P_" (e.g., 20250205154233_1.xml)
         newNameWithoutExt := ""
         fileExtension := ""
-        
+
         SplitPath, originalFileName, , , fileExtension, newNameWithoutExt
 
         if(userFriendCode){
             if (InStr(originalFileName, "2025")) {
                 fileparts := StrSplit(originalFileName, "2025")
-                fullStringAfter2025 := fileparts[2] 
-                dates := "_" . SubStr(fullStringAfter2025, 1, 4) 
+                fullStringAfter2025 := fileparts[2]
+                dates := "_" . SubStr(fullStringAfter2025, 1, 4)
                 newNameWithoutExt := userFriendCode . dates
-                if RegExMatch(originalFileName, "\(([A-Z]+)\)", match){ 
-                    extractedContent := match1 
+                if RegExMatch(originalFileName, "\(([A-Z]+)\)", match){
+                    extractedContent := match1
                     newNameWithoutExt := newNameWithoutExt . "(" . match1 . ")"
                 }
 
             } else {
-            newNameWithoutExt := userFriendCode
-                if RegExMatch(originalFileName, "\(([A-Z]+)\)", match){ 
-                    extractedContent := match1 
+                newNameWithoutExt := userFriendCode
+                if RegExMatch(originalFileName, "\(([A-Z]+)\)", match){
+                    extractedContent := match1
                     newNameWithoutExt := newNameWithoutExt . "(" . match1 . ")"
                 }
             }
         }
-        
+
         ; Prepend newPlayerName: NewPlayerName_20250205154233_1.xml
         renamedFileName := newPlayerName . "_" . newNameWithoutExt . "." . fileExtension
     }
@@ -5274,7 +5256,7 @@ setRenameData() {
     saveDir := A_ScriptDir "\..\Accounts\Saved\" . winTitle
     originalFullPath := saveDir . "\" . originalFileName
     renamedFullPath := saveDir . "\" . renamedFileName
-    
+
     ; Check if new and old filenames are the same to avoid unnecessary FileMove
     if (originalFileName = renamedFileName) {
         LogToFile("Filename already contains " . newPlayerName . ", no rename needed for: " . originalFileName, "PlayerRename.txt")
@@ -5289,7 +5271,7 @@ setRenameData() {
 
     ; Perform file move
     FileMove, %originalFullPath%, %renamedFullPath%
-    
+
     ; Update global variables to reflect the new filename
     accountFileName := renamedFileName
     accountFileNameOrig := renamedFileName
@@ -5327,8 +5309,8 @@ ParseUsername(screenshotFile, x, y, w, h, targetUsername) {
         CreateStatusMessage("OCR Result: " . ocrText, , , , , true)
         ; Convert to lowercase for easier matching
         StringLower, lowerOcrText, ocrText
-        cleanedOcrText := RegExReplace(ocrText, "[^a-zA-Z0-9]", "")  ; 
-        cleanedOcrText := Trim(cleanedOcrText) 
+        cleanedOcrText := RegExReplace(ocrText, "[^a-zA-Z0-9]", "")  ;
+        cleanedOcrText := Trim(cleanedOcrText)
         renameOcrText := cleanedOcrText
         Sleep 1000
         CreateStatusMessage("Checking if OCR text starts with '" . targetUsername . "'..." . lowerOcrText, , , , , true)
@@ -5343,7 +5325,7 @@ ParseUsername(screenshotFile, x, y, w, h, targetUsername) {
                     success := False
                     LogToFile("OCR text does not match target username: " . lowerOcrText, "PlayerRename.txt")
                     forLoopBroken := True
-		
+
                     break
                 }
             }
@@ -5352,7 +5334,7 @@ ParseUsername(screenshotFile, x, y, w, h, targetUsername) {
             }
         }
     }
-    
+
     return success
 }
 
