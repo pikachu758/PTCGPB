@@ -21,6 +21,7 @@ CoordMode, Pixel, Screen
 DllCall("AllocConsole")
 WinHide % "ahk_id " DllCall("GetConsoleWindow", "ptr")
 
+global RESTART_LOOP_EXCEPTION := { message: "Restarting main loop" }
 global winTitle, changeDate, failSafe, openPack, Delay, failSafeTime, StartSkipTime, Columns, failSafe, scriptName, GPTest, StatusText, defaultLanguage, setSpeed, jsonFileName, pauseToggle, SelectedMonitorIndex, swipeSpeed, godPack, scaleParam, skipInvalidGP, deleteXML, packs, FriendID, AddFriend, Instances, showStatus, AutoSolo
 global triggerTestNeeded, testStartTime, firstRun, minStars, minStarsA2b, vipIdsURL
 global autoUseGPTest, autotest, autotest_time, A_gptest, TestTime
@@ -86,7 +87,7 @@ Loop {
         if (scaleParam = 287)
             buttonWidth := buttonWidth + 5
 
-        Gui, ToolBar:New, +Owner%OwnerWND% -AlwaysOnTop +ToolWindow -Caption +LastFound -DPIScale 
+        Gui, ToolBar:New, +Owner%OwnerWND% -AlwaysOnTop +ToolWindow -Caption +LastFound -DPIScale
         Gui, ToolBar:Default
         Gui, ToolBar:Margin, 4, 4  ; Set margin for the GUI
         Gui, ToolBar:Font, s5 cGray Norm Bold, Segoe UI  ; Normal font for input labels
@@ -97,7 +98,7 @@ Loop {
         Gui, ToolBar:Add, Button, % "x" . (buttonWidth * 4) . " y0 w" . buttonWidth . " h25 gSoloScript", Solo Battle (Shift+F8)
         Gui, ToolBar:Add, Button, % "x" . (buttonWidth * 5) . " y0 w" . buttonWidth . " h25 gTestScript", GP Test (Shift+F9)
         DllCall("SetWindowPos", "Ptr", WinExist(), "Ptr", 1  ; HWND_BOTTOM
-                , "Int", 0, "Int", 0, "Int", 0, "Int", 0, "UInt", 0x13)  ; SWP_NOSIZE, SWP_NOMOVE, SWP_NOACTIVATE
+            , "Int", 0, "Int", 0, "Int", 0, "Int", 0, "UInt", 0x13)  ; SWP_NOSIZE, SWP_NOMOVE, SWP_NOACTIVATE
         Gui, ToolBar:Show, NoActivate x%x4% y%y4%  w275 h30
         break
     }
@@ -119,26 +120,11 @@ A_gptest := 0
 
 initializeAdbShell()
 CreateStatusMessage("Initializing bot...",,,, false)
-restartGameInstance("Initializing bot...", false)
+adbShell.StdIn.WriteLine("am start -n jp.pokemon.pokemontcgp/com.unity3d.player.UnityPlayerActivity")
 pToken := Gdip_Startup()
 
 if(heartBeat)
     IniWrite, 1, %A_ScriptDir%\..\HeartBeat.ini, HeartBeat, Main
-
-failSafe := A_TickCount
-Loop { ; prevent unexpected interruption of battle
-    failSafeTime := (A_TickCount - failSafe) // 1000
-    if(FindOrLoseImage(233, 400, 264, 428, , "Points", 0, failSafeTime))
-        break
-    if(FindOrLoseImage(20, 500, 55, 530, , "Home", 0, failSafeTime))
-        break
-    if(FindOrLoseImage(120, 500, 155, 530, , "Social", 0, failSafeTime))
-        break
-    adbClick(143, 518)
-    Delay(1)
-    adbClick(40, 384)
-    Delay(1)
-}
 
 firstRun := true
 
@@ -169,59 +155,92 @@ if (scaleParam = 287) {
 99Rightx := 99Configs[clientLanguage].rightx
 
 Loop {
-    if (autoUseGPTest) {
-        autotest_time := (A_TickCount - autotest) // 1000
-        CreateStatusMessage("Last GP Test: " . autotest_time//60 .  " mins ago | Auto GP Test CD: " Max(0,(TestTime-autotest_time)//60) " mins", "AutoGPTest", 0, 605, false, true)      
-    }
-    if (GPTest) {
-        if (triggerTestNeeded)
-            GPTestScript()
-        Sleep, 1000
-        if (heartBeat && (Mod(A_Index, 60) = 0))
-            IniWrite, 1, %A_ScriptDir%\..\HeartBeat.ini, HeartBeat, Main
-        Continue
-    }
-    
-    if (AutoSolo) {
-        SoloBattle()
-        Continue
-    }
+    try{
 
-    if(heartBeat)
-        IniWrite, 1, %A_ScriptDir%\..\HeartBeat.ini, HeartBeat, Main
-    Sleep, %Delay%
-    FindImageAndClick(120, 500, 155, 530, , "Social", 143, 518, 1000, 30)
-    FindImageAndClick(226, 100, 270, 135, , "Add", 38, 460, 500)
-    FindImageAndClick(170, 450, 195, 480, , "Approve", 228, 464)
-
-    failSafe := A_TickCount
-    failSafeTime := 0
-    Loop {
-        if(FindOrLoseImage(99Leftx, 110, 99Rightx, 127, , 99Path, 0, failSafeTime)) {
-            if (autoUseGPTest && autotest_time >= TestTime) {
-                A_gptest := 1
-                ToggleTestScript()
-            }
-            break
-        } else if(FindOrLoseImage(225, 195, 250, 220, , "Pending", 0, failSafeTime)) {
-            adbClick(245, 210)
-        } else if(FindOrLoseImage(186, 496, 206, 518, , "Accept", 0, failSafeTime)) {
-            break
-        } else if(FindOrLoseImage(75, 340, 195, 530, 80, "Button", 0, failSafeTime)) {
-            Sleep, 1000
-            if(FindImageAndClick(190, 195, 215, 220, , "DeleteFriend", 169, 365, 4000)) {
-                Sleep, %Delay%
-                adbClick(210, 210)
-            }
-        } else if(FindOrLoseImage(170, 450, 195, 480, , "Approve", 1, failSafeTime)) {
-            adbClick(228, 464)
+        failSafe := A_TickCount
+        Loop { ; prevent unexpected interruption of battle
+            failSafeTime := (A_TickCount - failSafe) // 1000
+            if(FindOrLoseImage(233, 400, 264, 428, , "Points", 0, failSafeTime))
+                break
+            if(FindOrLoseImage(20, 500, 55, 530, , "Home", 0, failSafeTime))
+                break
+            if(FindOrLoseImage(120, 500, 155, 530, , "Social", 0, failSafeTime))
+                break
+            adbClick(143, 518)
+            Delay(1)
+            adbClick(40, 384)
+            Delay(1)
         }
-        if (GPTest || AutoSolo)
-            break
-        failSafeTime := (A_TickCount - failSafe) // 1000
-        CreateStatusMessage("Failsafe " . failSafeTime . "/180 seconds")
+        if (autoUseGPTest) {
+            autotest_time := (A_TickCount - autotest) // 1000
+            CreateStatusMessage("Last GP Test: " . autotest_time//60 .  " mins ago | Auto GP Test CD: " Max(0,(TestTime-autotest_time)//60) " mins", "AutoGPTest", 0, 605, false, true)
+        }
+        if (GPTest) {
+            if (triggerTestNeeded) {
+                GPTestScript()
+                if (A_gptest)   ; triggered by auto GP Test
+                    A_gptest := 0
+                else
+                    MsgBox, Ready to test.
+            }
+            Sleep, 1000
+            if (heartBeat && (Mod(A_Index, 60) = 0))
+                IniWrite, 1, %A_ScriptDir%\..\HeartBeat.ini, HeartBeat, Main
+            Continue
+        }
+
+        if (AutoSolo) {
+            SoloBattle()
+            Continue
+        }
+
+        if(heartBeat)
+            IniWrite, 1, %A_ScriptDir%\..\HeartBeat.ini, HeartBeat, Main
+        Sleep, %Delay%
+        FindImageAndClick(120, 500, 155, 530, , "Social", 143, 518, 1000, 30)
+        FindImageAndClick(226, 100, 270, 135, , "Add", 38, 460, 500)
+        FindImageAndClick(170, 450, 195, 480, , "Approve", 228, 464)
+
+        failSafe := A_TickCount
+        failSafeTime := 0
+        Loop {
+            if(FindOrLoseImage(99Leftx, 110, 99Rightx, 127, , 99Path, 0, failSafeTime)) {
+                if (autoUseGPTest && autotest_time >= TestTime) {
+                    A_gptest := 1
+                    ToggleTestScript()
+                }
+                break
+            } else if(FindOrLoseImage(225, 195, 250, 220, , "Pending", 0, failSafeTime)) {
+                adbClick(245, 210)
+            } else if(FindOrLoseImage(186, 496, 206, 518, , "Accept", 0, failSafeTime)) {
+                break
+            } else if(FindOrLoseImage(75, 340, 195, 530, 80, "Button", 0, failSafeTime)) {
+                Sleep, 1000
+                if(FindImageAndClick(190, 195, 215, 220, , "DeleteFriend", 169, 365, 4000)) {
+                    Sleep, %Delay%
+                    adbClick(210, 210)
+                }
+            } else if(FindOrLoseImage(170, 450, 195, 480, , "Approve", 1, failSafeTime)) {
+                adbClick(228, 464)
+            }
+            if (GPTest || AutoSolo)
+                break
+            failSafeTime := (A_TickCount - failSafe) // 1000
+            CreateStatusMessage("Failsafe " . failSafeTime . "/180 seconds")
+        }
     }
-    
+    catch e {
+        if (e = RESTART_LOOP_EXCEPTION) {
+            CreateStatusMessage("Restarting mission loop...",,,, false)
+            sleep, 1000
+            continue
+        }
+        else {
+            LogToFile("Error message : " . e.message, "Error.txt")
+            ExitApp
+        }
+    }
+
 }
 return
 
@@ -456,7 +475,7 @@ resetWindows(){
     return true
 }
 
-restartGameInstance(reason, RL := true, isFirstRun := false) {
+restartGameInstance(reason, RL := true) {
     global Delay, scriptName, adbShell, adbPath, adbPort
     initializeAdbShell()
 
@@ -464,17 +483,11 @@ restartGameInstance(reason, RL := true, isFirstRun := false) {
         CreateStatusMessage("Restarting game reason:`n" . reason)
     else
         CreateStatusMessage("Restarting game...",,,, false)
-    if (!isFirstRun) 
-        adbShell.StdIn.WriteLine("am force-stop jp.pokemon.pokemontcgp")
-    ;adbShell.StdIn.WriteLine("rm -rf /data/data/jp.pokemon.pokemontcgp/cache/*") ; clear cache
-    Sleep, 3000
-    adbShell.StdIn.WriteLine("am start -n jp.pokemon.pokemontcgp/com.unity3d.player.UnityPlayerActivity")
+    adbShell.StdIn.WriteLine("am start -S jp.pokemon.pokemontcgp/com.unity3d.player.UnityPlayerActivity")
 
-    Sleep, 3000
-    if(RL) {
-        LogToFile("Restarted game for instance " . scriptName . ". Reason: " reason, "Restart.txt")
-        Reload
-    }
+    LogToFile("Restarted game for instance " . scriptName . ". Reason: " reason, "Restart.txt")
+    throw RESTART_LOOP_EXCEPTION
+
 }
 
 ControlClick(X, Y) {
@@ -535,7 +548,6 @@ return
 SoloScript:
     ToggleSoloScript()
 return
-
 
 ReloadScript:
     Reload
@@ -808,7 +820,6 @@ RemoveNonVipFriends() {
     if (vipIdsURL != "" && !DownloadFile(vipIdsURL, "vip_ids.txt")) {
         CreateStatusMessage("Failed to download vip_ids.txt. Aborting test...",,,, false)
         if(A_gptest && autoUseGPTest) {
-            A_gptest := 0
             ToggleTestScript()
         }
         autotest := A_TickCount
@@ -820,7 +831,6 @@ RemoveNonVipFriends() {
     if (!vipFriendsArray.MaxIndex()) {
         CreateStatusMessage("No accounts found in vip_ids.txt. Aborting test...",,,, false)
         if(A_gptest && autoUseGPTest) {
-            A_gptest := 0
             ToggleTestScript()
         }
         autotest := A_TickCount
@@ -829,15 +839,14 @@ RemoveNonVipFriends() {
 
     friendIndex := 0
     repeatFriendAccounts := 0
-	scrolledWithoutFriend := 0
+    scrolledWithoutFriend := 0
     recentFriendAccounts := []
     Loop {
         if (scrolledWithoutFriend > 5){
             CreateStatusMessage("End of list - scrolled without friend codes multiple times.`nReady to test.")
             if(A_gptest && autoUseGPTest) {
-                A_gptest := 0
                 ToggleTestScript()
-			}
+            }
             autotest := A_TickCount
             return
         }
@@ -863,10 +872,9 @@ RemoveNonVipFriends() {
                     CreateStatusMessage("Ready to test.",,,, false)
                 adbClick(143, 507)
                 if(A_gptest && autoUseGPTest) {
-					A_gptest := 0
-					ToggleTestScript()
-				}
-				autotest := A_TickCount
+                    ToggleTestScript()
+                }
+                autotest := A_TickCount
                 return
             }
             matchedFriend := ""
@@ -880,8 +888,8 @@ RemoveNonVipFriends() {
                 ; If it's a VIP friend, skip removal
                 if (isVipResult) {
                     CreateStatusMessage("Parsed friend: " . friendAccount.ToString() . "`nMatched VIP: " . matchedFriend.ToString() . "`nSkipping VIP...",,,, false)
-					scrolledWithoutFriend := 0
-				}
+                    scrolledWithoutFriend := 0
+                }
                 Sleep, 1500 ; Time to read
                 FindImageAndClick(226, 100, 270, 135, , "Add", 143, 507, 500)
                 Delay(2)
@@ -911,7 +919,7 @@ RemoveNonVipFriends() {
                 Delay(1)
                 FindImageAndClick(226, 100, 270, 135, , "Add", 143, 507, 500)
                 Delay(3)
-				scrolledWithoutFriend := 0
+                scrolledWithoutFriend := 0
             }
         }
         else {
@@ -933,10 +941,10 @@ RemoveNonVipFriends() {
                 FindImageAndClick(226, 100, 270, 135, , "Add", 143, 508, 500)
                 Delay(3)
             }
-			scrolledWithoutFriend++
+            scrolledWithoutFriend++
         }
         if (!GPTest) {
-			autotest := A_TickCount
+            autotest := A_TickCount
             return
         }
     }
@@ -1335,17 +1343,7 @@ SoloBattle() {
         if(FindOrLoseImage(119, 356, 180, 363, , "stamina", 0)) ; if no stamina, exit
             break
 
-        failSafe := A_TickCount
-        Loop {
-            failSafeTime := (A_TickCount - failSafe) // 1000
-            adbClick(189, 517)
-            Delay(5)
-            if(FindOrLoseImage(191, 383, 223, 416, , "Solo2", 0, failSafeTime)) {
-                failSafeTime := 0
-                break
-            }
-            CreateStatusMessage("In Battle. " . failSafeTime "/600 seconds")
-        }
+        FindImageAndClick(191, 383, 223, 416, , "Solo2",189, 517, 5000)
     }
 
     AutoSolo := False
