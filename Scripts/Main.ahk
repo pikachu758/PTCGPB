@@ -121,6 +121,7 @@ A_gptest := 0
 initializeAdbShell()
 CreateStatusMessage("Initializing bot...",,,, false)
 adbShell.StdIn.WriteLine("am start -n jp.pokemon.pokemontcgp/com.unity3d.player.UnityPlayerActivity")
+sleep, 5000
 pToken := Gdip_Startup()
 
 if(heartBeat)
@@ -154,23 +155,23 @@ if (scaleParam = 287) {
 99Leftx := 99Configs[clientLanguage].leftx
 99Rightx := 99Configs[clientLanguage].rightx
 
+failSafe := A_TickCount
+Loop { ; prevent unexpected interruption of battle
+    failSafeTime := (A_TickCount - failSafe) // 1000
+    if(FindOrLoseImage(233, 400, 264, 428, , "Points", 0, failSafeTime))
+        break
+    if(FindOrLoseImage(20, 500, 55, 530, , "Home", 0, failSafeTime))
+        break
+    if(FindOrLoseImage(120, 500, 155, 530, , "Social", 0, failSafeTime))
+        break
+    adbClick(143, 518)
+    Delay(1)
+    adbClick(40, 384)
+    Delay(1)
+}
+
 Loop {
     try{
-
-        failSafe := A_TickCount
-        Loop { ; prevent unexpected interruption of battle
-            failSafeTime := (A_TickCount - failSafe) // 1000
-            if(FindOrLoseImage(233, 400, 264, 428, , "Points", 0, failSafeTime))
-                break
-            if(FindOrLoseImage(20, 500, 55, 530, , "Home", 0, failSafeTime))
-                break
-            if(FindOrLoseImage(120, 500, 155, 530, , "Social", 0, failSafeTime))
-                break
-            adbClick(143, 518)
-            Delay(1)
-            adbClick(40, 384)
-            Delay(1)
-        }
         if (autoUseGPTest) {
             autotest_time := (A_TickCount - autotest) // 1000
             CreateStatusMessage("Last GP Test: " . autotest_time//60 .  " mins ago | Auto GP Test CD: " Max(0,(TestTime-autotest_time)//60) " mins", "AutoGPTest", 0, 605, false, true)
@@ -233,6 +234,20 @@ Loop {
         if (e = RESTART_LOOP_EXCEPTION) {
             CreateStatusMessage("Restarting mission loop...",,,, false)
             sleep, 1000
+            failSafe := A_TickCount
+            Loop { ; prevent unexpected interruption of battle
+                failSafeTime := (A_TickCount - failSafe) // 1000
+                if(FindOrLoseImage(233, 400, 264, 428, , "Points", 0, failSafeTime))
+                    break
+                if(FindOrLoseImage(20, 500, 55, 530, , "Home", 0, failSafeTime))
+                    break
+                if(FindOrLoseImage(120, 500, 155, 530, , "Social", 0, failSafeTime))
+                    break
+                adbClick(143, 518)
+                Delay(1)
+                adbClick(40, 384)
+                Delay(1)
+            }
             continue
         }
         else {
