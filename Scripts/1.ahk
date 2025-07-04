@@ -261,9 +261,6 @@ if(injectMethod && DeadCheck != 1) {
 
 clearMissionCache()
 
-if(!injectMethod || !loadedAccount)
-    restartGameInstance("Initializing bot...", false)
-
 pToken := Gdip_Startup()
 packsInPool := 0
 packsThisRun := 0
@@ -309,14 +306,14 @@ Loop {
 
             if (avgtotalSeconds > 0 ) {
                 StartTime := changeDate
-                StartTime += -(0.8*avgtotalSeconds), Seconds
+                StartTime += -(1.0*avgtotalSeconds), Seconds
                 EndTime := changeDate
                 EndTime += (0.2*avgtotalSeconds), Seconds
             } else {
                 StartTime := changeDate
                 StartTime += -5, minutes
                 EndTime := changeDate
-                EndTime += 2, minutes
+                EndTime += 1, minutes
             }
 
             StartCurrentTimeDiff := A_Now
@@ -879,13 +876,12 @@ Loop {
     catch e {
         if (e = RESTART_LOOP_EXCEPTION) {
             CreateStatusMessage("Restarting mission loop...",,,, false)
-            sleep, 1000
-            continue
         }
         else {
-            LogToFile("Error message : " . e.message, "Error.txt")
-            ExitApp
+            LogToFile("Instance " scriptName ": Error in " e.What ", which was called at line " e.Line, "Error.txt")
         }
+        sleep, 1000
+        continue
     }
 }
 
@@ -1102,11 +1098,6 @@ RemoveFriends() {
     IniWrite, 0, %A_ScriptDir%\%scriptName%.ini, UserSettings, DeadCheck
     friended := false
     CreateStatusMessage("Friends removed successfully!",,,, false)
-
-    if(stopToggle) {
-        CreateStatusMessage("Stopping...",,,, false)
-        ExitApp
-    }
 }
 
 TradeTutorial() {
@@ -1713,35 +1704,36 @@ restartGameInstance(reason, RL := true) {
 
     ;Screenshot("restartGameInstance")
 
-    if (stopToggle) {
-        CreateStatusMessage("Stopping...",,,, false)
-        ;TODO force stop, remove account
-        ExitApp
-    }
+    
     if (Debug)
         CreateStatusMessage("Restarting game reason:`n" . reason)
     else if (InStr(reason, "Stuck"))
         CreateStatusMessage("Stuck! Restarting game...",,,, false)
     else
         CreateStatusMessage("Restarting game...",,,, false)
+    LogToFile("Restarted game for instance " . scriptName . ". Reason: " reason, "Restart.txt")
 
     if (RL = "GodPack") {
-        LogToFile("Restarted game for instance " . scriptName . ". Reason: " reason, "Restart.txt")
         IniWrite, 0, %A_ScriptDir%\%scriptName%.ini, UserSettings, DeadCheck
         AppendToJsonFile(packsThisRun)
         loadedAccount := loadAccount()
+        throw RESTART_LOOP_EXCEPTION
     } else {
         if (!RL && DeadCheck = 0) {
-            waitadb()
+            if (stopToggle) {
+                CreateStatusMessage("Stopping...",,,, false)
+                ;TODO force stop, remove account
+                ExitApp
+            }
             adbShell.StdIn.WriteLine("am force-stop jp.pokemon.pokemontcgp")
             waitadb()
             clearMissionCache()
             adbShell.StdIn.WriteLine("rm /data/data/jp.pokemon.pokemontcgp/shared_prefs/deviceAccount:.xml") ; delete account data
             ;TODO improve friend list cluter with deadcheck/stuck at, for injection. need to check also loadAccount at the beggining
             waitadb()
-            adbShell.StdIn.WriteLine("am start -n jp.pokemon.pokemontcgp/com.unity3d.player.UnityPlayerActivity")
+            adbShell.StdIn.WriteLine("am start -W -n jp.pokemon.pokemontcgp/com.unity3d.player.UnityPlayerActivity -f 0x10018000")
             waitadb()
-            Sleep, 5000
+            Sleep, 500
         }
         else {
             AppendToJsonFile(packsThisRun)
@@ -1755,16 +1747,13 @@ restartGameInstance(reason, RL := true) {
                     ;LogToDiscord(logMessage,, true)
                 }
             }
-            LogToFile("Restarted game for instance " . scriptName . ". Reason: " reason, "Restart.txt")
+            ; Reliably restart the app: Force-stop, wait for launch, and start in a clean, new task without animation.
+            adbShell.StdIn.WriteLine("am start -S -W -n jp.pokemon.pokemontcgp/com.unity3d.player.UnityPlayerActivity -f 0x10018000")
             waitadb()
-            adbShell.StdIn.WriteLine("am force-stop jp.pokemon.pokemontcgp")
-            waitadb()
-            adbShell.StdIn.WriteLine("am start -n jp.pokemon.pokemontcgp/com.unity3d.player.UnityPlayerActivity")
-            waitadb()
-            sleep, 5000
+            sleep, 500
+            throw RESTART_LOOP_EXCEPTION
         }
     }
-    throw RESTART_LOOP_EXCEPTION
 }
 
 menuDelete() {
@@ -2389,7 +2378,7 @@ GodPackFound(validity) {
         LogToDiscord(logMessage, screenShot, true, (sendAccountXml ? accountFullPath : ""), fcScreenshot)
         ;ChooseTag()
     } else if (!InvalidCheck) {
-        LogToDiscord(logMessage, screenShot, true, (sendAccountXml ? accountFullPath : ""), fcScreenshot)
+        LogToDiscord(logMessage, screenShot, true, (sendAccountXml ? accountFullPath : ""))
     }
 }
 
@@ -2485,8 +2474,6 @@ loadAccount() {
         return false
     }
 
-    ; OPTIMIZED ADB OPERATIONS - Reduced delays
-    waitadb()
     adbShell.StdIn.WriteLine("am force-stop jp.pokemon.pokemontcgp")
     waitadb()
     RunWait, % adbPath . " -s 127.0.0.1:" . adbPort . " push " . loadFile . " /sdcard/deviceAccount.xml",, Hide
@@ -2495,8 +2482,8 @@ loadAccount() {
     waitadb()
     adbShell.StdIn.WriteLine("rm /sdcard/deviceAccount.xml")
     waitadb()
-    Sleep, 1000  ; Reduced from 3000
-    adbShell.StdIn.WriteLine("am start -n jp.pokemon.pokemontcgp/com.unity3d.player.UnityPlayerActivity")
+    ; Reliably restart the app: Wait for launch, and start in a clean, new task without animation.
+    adbShell.StdIn.WriteLine("am start -W -n jp.pokemon.pokemontcgp/com.unity3d.player.UnityPlayerActivity -f 0x10018000")
     waitadb()
     Sleep, 500   ; Reduced from 1000
     ; Parse account filename for pack info (unchanged)
@@ -2944,10 +2931,7 @@ return
 ToggleStop() {
     global stopToggle, friended
     stopToggle := true
-    if (!friended)
-        ExitApp
-    else
-        CreateStatusMessage("Stopping script at the end of the run...",,,, false)
+    CreateStatusMessage("Stopping script at the end of the run...",,,, false)
 }
 
 ToggleTestScript() {
@@ -4102,7 +4086,7 @@ HourglassOpening(HG := false, NEIRestart := true) {
         if(cantOpenMorePacks)
             return
 
-        if(FindOrLoseImage(100, 240, 185, 275, , "Error", 0, failSafeTime)){
+        if(FindOrLoseImage(191, 393, 211, 411, , "Shop", 0, failSafeTime)){
             SelectPack("HGPack")
         }
 
@@ -4204,6 +4188,8 @@ getFriendCode() {
             restartGameInstance("Stuck at Home")
     }
     friendCode := AddFriends(false, true)
+    if(!friendCode)
+        friendCode := "0000000000000000"
 
     return friendCode
 }
@@ -4932,7 +4918,7 @@ GetEventRewards(frommain := true){
 
 GetAllRewards(tomain := true, dailies := false) {
     FindImageAndClick(2, 85, 34, 120, , "Missions", 261, 478, 500)
-    Delay(4)
+    FindImageAndClick(244, 406, 273, 449, , "GotAllMissions", 172, 427, 500)
     failSafe := A_TickCount
     failSafeTime := 0
     GotRewards := true
@@ -4940,8 +4926,8 @@ GetAllRewards(tomain := true, dailies := false) {
         FindImageAndClick(37, 130, 64, 156, , "DailyMissions", 165, 465, 500)
     }
     Loop {
-        Delay(2)
         adbClick(172, 427)
+        Delay(1)
 
         if(dailies) {
             FindImageAndClick(73, 151, 210, 173, , "CollectDailies", 250, 135, 500)
