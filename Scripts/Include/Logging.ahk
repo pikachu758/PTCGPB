@@ -128,8 +128,13 @@ LogToDiscord(message, screenshotFile := "", ping := false, xmlFile := "", screen
     if (webhookURL != "") {
         MaxRetries := 10
         RetryCount := 0
-        RegRead, proxyEnabled, HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Internet Settings, ProxyEnable
-        RegRead, proxyServer, HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Internet Settings, ProxyServer
+        try {
+            RegRead, proxyEnabled, HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Internet Settings, ProxyEnable
+            RegRead, proxyServer, HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Internet Settings, ProxyServer
+        } Catch {
+            ProxyEnable := false
+            ProxyServer := ""
+        }
         if (proxyEnabled) {
             curlChar := "curl -k -x " . proxyServer . "/ " 
         } else {
