@@ -14,7 +14,7 @@ global STATIC_BRUSH := 0
 
 githubUser := "pikachu758"
 repoName := "PTCGPB"
-localVersion := "v6.5.1"
+localVersion := "v6.5.2"
 scriptFolder := A_ScriptDir
 zipPath := A_Temp . "\update.zip"
 extractPath := A_Temp . "\update"
@@ -4236,7 +4236,7 @@ StartBot:
         metricFile := A_ScriptDir . "\Scripts\" . A_Index . ".ini"
         if (FileExist(metricFile)) {
             IniWrite, 0, %metricFile%, Metrics, LastEndEpoch
-            IniWrite, 0, %metricFile%, UserSettings, DeadCheck
+            ; IniWrite, 0, %metricFile%, UserSettings, DeadCheck
             IniWrite, 0, %metricFile%, Metrics, rerolls
             now := A_TickCount
             IniWrite, %now%, %metricFile%, Metrics, rerollStartTime
