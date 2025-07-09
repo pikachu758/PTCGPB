@@ -120,6 +120,7 @@ A_gptest := 0
 
 initializeAdbShell()
 CreateStatusMessage("Initializing bot...",,,, false)
+adbShell.StdIn.WriteLine("rm /data/data/jp.pokemon.pokemontcgp/files/UserPreferences/v1/SoloBattleResumeUserPrefs")
 adbShell.StdIn.WriteLine("am start -n jp.pokemon.pokemontcgp/com.unity3d.player.UnityPlayerActivity")
 sleep, 5000
 pToken := Gdip_Startup()
@@ -154,21 +155,6 @@ if (scaleParam = 287) {
 99Path := "99" . clientLanguage
 99Leftx := 99Configs[clientLanguage].leftx
 99Rightx := 99Configs[clientLanguage].rightx
-
-failSafe := A_TickCount
-Loop { ; prevent unexpected interruption of battle
-    failSafeTime := (A_TickCount - failSafe) // 1000
-    if(FindOrLoseImage(233, 400, 264, 428, , "Points", 0, failSafeTime))
-        break
-    if(FindOrLoseImage(20, 500, 55, 530, , "Home", 0, failSafeTime))
-        break
-    if(FindOrLoseImage(120, 500, 155, 530, , "Social", 0, failSafeTime))
-        break
-    adbClick(143, 518)
-    Delay(1)
-    adbClick(40, 384)
-    Delay(1)
-}
 
 Loop {
     try{
@@ -231,29 +217,12 @@ Loop {
         }
     }
     catch e {
-        if (e = RESTART_LOOP_EXCEPTION) {
-            CreateStatusMessage("Restarting mission loop...",,,, false)
-            sleep, 1000
-            failSafe := A_TickCount
-            Loop { ; prevent unexpected interruption of battle
-                failSafeTime := (A_TickCount - failSafe) // 1000
-                if(FindOrLoseImage(233, 400, 264, 428, , "Points", 0, failSafeTime))
-                    break
-                if(FindOrLoseImage(20, 500, 55, 530, , "Home", 0, failSafeTime))
-                    break
-                if(FindOrLoseImage(120, 500, 155, 530, , "Social", 0, failSafeTime))
-                    break
-                adbClick(143, 518)
-                Delay(1)
-                adbClick(40, 384)
-                Delay(1)
-            }
-            continue
+        if (e != RESTART_LOOP_EXCEPTION) {
+            LogToFile("Instance " scriptName ": Error in " e.What ", which was called at line " e.Line, "Error.txt")
         }
-        else {
-            LogToFile("Error message : " . e.message, "Error.txt")
-            ExitApp
-        }
+        CreateStatusMessage("Restarting mission loop...",,,, false)
+        sleep, 1000
+        continue
     }
 
 }
@@ -498,9 +467,12 @@ restartGameInstance(reason, RL := true) {
         CreateStatusMessage("Restarting game reason:`n" . reason)
     else
         CreateStatusMessage("Restarting game...",,,, false)
-    adbShell.StdIn.WriteLine("am start -S jp.pokemon.pokemontcgp/com.unity3d.player.UnityPlayerActivity")
-
     LogToFile("Restarted game for instance " . scriptName . ". Reason: " reason, "Restart.txt")
+
+    adbShell.StdIn.WriteLine("rm /data/data/jp.pokemon.pokemontcgp/files/UserPreferences/v1/SoloBattleResumeUserPrefs")
+    waitadb()
+    adbShell.StdIn.WriteLine("am start -S -n jp.pokemon.pokemontcgp/com.unity3d.player.UnityPlayerActivity")
+    Sleep, 5000
     throw RESTART_LOOP_EXCEPTION
 
 }
@@ -632,7 +604,7 @@ AppendToJsonFile(variableValue) {
     jsonContent .= "{""time"": """ A_Now """, ""variable"": " variableValue "}]"
 
     ; Write the updated JSON back to the file
-    FileDelete, %jsonFileName%
+    Try FileDelete, %jsonFileName%
     FileAppend, %jsonContent%, %jsonFileName%
 }
 
@@ -665,7 +637,7 @@ SumVariablesInJsonFile() {
     ; Write the total sum to a file called "total.json"
     totalFile := A_ScriptDir . "\json\total.json"
     totalContent := "{""total_sum"": " sum "}"
-    FileDelete, %totalFile%
+    Try FileDelete, %totalFile%
     FileAppend, %totalContent%, %totalFile%
 
     return sum
@@ -1094,8 +1066,7 @@ GetFriendAccountsFromFile(filePath, ByRef includesIdsAndNames) {
     global minStars, minStarsA2b
     friendList := []  ; Create an empty array
     includesIdsAndNames := false
-
-    FileRead, fileContent, %filePath%
+    Try FileRead, fileContent, %filePath%
     if (ErrorLevel) {
         MsgBox, Failed to read file!
         return friendList  ; Return empty array if file can't be read
@@ -1326,7 +1297,7 @@ DownloadFile(url, filename) {
         errored := true
     }
     if(!errored) {
-        FileDelete, %localPath%
+        Try FileDelete, %localPath%
         FileAppend, %contents%, %localPath%
     }
     return !errored
