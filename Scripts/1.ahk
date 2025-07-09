@@ -254,11 +254,6 @@ createAccountList(scriptName)
 rerolls_local := 0
 rerollStartTime_local := A_TickCount
 
-if(injectMethod && DeadCheck != 1) {
-    loadedAccount := loadAccount()
-    nukeAccount := false
-}
-
 clearMissionCache()
 
 pToken := Gdip_Startup()
@@ -276,7 +271,10 @@ Loop {
         if(DeadCheck = 1 && deleteMethod != "13 Pack") {
             CreateStatusMessage("Account is stuck! Restarting and unfriending...")
             friended := true
-            CreateStatusMessage("Stuck account still has friends. Unfriending accounts...")
+            ; Reliably restart the app: Force-stop, wait for launch, and start in a clean, new task without animation.
+            adbShell.StdIn.WriteLine("am start -S -W -n jp.pokemon.pokemontcgp/com.unity3d.player.UnityPlayerActivity -f 0x10018000")
+            waitadb()
+            sleep, 500
             FindImageAndClick(25, 145, 70, 170, , "Platin", 18, 109, 2000) ; click mod settings
             if(setSpeed = 3)
                 FindImageAndClick(182, 170, 194, 190, , "Three", 187, 180) ; click mod settings
@@ -288,10 +286,13 @@ Loop {
             DeadCheck := 0
             IniWrite, 0, %A_ScriptDir%\%scriptName%.ini, UserSettings, DeadCheck
             createAccountList(scriptName)
+            loadedAccount := false
             continue
         } else if(DeadCheck = 1 && deleteMethod = "13 Pack") {
             CreateStatusMessage("New account creation is stuck! Deleting account...")
             menuDeleteStart()
+            DeadCheck := 0
+            IniWrite, 0, %A_ScriptDir%\%scriptName%.ini, UserSettings, DeadCheck
             continue
         } else {
             ; in injection mode, we dont need to reload
@@ -496,8 +497,8 @@ Loop {
                     SplitPath, loadedAccount, fileName
                     LogToFile("New Player Name: " newPlayerName " | File: " fileName, "PlayerRename.txt")
                     ; Clean up temp file
-                    if (FileExist(profileUsernameScreenshot))
-                        FileDelete, %profileUsernameScreenshot%
+                    
+                    Try FileDelete, %profileUsernameScreenshot%
                     if(loadedAccount && renameAndSaveAndReload) {
                         renamedDir := A_ScriptDir . "\..\Accounts\RenamedPlayer\"
                         if !FileExist(renamedDir)
@@ -511,8 +512,7 @@ Loop {
                     }
                 } else {
                     ; Clean up temp file if no restriction found
-                    if (FileExist(profileUsernameScreenshot))
-                        FileDelete, %profileUsernameScreenshot%
+                    Try FileDelete, %profileUsernameScreenshot%
 
                     Loop {
                         adbClick_wbb(217, 284)
@@ -584,8 +584,7 @@ Loop {
                         ;LogToFile("New Player Name: " newPlayerName " | File: " fileName, "PlayerRename.txt")
 
                         ; Clean up temp file
-                        if (FileExist(profileUsernameScreenshot))
-                            FileDelete, %profileUsernameScreenshot%
+                        Try FileDelete, %profileUsernameScreenshot%
                         if(loadedAccount && renameAndSaveAndReload) {
                             renamedDir := A_ScriptDir . "\..\Accounts\RenamedPlayer\"
                             if !FileExist(renamedDir)
@@ -832,6 +831,9 @@ Loop {
 
             AppendToJsonFile(packsThisRun)
 
+            DeadCheck := 0
+            IniWrite, 0, %A_ScriptDir%\%scriptName%.ini, UserSettings, DeadCheck
+
             ; Check for 40 first to quit
             if (deleteMethod = "Inject" || deleteMethod = "Inject Missions" && accountOpenPacks >= maxAccountPackNum) {
                 if (injectMethod && loadedAccount) {
@@ -875,7 +877,7 @@ Loop {
     }
     catch e {
         if (e = RESTART_LOOP_EXCEPTION) {
-            CreateStatusMessage("Restarting mission loop...",,,, false)
+            CreateStatusMessage("Restarting main loop...",,,, false)
         }
         else {
             LogToFile("Instance " scriptName ": Error in " e.What ", which was called at line " e.Line, "Error.txt")
@@ -1095,7 +1097,6 @@ RemoveFriends() {
 
     ; Exit friend removal process
     CreateStatusMessage("Friend removal completed. Processed " . friendsProcessed . " friends. Returning to main...",,,, false)
-    IniWrite, 0, %A_ScriptDir%\%scriptName%.ini, UserSettings, DeadCheck
     friended := false
     CreateStatusMessage("Friends removed successfully!",,,, false)
 }
@@ -1178,9 +1179,6 @@ AddFriends(renew := false, getFC := false) {
         friendCode := Clipboard
         return friendCode
     }
-    else {
-        IniWrite, 1, %A_ScriptDir%\%scriptName%.ini, UserSettings, DeadCheck
-    }
 
     ; start adding friends
     if(!friendIDs)
@@ -1255,6 +1253,9 @@ AddFriends(renew := false, getFC := false) {
         CreateStatusMessage("Waiting for friends to accept request`n(" . A_Index . "/" . waitTime . " seconds)")
         sleep, 1000
     }
+    
+    IniWrite, 1, %A_ScriptDir%\%scriptName%.ini, UserSettings, DeadCheck
+    DeadCheck := 1
     return n ;return added friends so we can dynamically update the .txt in the middle of a run without leaving friends at the end
 }
 
@@ -1385,8 +1386,10 @@ FindOrLoseImage(X1, Y1, X2, Y2, searchVariation := "", imageName := "DEFAULT", E
             waitadb()
             CreateStatusMessage("Loaded deleted account. Deleting XML...",,,, false)
             if(loadedAccount) {
-                FileDelete, %loadedAccount%
+                Try FileDelete, %loadedAccount%
                 IniWrite, 0, %A_ScriptDir%\%scriptName%.ini, UserSettings, DeadCheck
+                DeadCheck := 0
+                loadedAccount := false
             }
             LogToFile("Restarted game for instance " . scriptName . ". Reason: No save data found", "Restart.txt")
             throw RESTART_LOOP_EXCEPTION
@@ -1537,8 +1540,6 @@ FindImageAndClick(X1, Y1, X2, Y2, searchVariation := "", imageName := "DEFAULT",
             }
             if (ElapsedTime >= FSTime || safeTime >= FSTime) {
                 CreateStatusMessage("Instance " . scriptName . " has been stuck for 90s. Killing it...")
-                if (injectMethod)
-                    RemoveFriends()
                 restartGameInstance("Stuck at " . imageName . "...") ; change to reset the instance and delete data then reload script
             }
         }
@@ -1571,8 +1572,10 @@ FindImageAndClick(X1, Y1, X2, Y2, searchVariation := "", imageName := "DEFAULT",
                 waitadb()
                 CreateStatusMessage("Loaded deleted account. Deleting XML...",,,, false)
                 if(loadedAccount) {
-                    FileDelete, %loadedAccount%
+                    Try FileDelete, %loadedAccount%
                     IniWrite, 0, %A_ScriptDir%\%scriptName%.ini, UserSettings, DeadCheck
+                    DeadCheck := 0
+                    loadedAccount := false
                 }
                 LogToFile("Restarted game for instance " . scriptName . ". Reason: No save data found", "Restart.txt")
                 throw RESTART_LOOP_EXCEPTION
@@ -1702,9 +1705,8 @@ DirectlyPositionWindow() {
 restartGameInstance(reason, RL := true) {
     global friended, scriptName, packsThisRun, injectMethod, loadedAccount, DeadCheck, starCount, packsInPool, openPack, invalid, accountFile, username, stopToggle
 
-    ;Screenshot("restartGameInstance")
+    Screenshot("restartGameInstance", "Restart")
 
-    
     if (Debug)
         CreateStatusMessage("Restarting game reason:`n" . reason)
     else if (InStr(reason, "Stuck"))
@@ -1714,22 +1716,21 @@ restartGameInstance(reason, RL := true) {
     LogToFile("Restarted game for instance " . scriptName . ". Reason: " reason, "Restart.txt")
 
     if (RL = "GodPack") {
-        IniWrite, 0, %A_ScriptDir%\%scriptName%.ini, UserSettings, DeadCheck
         AppendToJsonFile(packsThisRun)
-        loadedAccount := loadAccount()
+        DeadCheck := 0
+        IniWrite, 0, %A_ScriptDir%\%scriptName%.ini, UserSettings, DeadCheck
+        loadedAccount := false
         throw RESTART_LOOP_EXCEPTION
     } else {
         if (!RL && DeadCheck = 0) {
             if (stopToggle) {
                 CreateStatusMessage("Stopping...",,,, false)
-                ;TODO force stop, remove account
                 ExitApp
             }
             adbShell.StdIn.WriteLine("am force-stop jp.pokemon.pokemontcgp")
             waitadb()
             clearMissionCache()
             adbShell.StdIn.WriteLine("rm /data/data/jp.pokemon.pokemontcgp/shared_prefs/deviceAccount:.xml") ; delete account data
-            ;TODO improve friend list cluter with deadcheck/stuck at, for injection. need to check also loadAccount at the beggining
             waitadb()
             adbShell.StdIn.WriteLine("am start -W -n jp.pokemon.pokemontcgp/com.unity3d.player.UnityPlayerActivity -f 0x10018000")
             waitadb()
@@ -1737,20 +1738,6 @@ restartGameInstance(reason, RL := true) {
         }
         else {
             AppendToJsonFile(packsThisRun)
-            ;if(!injectMethod || !loadedAccount)
-            if(!injectMethod) {
-                if (menuDeleteStart()) {
-                    IniWrite, 0, %A_ScriptDir%\%scriptName%.ini, UserSettings, DeadCheck
-                    logMessage := "\n" . username . "\n[" . (starCount ? starCount : "0") . "/5][" . (packsInPool ? packsInPool : 0) . "P][" . openPack . "] " . (invalid ? invalid . " God Pack" : "Some sort of pack") . " found in instance: " . scriptName . "\nFile name: " . accountFile . "\nGot stuck doing something. Check Log_" . scriptName . ".txt."
-                    LogToFile(Trim(StrReplace(logMessage, "\n", " ")))
-                    ; Logging to Discord is temporarily disabled until all of the scenarios which could cause the script to end up here are fully understood.
-                    ;LogToDiscord(logMessage,, true)
-                }
-            }
-            ; Reliably restart the app: Force-stop, wait for launch, and start in a clean, new task without animation.
-            adbShell.StdIn.WriteLine("am start -S -W -n jp.pokemon.pokemontcgp/com.unity3d.player.UnityPlayerActivity -f 0x10018000")
-            waitadb()
-            sleep, 500
             throw RESTART_LOOP_EXCEPTION
         }
     }
@@ -1888,9 +1875,6 @@ menuDeleteStart() {
         failSafeTime := (A_TickCount - failSafe) // 1000
         CreateStatusMessage("Waiting for Country/Menu`n(" . failSafeTime . "/45 seconds)")
     }
-    if(loadedAccount) {
-        ;    FileDelete, %loadedAccount%
-    }
 }
 
 CheckPack() {
@@ -1924,14 +1908,17 @@ CheckPack() {
     if (foundInvalid) {
         ; Pack is invalid...
         foundInvalidGP := FindGodPack(true) ; GP is never ignored
-        if (!foundInvalidGP && !InvalidCheck) {
+        if(foundInvalidGP) {
+            restartGameInstance("Invalid God Pack found. Continuing...", "GodPack")
+        }
+        else if (!InvalidCheck) {
             ; If not a GP and not "ignore invalid packs" , check what cards the current pack contains which make it invalid, and if user want to save them.
-            if (ShinyCheck && foundShiny && !foundLabel)
-                foundLabel := "Shiny"
-            if (ImmersiveCheck && foundImmersive && !foundLabel)
-                foundLabel := "Immersive"
             if (CrownCheck && foundCrown && !foundLabel)
                 foundLabel := "Crown"
+            if (ImmersiveCheck && foundImmersive && !foundLabel)
+                foundLabel := "Immersive"
+            if (ShinyCheck && foundShiny && !foundLabel)
+                foundLabel := "Shiny"
 
             ; Report invalid cards found.
             if (foundLabel) {
@@ -1939,9 +1926,6 @@ CheckPack() {
                 restartGameInstance(foundLabel . " found. Continuing...", "GodPack")
             }
         }
-
-        IniWrite, 0, %A_ScriptDir%\%scriptName%.ini, UserSettings, DeadCheck
-
         return
     }
 
@@ -1953,7 +1937,6 @@ CheckPack() {
             ;accountFoundGP()
             accountHasPackInTesting := 1
             setMetaData()
-            IniWrite, 0, %A_ScriptDir%\%scriptName%.ini, UserSettings, DeadCheck
         }
 
         restartGameInstance("God Pack found. Continuing...", "GodPack")
@@ -1999,7 +1982,6 @@ CheckPack() {
                 ;accountFoundGP()
                 accountHasPackInTesting := 1
                 setMetaData()
-                IniWrite, 0, %A_ScriptDir%\%scriptName%.ini, UserSettings, DeadCheck
             }
 
             FoundStars(foundLabel)
@@ -2076,7 +2058,7 @@ CheckPack() {
 
 FoundTradeable(found3Dmnd := 0, found4Dmnd := 0, found1Star := 0, foundGimmighoul := 0) {
     ; Not dead.
-    IniWrite, 0, %A_ScriptDir%\%scriptName%.ini, UserSettings, DeadCheck
+    IniWrite, 0, %A_ScriptDir%\%scriptName%.ini, UserSettings
 
     ; Keep account.
     keepAccount := true
@@ -2166,10 +2148,7 @@ FoundTradeable(found3Dmnd := 0, found4Dmnd := 0, found1Star := 0, foundGimmighou
 }
 
 FoundStars(star) {
-    global scriptName, DeadCheck, ocrLanguage, injectMethod, openPack
-
-    ; Not dead.
-    IniWrite, 0, %A_ScriptDir%\%scriptName%.ini, UserSettings, DeadCheck
+    global scriptName, ocrLanguage, injectMethod, openPack
 
     ; Keep account.
     keepAccount := true
@@ -2321,9 +2300,6 @@ FindGodPack(invalidPack := false) {
     if (invalidPack) {
         GodPackFound("Invalid")
         RemoveFriends()
-        IniWrite, 0, %A_ScriptDir%\%scriptName%.ini, UserSettings, DeadCheck
-        openExtraPack := false
-        spendHourGlass := false
     } else {
         GodPackFound("Valid")
     }
@@ -2332,9 +2308,7 @@ FindGodPack(invalidPack := false) {
 }
 
 GodPackFound(validity) {
-    global scriptName, DeadCheck, ocrLanguage, injectMethod, openPack
-
-    IniWrite, 0, %A_ScriptDir%\%scriptName%.ini, UserSettings, DeadCheck
+    global scriptName, ocrLanguage, injectMethod, openPack
 
     if(validity = "Valid") {
         Praise := ["Congrats!", "Congratulations!", "GG!", "Whoa!", "Praise Helix! ༼ つ ◕_◕ ༽つ", "Way to go!", "You did it!", "Awesome!", "Nice!", "Cool!", "You deserve it!", "Keep going!", "This one has to be live!", "No duds, no duds, no duds!", "Fantastic!", "Bravo!", "Excellent work!", "Impressive!", "You're amazing!", "Well done!", "You're crushing it!", "Keep up the great work!", "You're unstoppable!", "Exceptional!", "You nailed it!", "Hats off to you!", "Sweet!", "Kudos!", "Phenomenal!", "Boom! Nailed it!", "Marvelous!", "Outstanding!", "Legendary!", "Youre a rock star!", "Unbelievable!", "Keep shining!", "Way to crush it!", "You're on fire!", "Killing it!", "Top-notch!", "Superb!", "Epic!", "Cheers to you!", "Thats the spirit!", "Magnificent!", "Youre a natural!", "Gold star for you!", "You crushed it!", "Incredible!", "Shazam!", "You're a genius!", "Top-tier effort!", "This is your moment!", "Powerful stuff!", "Wicked awesome!", "Props to you!", "Big win!", "Yesss!", "Champion vibes!", "Spectacular!"]
@@ -2478,6 +2452,8 @@ loadAccount() {
     waitadb()
     RunWait, % adbPath . " -s 127.0.0.1:" . adbPort . " push " . loadFile . " /sdcard/deviceAccount.xml",, Hide
     waitadb()
+    ;adbShell.StdIn.WriteLine("rm /data/data/jp.pokemon.pokemontcgp/files/UserPreferences/v1/PackUserPrefs")
+    ;waitadb()
     adbShell.StdIn.WriteLine("cp /sdcard/deviceAccount.xml /data/data/jp.pokemon.pokemontcgp/shared_prefs/deviceAccount:.xml")
     waitadb()
     adbShell.StdIn.WriteLine("rm /sdcard/deviceAccount.xml")
@@ -2524,7 +2500,7 @@ MarkAccountAsUsed() {
                 newListContent .= fileLines[A_Index] "`r`n"
         }
 
-        FileDelete, %outputTxt%
+        Try FileDelete, %outputTxt%
         FileAppend, %newListContent%, %outputTxt%
     }
 
@@ -2684,7 +2660,7 @@ CleanupUsedAccounts() {
     }
 
     ; Write cleaned content back
-    FileDelete, %usedAccountsLog%
+    Try FileDelete, %usedAccountsLog%
     if (cleanedContent) {
         FileAppend, %cleanedContent%, %usedAccountsLog%
     }
@@ -2746,7 +2722,7 @@ DownloadFile(url, filename) {
         errored := true
     }
     if(!errored) {
-        FileDelete, %localPath%
+        Try FileDelete, %localPath%
         FileAppend, %ids%, %localPath%
     }
 }
@@ -2967,7 +2943,7 @@ AppendToJsonFile(variableValue) {
     jsonContent .= "{""time"": """ A_Now """, ""variable"": " variableValue "}]"
 
     ; Write the updated JSON back to the file
-    FileDelete, %jsonFileName%
+    Try FileDelete, %jsonFileName%
     FileAppend, %jsonContent%, %jsonFileName%
 }
 
@@ -3954,10 +3930,11 @@ PackOpening() {
         failSafeTime := (A_TickCount - failSafe) // 1000
         CreateStatusMessage("Waiting for Pack`n(" . failSafeTime . "/45 seconds)")
         if(failSafeTime > 45){
-            RemoveFriends()
             restartGameInstance("Stuck at Pack")
         }
     }
+    ;adbShell.StdIn.WriteLine("rm /data/data/jp.pokemon.pokemontcgp/files/UserPreferences/v1/PackUserPrefs")
+    ;waitadb()
 
     if(setSpeed > 1) {
         FindImageAndClick(25, 145, 70, 170, , "Platin", 18, 109, 2000) ; click mod settings
@@ -4018,6 +3995,7 @@ PackOpening() {
 }
 
 HourglassOpening(HG := false, NEIRestart := true) {
+    global openExtraPack
     if(!HG) {
         Delay(3)
         adbClick_wbb(146, 441) ; 146 440
@@ -4063,6 +4041,12 @@ HourglassOpening(HG := false, NEIRestart := true) {
             failSafeTime := (A_TickCount - failSafe) // 1000
             CreateStatusMessage("Waiting for HourglassPack`n(" . failSafeTime . "/45 seconds)")
         }
+        
+        GoToMain()
+        SelectPack("HGPack")
+        
+        /*
+        sleep, 1000
         failSafe := A_TickCount
         failSafeTime := 0
         Loop {
@@ -4074,6 +4058,8 @@ HourglassOpening(HG := false, NEIRestart := true) {
             failSafeTime := (A_TickCount - failSafe) // 1000
             CreateStatusMessage("Waiting for HourglassPack2`n(" . failSafeTime . "/45 seconds)")
         }
+        */
+
     }
     Loop {
         adbClick_wbb(146, 439)
@@ -4088,6 +4074,7 @@ HourglassOpening(HG := false, NEIRestart := true) {
 
         if(FindOrLoseImage(191, 393, 211, 411, , "Shop", 0, failSafeTime)){
             SelectPack("HGPack")
+            LogToFile("Instance " scriptName ": extra pack error", "Error.txt")
         }
 
         clickButton := FindOrLoseImage(145, 440, 258, 480, 80, "Button", 0, failSafeTime)
@@ -4399,7 +4386,7 @@ CreateAccountList(instance) {
         }
 
         ; Clear the used accounts log
-        FileDelete, %usedAccountsLog%
+        Try FileDelete, %usedAccountsLog%
         LogToFile("Cleared used accounts log - all accounts now available again")
     }
 
@@ -4442,10 +4429,8 @@ CreateAccountList(instance) {
     }
 
     ; Delete existing list files before regenerating
-    if FileExist(outputTxt)
-        FileDelete, %outputTxt%
-    if FileExist(outputTxt_current)
-        FileDelete, %outputTxt_current%
+    Try FileDelete, %outputTxt%
+    Try FileDelete, %outputTxt_current%
 
     ; Create arrays to store files with their timestamps
     fileNames := []
@@ -4571,7 +4556,7 @@ CreateAccountList(instance) {
     }
 
     ; Create a file that tracks when the list was last regenerated
-    FileDelete, % lastGeneratedFile
+    Try FileDelete, % lastGeneratedFile
     FileAppend, % A_Now, % lastGeneratedFile
     LogToFile("List generation completed at: " . A_Now)
 
@@ -4926,8 +4911,8 @@ GetAllRewards(tomain := true, dailies := false) {
         FindImageAndClick(37, 130, 64, 156, , "DailyMissions", 165, 465, 500)
     }
     Loop {
-        adbClick(172, 427)
         Delay(1)
+        adbClick(172, 427)
 
         if(dailies) {
             FindImageAndClick(73, 151, 210, 173, , "CollectDailies", 250, 135, 500)
@@ -5055,8 +5040,7 @@ FindPackStats() {
         UpdateAccount()
     }
 
-    if (FileExist(fullScreenshotFile))
-        FileDelete, %fullScreenshotFile%
+    Try FileDelete, %fullScreenshotFile%
 
     FindImageAndClick(230, 120, 260, 150, , "UserProfile", 140, 496, 200) ; go back to hamburger menu
 
@@ -5239,7 +5223,7 @@ setRenameData() {
     ; If target file already exists, handle it to prevent FileMove failure
     if FileExist(renamedFullPath) {
         LogToFile("Warning: Target renamed file already exists: " . renamedFullPath . ". Deleting existing file before move.", "PlayerRename.txt")
-        FileDelete, %renamedFullPath%
+        Try FileDelete, %renamedFullPath%
     }
 
     ; Perform file move
