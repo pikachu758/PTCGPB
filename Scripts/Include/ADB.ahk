@@ -164,6 +164,9 @@ initializeAdbShell() {
                 ; Ensure adbShell is running before sending 'su'
                 Sleep, 500
                 if (adbShell.Status != 0) {
+                    RunWait, % adbPath . " disconnect 127.0.0.1:" . adbPort ,, Hide
+                    RunWait, % adbPath . " connect 127.0.0.1:" . adbPort ,, Hide
+                    ConnectAdb()
                     throw Exception("Failed to start ADB shell.")
                 }
 
