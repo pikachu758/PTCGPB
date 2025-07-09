@@ -4,11 +4,14 @@ Accounts/*
 json/*
 Logs/*
 Screenshots/*
+Screenshots/Restart/*
 Screenshots/Trades/**
+!Screenshots/Restart/
 !Screenshots/Trades/
 !Screenshots/Trades/.gitignore
 Scripts/*.ahk
 Scripts/*.ini
+Scripts/temp/*
 !Scripts/1.ahk
 !Scripts/Main.ahk
 *.txt
