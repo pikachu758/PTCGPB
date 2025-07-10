@@ -271,8 +271,10 @@ Loop {
         if(DeadCheck = 1 && deleteMethod != "13 Pack") {
             CreateStatusMessage("Account is stuck! Restarting and unfriending...")
             friended := true
-            ; Reliably restart the app: Force-stop, wait for launch, and start in a clean, new task without animation.
-            adbShell.StdIn.WriteLine("am start -S -W -n jp.pokemon.pokemontcgp/com.unity3d.player.UnityPlayerActivity -f 0x10018000")
+            waitadb()
+            adbShell.StdIn.WriteLine("am force-stop jp.pokemon.pokemontcgp")
+            waitadb()
+            adbShell.StdIn.WriteLine("am start -n jp.pokemon.pokemontcgp/com.unity3d.player.UnityPlayerActivity -f 0x10018000")
             waitadb()
             sleep, 500
             FindImageAndClick(25, 145, 70, 170, , "Platin", 18, 109, 2000) ; click mod settings
@@ -4042,10 +4044,10 @@ HourglassOpening(HG := false, NEIRestart := true) {
             CreateStatusMessage("Waiting for HourglassPack`n(" . failSafeTime . "/45 seconds)")
         }
         
-        GoToMain()
-        SelectPack("HGPack")
+        ; GoToMain()
+        ; SelectPack("HGPack")
         
-        /*
+        
         sleep, 1000
         failSafe := A_TickCount
         failSafeTime := 0
@@ -4058,7 +4060,7 @@ HourglassOpening(HG := false, NEIRestart := true) {
             failSafeTime := (A_TickCount - failSafe) // 1000
             CreateStatusMessage("Waiting for HourglassPack2`n(" . failSafeTime . "/45 seconds)")
         }
-        */
+        
 
     }
     Loop {
