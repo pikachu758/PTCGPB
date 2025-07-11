@@ -34,6 +34,7 @@ global injectMaxPacks := 39      ; Maximum pack count for injection (default for
 
 global waitForEligibleAccounts := 1  ; Enable/disable waiting (1 = wait, 0 = stop script)
 global maxWaitHours := 24             ; Maximum hours to wait before giving up (0 = wait forever)
+global DelayOfExtraPack := 4000
 
 avgtotalSeconds := 0
 
@@ -271,12 +272,6 @@ Loop {
         if(DeadCheck = 1 && deleteMethod != "13 Pack") {
             CreateStatusMessage("Account is stuck! Restarting and unfriending...")
             friended := true
-            waitadb()
-            adbShell.StdIn.WriteLine("am force-stop jp.pokemon.pokemontcgp")
-            waitadb()
-            adbShell.StdIn.WriteLine("am start -n jp.pokemon.pokemontcgp/com.unity3d.player.UnityPlayerActivity -f 0x10018000")
-            waitadb()
-            sleep, 500
             FindImageAndClick(25, 145, 70, 170, , "Platin", 18, 109, 2000) ; click mod settings
             if(setSpeed = 3)
                 FindImageAndClick(182, 170, 194, 190, , "Three", 187, 180) ; click mod settings
@@ -1740,6 +1735,10 @@ restartGameInstance(reason, RL := true) {
         }
         else {
             AppendToJsonFile(packsThisRun)
+            waitadb()
+            adbShell.StdIn.WriteLine("am start -S -W -n jp.pokemon.pokemontcgp/com.unity3d.player.UnityPlayerActivity -f 0x10018000")
+            waitadb()
+            sleep, 500
             throw RESTART_LOOP_EXCEPTION
         }
     }
@@ -3997,7 +3996,7 @@ PackOpening() {
 }
 
 HourglassOpening(HG := false, NEIRestart := true) {
-    global openExtraPack
+    global openExtraPack, DelayOfExtraPack
     if(!HG) {
         Delay(3)
         adbClick_wbb(146, 441) ; 146 440
@@ -4047,8 +4046,9 @@ HourglassOpening(HG := false, NEIRestart := true) {
         ; GoToMain()
         ; SelectPack("HGPack")
         
-        
-        sleep, 1000
+        sleep, %DelayOfExtraPack%
+        LogToFile("Delay of extra pack : " DelayOfExtraPack)
+        DelayOfExtraPack -= 70
         failSafe := A_TickCount
         failSafeTime := 0
         Loop {
@@ -4075,6 +4075,7 @@ HourglassOpening(HG := false, NEIRestart := true) {
             return
 
         if(FindOrLoseImage(191, 393, 211, 411, , "Shop", 0, failSafeTime)){
+            DelayOfExtraPack += 1000
             SelectPack("HGPack")
             LogToFile("Instance " scriptName ": extra pack error", "Error.txt")
         }
