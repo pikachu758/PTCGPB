@@ -168,7 +168,7 @@ Loop {
                 if (A_gptest)   ; triggered by auto GP Test
                     A_gptest := 0
                 else
-                    MsgBox, Ready to test.
+                    MsgBox,0x40040,,Ready to test.
             }
             Sleep, 1000
             if (heartBeat && (Mod(A_Index, 60) = 0))
