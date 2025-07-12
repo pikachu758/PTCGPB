@@ -218,7 +218,8 @@ Loop {
     }
     catch e {
         if (e != RESTART_LOOP_EXCEPTION) {
-            LogToFile("Instance " scriptName ": Error in " e.What ", which was called at line " e.Line, "Error.txt")
+            LogToFile("Instance " scriptName ": Error in " e.What ", which was called at line " e.Line " in " e.File, "Error.txt")
+            restartGameInstance("Stuck at " . e.What . "...")
         }
         CreateStatusMessage("Restarting mission loop...",,,, false)
         sleep, 1000

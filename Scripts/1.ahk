@@ -877,7 +877,7 @@ Loop {
             CreateStatusMessage("Restarting main loop...",,,, false)
         }
         else {
-            LogToFile("Instance " scriptName ": Error in " e.What ", which was called at line " e.Line, "Error.txt")
+            LogToFile("Instance " scriptName ": Error in " e.What ", which was called at line " e.Line " in " e.File, "Error.txt")
         }
         sleep, 1000
         continue
@@ -1027,8 +1027,10 @@ RemoveFriends() {
             Delay(1)
 
             adbClick_wbb(203, 436) ; 203 436
-        } else if(!renew && !getFC && DeadCheck = 1) {
-            clickButton := FindOrLoseImage(75, 340, 195, 530, 80, "Button", 0)
+        }
+        /* 
+        else if(!renew && !getFC && DeadCheck = 1) {
+            clickButton := FindOrLoseImage(140, 340, 195, 530, 80, "Button", 0)
             if(clickButton) {
                 StringSplit, pos, clickButton, `,  ; Split at ", "
                 if (scaleParam = 287) {
@@ -1037,6 +1039,7 @@ RemoveFriends() {
                 adbClick_wbb(pos1, pos2)
             }
         }
+        */
         Sleep, 500
         failSafeTime := (A_TickCount - failSafe) // 1000
         CreateStatusMessage("Waiting for Social`n(" . failSafeTime . "/90 seconds)")
