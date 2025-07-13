@@ -14,7 +14,7 @@ global STATIC_BRUSH := 0
 
 githubUser := "pikachu758"
 repoName := "PTCGPB"
-localVersion := "v6.5.5"
+localVersion := "v6.5.6"
 scriptFolder := A_ScriptDir
 zipPath := A_Temp . "\update.zip"
 extractPath := A_Temp . "\update"
@@ -4303,6 +4303,27 @@ StartBot:
         else
             selectMsg .= value . commaSeparate
     }
+    detectionMsg := "\nDetection: minStars=" minStars ", minStarsShiny=" minStarsShiny
+    if (openExtraPack) 
+        detectionMsg .= ", openExtraPack"
+    if (FullArtCheck) 
+        detectionMsg .= ", FullArtCheck"
+    if (TrainerCheck) 
+        detectionMsg .= ", TrainerCheck"
+    if (RainbowCheck) 
+        detectionMsg .= ", RainbowCheck"
+    if (PseudoGodPack) 
+        detectionMsg .= ", PseudoGodPack"
+    if (CheckShinyPackOnly) 
+        detectionMsg .= ", CheckShinyPackOnly"
+    if (ShinyCheck) 
+        detectionMsg .= ", ShinyCheck"
+    if (ImmersiveCheck) 
+        detectionMsg .= ", ImmersiveCheck"
+    if (CrownCheck) 
+        detectionMsg .= ", CrownCheck"
+    if (InvalidCheck) 
+        detectionMsg .= ", InvalidCheck"
     
     ; === MAIN HEARTBEAT LOOP ===
     Loop {
@@ -4317,7 +4338,7 @@ StartBot:
             onlineAHK := ""
             offlineAHK := ""
             Online := []
-            
+
             Loop %Instances% {
                 IniRead, value, HeartBeat.ini, HeartBeat, Instance%A_Index%
                 if(value)
@@ -4422,7 +4443,7 @@ StartBot:
                 onlineAHK := ""
                 offlineAHK := ""
                 Online := []
-                
+                sumPPHFS := 0
                 Loop %Instances% {
                     IniRead, value, HeartBeat.ini, HeartBeat, Instance%A_Index%
                     if(value)
@@ -4430,7 +4451,12 @@ StartBot:
                     else
                         Online.Push(0)
                     IniWrite, 0, HeartBeat.ini, HeartBeat, Instance%A_Index%
+                    IniRead, pphfs, HeartBeat.ini, PPHFS, Instance%A_Index%, 0
+                    sumPPHFS += pphfs
+                    IniWrite, 0, HeartBeat.ini, PPHFS, Instance%A_Index%
                 }
+                avgPPHFS := (A_Index = 1) ? 0 : sumPPHFS / Instances
+                pphfsMsg := "\nPPHFS: " . avgPPHFS
                 
                 for index, value in Online {
                     if(index = Online.MaxIndex())
@@ -4474,6 +4500,8 @@ StartBot:
                 discMessage .= "\n" . onlineAHK . "\n" . offlineAHK . "\n" . packStatus . "\nVersion: " . RegExReplace(githubUser, "-.*$") . "-" . localVersion
                 discMessage .= typeMsg
                 discMessage .= selectMsg
+                discMessage .= pphfsMsg
+                discMessage .= detectionMsg
                 
                 LogToDiscord(discMessage,, false,,, heartBeatWebhookURL)
                 
@@ -4506,7 +4534,7 @@ return
 ; Function to send a Discord message with all instances marked as offline
 SendAllInstancesOfflineStatus() {
     global heartBeatName, heartBeatWebhookURL, localVersion, githubUser, Instances, runMain, Mains
-    global typeMsg, selectMsg, rerollTime, scaleParam
+    global typeMsg, selectMsg, rerollTime, scaleParam, pphfsMsg, detectionMsg
     
     ; Display visual feedback that the hotkey was triggered
     DisplayPackStatus("Shift+F7 pressed - Sending offline heartbeat to Discord...", ((runMain ? Mains * scaleParam : 0) + 5), 625)
@@ -4544,6 +4572,8 @@ SendAllInstancesOfflineStatus() {
     discMessage .= "\n" . packStatus . "\nVersion: " . RegExReplace(githubUser, "-.*$") . "-" . localVersion
     discMessage .= typeMsg
     discMessage .= selectMsg
+    discMessage .= pphfsMsg
+    discMessage .= detectionMsg
     discMessage .= "\n\n All instances marked as OFFLINE"
     
     ; Send the message

@@ -35,6 +35,7 @@ global injectMaxPacks := 39      ; Maximum pack count for injection (default for
 global waitForEligibleAccounts := 1  ; Enable/disable waiting (1 = wait, 0 = stop script)
 global maxWaitHours := 24             ; Maximum hours to wait before giving up (0 = wait forever)
 global DelayOfExtraPack := 4000
+global startOfRun, startOfAdding, endOfAdding, startOfRemoving, endOfRemoving, timeTotal := 0, timeOccupied := 0, occupancy, packsTotal := 0
 
 avgtotalSeconds := 0
 
@@ -299,6 +300,7 @@ Loop {
             openPack := packArray[rand]
             friended := false
             IniWrite, 1, %A_ScriptDir%\..\HeartBeat.ini, HeartBeat, Instance%scriptName%
+            startOfRun := A_TickCount
 
             changeDate := getChangeDateTime() ; get server reset time
 
@@ -811,10 +813,15 @@ Loop {
             aseconds := Mod(avgtotalSeconds, 60) ; Average remaining seconds
             mminutes := Floor(totalSeconds / 60) ; Total minutes
             sseconds := Mod(totalSeconds, 60) ; Total remaining seconds
-
+			timeTotal += A_TickCount - startOfRun
+			timeOccupied += ((startOfRemoving + endOfRemoving) - (startOfAdding + endOfAdding)) / 2
+			occupancy := timeOccupied / timeTotal
+			packsTotal += packsThisRun
+			pphfs := packsTotal / (timeTotal / 3600000) / occupancy
+            IniWrite, %pphfs%, %A_ScriptDir%\..\HeartBeat.ini, PPHFS, Instance%scriptName%
             ; Display the times
-            CreateStatusMessage("Avg: " . aminutes . "m " . aseconds . "s | Runs: " . rerolls . " | Account Packs " . accountOpenPacks, "AvgRuns", 0, 605, false, true)
-
+            CreateStatusMessage("Avg: " . aminutes . "m " . aseconds . "s | Runs: " . rerolls . " | PPHFS: " . pphfs, "AvgRuns", 0, 605, false, true)
+			LogToFile(timeTotal/rerolls . " " . timeOccupied/rerolls . " " . occupancy . " " . packsTotal/rerolls . " " . pphfs)
             ; Log to file
             LogToFile("Packs: " . packsThisRun . " | Total time: " . mminutes . "m " . sseconds . "s | Avg: " . aminutes . "m " . aseconds . "s | Runs: " . rerolls)
 
@@ -996,7 +1003,7 @@ clearMissionCache() {
 }
 
 RemoveFriends() {
-    global friendIDs, friended, friendID, packsInPool
+    global friendIDs, friended, friendID, packsInPool, startOfRemoving, endOfRemoving
     friendIDs := ReadFile("ids")
 
     if(!friendIDs && friendID = "") {
@@ -1027,10 +1034,8 @@ RemoveFriends() {
             Delay(1)
 
             adbClick_wbb(203, 436) ; 203 436
-        }
-        /* 
-        else if(!renew && !getFC && DeadCheck = 1) {
-            clickButton := FindOrLoseImage(140, 340, 195, 530, 80, "Button", 0)
+        } else if(!renew && !getFC && DeadCheck = 1) {
+            clickButton := FindOrLoseImage(152, 359, 195, 375, 80, "Button", 0)
             if(clickButton) {
                 StringSplit, pos, clickButton, `,  ; Split at ", "
                 if (scaleParam = 287) {
@@ -1039,7 +1044,7 @@ RemoveFriends() {
                 adbClick_wbb(pos1, pos2)
             }
         }
-        */
+
         Sleep, 500
         failSafeTime := (A_TickCount - failSafe) // 1000
         CreateStatusMessage("Waiting for Social`n(" . failSafeTime . "/90 seconds)")
@@ -1060,6 +1065,7 @@ RemoveFriends() {
         CreateStatusMessage("Waiting for clearaAll`n(" . failSafeTime . "/45 seconds)")
     }
     FindImageAndClick(84, 463, 100, 475, 10, "Friends", 22, 464)
+    startOfRemoving := A_TickCount
     friendsProcessed := 0
     finished := false
     accepted := false
@@ -1094,7 +1100,7 @@ RemoveFriends() {
         FindImageAndClick(226, 100, 270, 135, , "Add", 143, 507)
         friendsProcessed++
     }
-
+    endOfRemoving := A_TickCount
     ; Exit friend removal process
     CreateStatusMessage("Friend removal completed. Processed " . friendsProcessed . " friends. Returning to main...",,,, false)
     friended := false
@@ -1120,7 +1126,7 @@ TradeTutorial() {
 }
 
 AddFriends(renew := false, getFC := false) {
-    global FriendID, friendIds, waitTime, friendCode, scriptName, friended
+    global FriendID, friendIds, waitTime, friendCode, scriptName, friended, startOfAdding, endOfAdding
     friendIDs := ReadFile("ids")
     friended := true
     if(!getFC && !friendIDs && friendID = "")
@@ -1196,6 +1202,7 @@ AddFriends(renew := false, getFC := false) {
         friendIDs[i] := friendIDs[j] . ""
         friendIDs[j] := temp . ""
     }
+    startOfAdding := A_TickCount
     for index, value in friendIDs {
         if (StrLen(value) != 16) {
             ; Wrong id value
@@ -1244,7 +1251,7 @@ AddFriends(renew := false, getFC := false) {
             EraseInput(index, n)
         }
     }
-
+    endOfAdding := A_TickCount
     FindImageAndClick(120, 500, 155, 530, , "Social", 143, 518, 500)
 
     FindImageAndClick(20, 500, 55, 530, , "Home", 40, 516, 500)
@@ -1714,6 +1721,9 @@ restartGameInstance(reason, RL := true) {
     else
         CreateStatusMessage("Restarting game...",,,, false)
     LogToFile("Restarted game for instance " . scriptName . ". Reason: " reason, "Restart.txt")
+    
+    adbShell.StdIn.WriteLine("rm /data/data/jp.pokemon.pokemontcgp/files/UserPreferences/v1/PackUserPrefs")
+    waitadb()
 
     if (RL = "GodPack") {
         AppendToJsonFile(packsThisRun)
@@ -2700,7 +2710,7 @@ UpdateAccount() {
     }
 
     ; Direct display of metrics rather than calling function
-    CreateStatusMessage("Avg: " . aminutes . "m " . aseconds . "s | Runs: " . rerolls . " | Account Packs " . accountOpenPacks, "AvgRuns", 0, 605, false, true)
+    ; CreateStatusMessage("Avg: " . aminutes . "m " . aseconds . "s | Runs: " . rerolls . " | Account Packs " . accountOpenPacks, "AvgRuns", 0, 605, false, true)
 }
 
 ControlClick(X, Y) {
@@ -4045,7 +4055,6 @@ HourglassOpening(HG := false, NEIRestart := true) {
             failSafeTime := (A_TickCount - failSafe) // 1000
             CreateStatusMessage("Waiting for HourglassPack`n(" . failSafeTime . "/45 seconds)")
         }
-        
         ; GoToMain()
         ; SelectPack("HGPack")
         
