@@ -81,6 +81,7 @@ ConnectAdb(folderPath := "C:\Program Files\Netease") {
         adbPort := findAdbPorts(folderPath)
         ip := "127.0.0.1:" . adbPort ; Specify the connection IP:port
         ; Attempt to connect using CmdRet
+        CmdRet(adbPath . " disconnect " . ip)
         connectionResult := CmdRet(adbPath . " connect " . ip)
 
         ; Check for successful connection in the output

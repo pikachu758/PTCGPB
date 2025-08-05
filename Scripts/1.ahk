@@ -21,7 +21,7 @@ WinHide % "ahk_id " DllCall("GetConsoleWindow", "ptr")
 
 global RESTART_LOOP_EXCEPTION := { message: "Restarting main loop" }
 global winTitle, changeDate, failSafe, openPack, Delay, failSafeTime, StartSkipTime, Columns, failSafe, scriptName, GPTest, StatusText, defaultLanguage, setSpeed, jsonFileName, pauseToggle, SelectedMonitorIndex, swipeSpeed, godPack, scaleParam, deleteMethod, packs, FriendID, friendIDs, Instances, username, friendCode, stopToggle, friended, runMain, Mains, showStatus, injectMethod, packMethod, loadDir, loadedAccount, nukeAccount, CheckShinyPackOnly, TrainerCheck, FullArtCheck, RainbowCheck, ShinyCheck, dateChange, foundGP, friendsAdded, PseudoGodPack, packArray, CrownCheck, ImmersiveCheck, InvalidCheck, slowMotion, screenShot, accountFile, invalid, starCount, keepAccount
-global Mewtwo, Charizard, Pikachu, Mew, Dialga, Palkia, Arceus, Shining, Solgaleo, Lunala, Buzzwole, Eevee
+global Mewtwo, Charizard, Pikachu, Mew, Dialga, Palkia, Arceus, Shining, Solgaleo, Lunala, Buzzwole, Eevee, HoOh, Lugia
 global shinyPacks, minStars, minStarsShiny
 global DeadCheck
 global s4tEnabled, s4tSilent, s4t3Dmnd, s4t4Dmnd, s4t1Star, s4tGholdengo, s4tWP, s4tWPMinCards, s4tDiscordWebhookURL, s4tDiscordUserId, s4tSendAccountXml
@@ -101,7 +101,9 @@ IniRead, PseudoGodPack, %A_ScriptDir%\..\Settings.ini, UserSettings, PseudoGodPa
 IniRead, minStars, %A_ScriptDir%\..\Settings.ini, UserSettings, minStars, 0
 IniRead, minStarsShiny, %A_ScriptDir%\..\Settings.ini, UserSettings, minStarsShiny, 0
 
-IniRead, Eevee, %A_ScriptDir%\..\Settings.ini, UserSettings, Eevee, 1
+IniRead, HoOh, %A_ScriptDir%\..\Settings.ini, UserSettings, HoOh, 1
+IniRead, Lugia, %A_ScriptDir%\..\Settings.ini, UserSettings, Lugia, 0
+IniRead, Eevee, %A_ScriptDir%\..\Settings.ini, UserSettings, Eevee, 0
 IniRead, Buzzwole, %A_ScriptDir%\..\Settings.ini, UserSettings, Buzzwole, 0
 IniRead, Solgaleo, %A_ScriptDir%\..\Settings.ini, UserSettings, Solgaleo, 0
 IniRead, Lunala, %A_ScriptDir%\..\Settings.ini, UserSettings, Lunala, 0
@@ -148,8 +150,8 @@ IniRead, targetUsername, %A_ScriptDir%\..\Settings.ini, UserSettings, TargetUser
 IniRead, renameXML, %A_ScriptDir%\..\Settings.ini, UserSettings, renameXML, 0
 IniRead, renameXMLwithFC, %A_ScriptDir%\..\Settings.ini, UserSettings, renameXMLwithFC, 0
 
-pokemonList := ["Mewtwo", "Charizard", "Pikachu", "Mew", "Dialga", "Palkia", "Arceus", "Shining", "Solgaleo", "Lunala", "Buzzwole", "Eevee"]
-shinyPacks := {"Shining": 1, "Solgaleo": 1, "Lunala": 1, "Buzzwole": 1, "Eevee": 1}
+pokemonList := ["Mewtwo", "Charizard", "Pikachu", "Mew", "Dialga", "Palkia", "Arceus", "Shining", "Solgaleo", "Lunala", "Buzzwole", "Eevee", "HoOh", "Lugia"]
+shinyPacks := {"Shining": 1, "Solgaleo": 1, "Lunala": 1, "Buzzwole": 1, "Eevee": 1, "HoOh": 1, "Lugia": 1}
 
 packArray := []  ; Initialize an empty array
 
@@ -821,7 +823,7 @@ Loop {
             IniWrite, %pphfs%, %A_ScriptDir%\..\HeartBeat.ini, PPHFS, Instance%scriptName%
             ; Display the times
             CreateStatusMessage("Avg: " . aminutes . "m " . aseconds . "s | Runs: " . rerolls . " | PPHFS: " . pphfs, "AvgRuns", 0, 605, false, true)
-			LogToFile(timeTotal/rerolls . " " . timeOccupied/rerolls . " " . occupancy . " " . packsTotal/rerolls . " " . pphfs)
+			; LogToFile(timeTotal/rerolls_local . " " . timeOccupied/rerolls_local . " " . occupancy . " " . packsTotal/rerolls_local . " " . pphfs)
             ; Log to file
             LogToFile("Packs: " . packsThisRun . " | Total time: " . mminutes . "m " . sseconds . "s | Avg: " . aminutes . "m " . aseconds . "s | Runs: " . rerolls)
 
@@ -1619,6 +1621,17 @@ FindImageAndClick(X1, Y1, X2, Y2, searchVariation := "", imageName := "DEFAULT",
                     setMetaData()
                 return
                 ;restartGameInstance("beginner missions done except solo battle")
+			}
+		}
+
+        if(imageName = "WonderPick") {
+            Path = %imagePath%Update.png
+            pNeedle := GetNeedle(Path)
+            vRet := Gdip_ImageSearch_wbb(pBitmap, pNeedle, vPosXY, 20, 191, 36, 211, searchVariation)
+            if (vRet = 1) {
+                CreateStatusMessage("Update popup found! Clicking to dismiss...")
+                adbClick_wbb(137, 485)
+                Sleep, 1000
             }
         }
 
@@ -1742,14 +1755,15 @@ restartGameInstance(reason, RL := true) {
             clearMissionCache()
             adbShell.StdIn.WriteLine("rm /data/data/jp.pokemon.pokemontcgp/shared_prefs/deviceAccount:.xml") ; delete account data
             waitadb()
-            adbShell.StdIn.WriteLine("am start -W -n jp.pokemon.pokemontcgp/com.unity3d.player.UnityPlayerActivity -f 0x10018000")
+            adbShell.StdIn.WriteLine("am start -n jp.pokemon.pokemontcgp/com.unity3d.player.UnityPlayerActivity -f 0x10018000")
             waitadb()
             Sleep, 500
         }
         else {
             AppendToJsonFile(packsThisRun)
+            adbShell.StdIn.WriteLine("am force-stop jp.pokemon.pokemontcgp")
             waitadb()
-            adbShell.StdIn.WriteLine("am start -S -W -n jp.pokemon.pokemontcgp/com.unity3d.player.UnityPlayerActivity -f 0x10018000")
+            adbShell.StdIn.WriteLine("am start -n jp.pokemon.pokemontcgp/com.unity3d.player.UnityPlayerActivity -f 0x10018000")
             waitadb()
             sleep, 500
             throw RESTART_LOOP_EXCEPTION
@@ -2473,7 +2487,7 @@ loadAccount() {
     adbShell.StdIn.WriteLine("rm /sdcard/deviceAccount.xml")
     waitadb()
     ; Reliably restart the app: Wait for launch, and start in a clean, new task without animation.
-    adbShell.StdIn.WriteLine("am start -W -n jp.pokemon.pokemontcgp/com.unity3d.player.UnityPlayerActivity -f 0x10018000")
+    adbShell.StdIn.WriteLine("am start -n jp.pokemon.pokemontcgp/com.unity3d.player.UnityPlayerActivity -f 0x10018000")
     waitadb()
     Sleep, 500   ; Reduced from 1000
     ; Parse account filename for pack info (unchanged)
@@ -3718,26 +3732,26 @@ SelectPack(HG := false) {
 
     packy := HomeScreenAllPackY
     if (openPack == "Eevee") {
-        packx := MiddlePackX
-    } else if (openPack == "Buzzwole") {
+        packx := LeftPackX
+    } else if (openPack == "Lugia") {
         packx := RightPackX
     } else {
-        packx := LeftPackX
+        packx := MiddlePackX
     }
 
-    if(openPack == "Eevee" || openPack == "Buzzwole" || openPack == "Solgaleo") {
+    if(openPack == "HoOh" || openPack == "Lugia" || openPack == "Eevee") {
         PackIsInHomeScreen := 1
     } else {
         PackIsInHomeScreen := 0
     }
 
-    if(openPack == "Eevee") {
+    if(openPack == "HoOh") {
         PackIsLatest := 1
     } else {
         PackIsLatest := 0
     }
 
-    if (openPack == "Eevee" || openPack == "Buzzwole" || openPack == "Solgaleo") {
+    if (openPack == "Eevee" || openPack == "HoOh" || openPack == "Lugia") {
         packInTopRowsOfSelectExpansion := 1
     } else {
         packInTopRowsOfSelectExpansion := 0
@@ -3758,8 +3772,12 @@ SelectPack(HG := false) {
             else if(!renew && !getFC) {
                 if(FindOrLoseImage(241, 377, 269, 407, , "closeduringpack", 0)) {
                     adbClick_wbb(139, 371)
+				}
+                if(FindOrLoseImage(20, 191, 36, 211, , "Update", 0)) {
+                    adbClick_wbb(137, 485)
                 }
             }
+
             else if(FindOrLoseImage(175, 165, 255, 235, , "Hourglass3", 0)) {
                 ;TODO hourglass tutorial still broken after injection
                 Delay(3)
@@ -3813,58 +3831,68 @@ SelectPack(HG := false) {
     }
 
     if(inselectexpansionscreen) {
-        if (openPack = "Arceus" || openPack = "Dialga" || openPack = "Palkia") {
+        if (openPack = "Arceus" || openPack = "Shining") {
             ; One swipe
-            adbSwipe("266 770 266 355 160")
-            Sleep, 500
+            adbSwipe("266 770 266 50 250")
+            Sleep, 250
 
-            packy := 490
+            packy := 433
 
-            if (openPack = "Arceus") {
+            if (openPack = "Shining") {
                 packx := SelectExpansionLeftCollumnMiddleX
-            } else if (openPack = "Dialga") {
-                packx := SelectExpansionRightCollumnMiddleX + 2PackExpansionLeft
-            } else if (openPack = "Palkia") {
-                packx := SelectExpansionRightCollumnMiddleX + 2PackExpansionRight
-            }
-        } else if (openPack = "Mew" || openPack = "Charizard" || openPack = "Mewtwo" || openPack = "Pikachu") {
-            ; Two swipes
-            adbSwipe("266 770 266 355 160")
-            Sleep, 500
-            adbSwipe("266 770 266 355 160")
-            Sleep, 500
-
-            packy := 450
-            if (openPack = "Mew") {
-                packx := SelectExpansionLeftCollumnMiddleX
-            } else if (openPack = "Charizard") {
-                packx := SelectExpansionRightCollumnMiddleX + 3PackExpansionLeft
-            } else if (openPack = "Mewtwo") {
+            } else if (openPack = "Arceus") {
                 packx := SelectExpansionRightCollumnMiddleX
+            }
+        } else if (openPack = "Mew" || openPack = "Charizard" || openPack = "Mewtwo" || openPack = "Pikachu" || openPack = "Dialga" || openPack = "Palkia") {
+            ; Two swipes
+            adbSwipe("266 770 266 50 250")
+            Sleep, 250
+            adbSwipe("266 770 266 50 250")
+            Sleep, 250
+
+            if (openPack = "Dialga") {
+                packy := SelectExpansionFirstRowY
+                packx := SelectExpansionLeftCollumnMiddleX + 2PackExpansionLeft
+            } else if (openPack = "Palkia") {
+                packy := SelectExpansionFirstRowY
+                packx := SelectExpansionLeftCollumnMiddleX + 2PackExpansionRight
+            } else if (openPack = "Mew") {
+                packy := SelectExpansionFirstRowY
+                packx := SelectExpansionRightCollumnMiddleX
+            } else if (openPack = "Charizard") {
+                packy := SelectExpansionSecondRowY
+                packx := SelectExpansionLeftCollumnMiddleX + 3PackExpansionLeft
+            } else if (openPack = "Mewtwo") {
+                packy := SelectExpansionSecondRowY
+                packx := SelectExpansionLeftCollumnMiddleX
             } else if (openPack = "Pikachu") {
-                packx := SelectExpansionRightCollumnMiddleX + 3PackExpansionRight
+                packy := SelectExpansionSecondRowY
+                packx := SelectExpansionLeftCollumnMiddleX + 3PackExpansionRight
             }
         } else {
             ; No swipe, top row
-            if (openPack == "Eevee") {
+            if (openPack == "HoOh") {
                 packy := SelectExpansionFirstRowY
-                packx := SelectExpansionLeftCollumnMiddleX
-            } else if (openPack == "Buzzwole") {
+                packx := SelectExpansionLeftCollumnMiddleX + 2PackExpansionLeft
+            } else if (openPack == "Lugia") {
+                packy := SelectExpansionFirstRowY
+                packx := SelectExpansionLeftCollumnMiddleX + 2PackExpansionRight
+            } else if (openPack == "Eevee") {
                 packy := SelectExpansionFirstRowY
                 packx := SelectExpansionRightCollumnMiddleX
+            } else if (openPack == "Buzzwole") {
+                packy := SelectExpansionSecondRowY
+                packx := SelectExpansionLeftCollumnMiddleX
             } else if (openPack == "Solgaleo") {
                 packy := SelectExpansionSecondRowY
-                packx := SelectExpansionLeftCollumnMiddleX + 2PackExpansionLeft
+                packx := SelectExpansionRightCollumnMiddleX + 2PackExpansionLeft
             } else if (openPack == "Lunala") {
                 packy := SelectExpansionSecondRowY
-                packx := SelectExpansionLeftCollumnMiddleX + 2PackExpansionRight
-            } else if (openPack = "Shining") {
-                packy := SelectExpansionSecondRowY
-                packx := SelectExpansionRightCollumnMiddleX
+                packx := SelectExpansionRightCollumnMiddleX + 2PackExpansionRight
             }
         }
 
-        FindImageAndClick(233, 400, 264, 428, , "Points", packx, packy)
+        FindImageAndClick(233, 400, 264, 428, , "Points", packx, packy, , 10)
     }
 
     if(HG = "First" && injectMethod && loadedAccount && !accountHasPackInfo) {

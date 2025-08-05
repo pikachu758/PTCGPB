@@ -167,8 +167,10 @@ Loop {
                 GPTestScript()
                 if (A_gptest)   ; triggered by auto GP Test
                     A_gptest := 0
-                else
+                else {
+                    sleep, 10000
                     MsgBox,0x40040,,Ready to test.
+                }
             }
             Sleep, 1000
             if (heartBeat && (Mod(A_Index, 60) = 0))
@@ -184,9 +186,9 @@ Loop {
         if(heartBeat)
             IniWrite, 1, %A_ScriptDir%\..\HeartBeat.ini, HeartBeat, Main
         Sleep, %Delay%
-        FindImageAndClick(120, 500, 155, 530, , "Social", 143, 518, 1000, 30)
-        FindImageAndClick(226, 100, 270, 135, , "Add", 38, 460, 500)
-        FindImageAndClick(170, 450, 195, 480, , "Approve", 228, 464)
+        FindImageAndClick(120, 500, 155, 530, , "Social", 143, 518, 1000, 45)
+        FindImageAndClick(226, 100, 270, 135, , "Add", 38, 460, 500, 8)
+        FindImageAndClick(170, 450, 195, 480, , "Approve", 228, 464, 7)
 
         failSafe := A_TickCount
         failSafeTime := 0
@@ -222,6 +224,10 @@ Loop {
             restartGameInstance("Stuck at " . e.What . "...")
         }
         CreateStatusMessage("Restarting mission loop...",,,, false)
+        GPTest := false
+        triggerTestNeeded := false
+        A_gptest := 0
+        AutoSolo := false
         sleep, 1000
         continue
     }
