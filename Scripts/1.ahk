@@ -1195,6 +1195,7 @@ AddFriends(renew := false, getFC := false) {
 
     ;randomize friend id list to not back up mains if running in groups since they'll be sent in a random order.
     n := friendIDs.MaxIndex()
+    /*
     Loop % n
     {
         i := n - A_Index + 1
@@ -1204,6 +1205,7 @@ AddFriends(renew := false, getFC := false) {
         friendIDs[i] := friendIDs[j] . ""
         friendIDs[j] := temp . ""
     }
+    */
     startOfAdding := A_TickCount
     for index, value in friendIDs {
         if (StrLen(value) != 16) {
@@ -3888,7 +3890,7 @@ SelectPack(HG := false) {
                 packx := SelectExpansionRightCollumnMiddleX + 2PackExpansionLeft
             } else if (openPack == "Lunala") {
                 packy := SelectExpansionSecondRowY
-                packx := SelectExpansionRightCollumnMiddleX + 2PackExpansionRight
+                packx := SelectExpansionRightCollumnMiddleX + 10
             }
         }
 
