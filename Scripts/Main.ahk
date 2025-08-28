@@ -186,9 +186,9 @@ Loop {
         if(heartBeat)
             IniWrite, 1, %A_ScriptDir%\..\HeartBeat.ini, HeartBeat, Main
         Sleep, %Delay%
-        FindImageAndClick(120, 500, 155, 530, , "Social", 143, 518, 1000, 45)
-        FindImageAndClick(226, 100, 270, 135, , "Add", 38, 460, 500, 8)
-        FindImageAndClick(170, 450, 195, 480, , "Approve", 228, 464, 7)
+        FindImageAndClick(120, 500, 155, 530, , "Social", 143, 518, 1000, 120)
+        FindImageAndClick(226, 100, 270, 135, , "Add", 38, 460, 500, 15)
+        FindImageAndClick(170, 450, 195, 480, , "Approve", 228, 464, ,15)
 
         failSafe := A_TickCount
         failSafeTime := 0
@@ -468,7 +468,8 @@ resetWindows(){
 
 restartGameInstance(reason, RL := true) {
     global Delay, scriptName, adbShell, adbPath, adbPort
-    initializeAdbShell()
+    ;Screenshot("restartGameInstance")
+    ; initializeAdbShell()
 
     if (Debug)
         CreateStatusMessage("Restarting game reason:`n" . reason)
@@ -506,7 +507,7 @@ Screenshot(filename := "Valid") {
     SetWorkingDir %A_ScriptDir%  ; Ensures the working directory is the script's directory
 
     ; Define folder and file paths
-    screenshotsDir := A_ScriptDir "\..\Screenshots"
+    screenshotsDir := A_ScriptDir "\..\Screenshots\Restart"
     if !FileExist(screenshotsDir)
         FileCreateDir, %screenshotsDir%
 

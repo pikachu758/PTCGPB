@@ -86,6 +86,7 @@
         Lang["Txt_claimSpecialMissions"] := "Claim Special Missions"
         Lang["SortByText"] := "Sort By:"
 
+        Lang["Txt_Suicune"] := "Suicune"
         Lang["Txt_HoOh"] := "Ho-Oh"
         Lang["Txt_Lugia"] := "Lugia"
         Lang["Txt_Eevee"] := "Eevee"
@@ -213,6 +214,7 @@
         Lang["Txt_claimSpecialMissions"] := "領取特殊任務"
         Lang["SortByText"] := "注入排序："
 
+        Lang["Txt_Suicune"] := "水君"
         Lang["Txt_HoOh"] := "鳳王"
         Lang["Txt_Lugia"] := "洛奇亞"
         Lang["Txt_Eevee"] := "伊布"
@@ -340,6 +342,7 @@
         Lang["Txt_claimSpecialMissions"] := "イベント"
         Lang["SortByText"] := "注入序列："
 
+        Lang["Txt_Suicune"] := "スイクン"
         Lang["Txt_HoOh"] := "ホウオウ"
         Lang["Txt_Lugia"] := "ルギア"
         Lang["Txt_Eevee"] := "イーブイ"
@@ -470,6 +473,7 @@
         Lang["Txt_claimSpecialMissions"] := "Spezialmissionen"
         Lang["SortByText"] := "Sortieren nach:"
 
+        Lang["Txt_Suicune"] := "Suicune"
         Lang["Txt_Ho-Oh"] := "Ho-Oh"
         Lang["Txt_Lugia"] := "Lugia"
         Lang["Txt_Eevee"] := "Evoli"
