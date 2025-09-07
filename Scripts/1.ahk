@@ -124,7 +124,7 @@ IniRead, injectSortMethod, %A_ScriptDir%\..\Settings.ini, UserSettings, injectSo
 IniRead, waitForEligibleAccounts, %A_ScriptDir%\..\Settings.ini, UserSettings, waitForEligibleAccounts, 1
 IniRead, maxWaitHours, %A_ScriptDir%\..\Settings.ini, UserSettings, maxWaitHours, 24
 IniRead, skipMissionsInjectMissions, %A_ScriptDir%\..\Settings.ini, UserSettings, skipMissionsInjectMissions, 0
-IniRead, claimSpecialMissions, %A_ScriptDir%\..\Settings.ini, UserSettings, claimSpecialMissions, 0
+IniRead, claimBonusWeek, %A_ScriptDir%\..\Settings.ini, UserSettings, claimBonusWeek, 0
 IniRead, spendHourGlass, %A_ScriptDir%\..\Settings.ini, UserSettings, spendHourGlass, 1
 IniRead, openExtraPack, %A_ScriptDir%\..\Settings.ini, UserSettings, openExtraPack, 0
 IniRead, verboseLogging, %A_ScriptDir%\..\Settings.ini, UserSettings, debugMode, 0
@@ -760,18 +760,6 @@ Loop {
 
             EndOfRun:
 
-            ; Special missions
-            IniRead, claimSpecialMissions, %A_ScriptDir%\..\Settings.ini, UserSettings, claimSpecialMissions, 0
-            if (claimSpecialMissions = 1 && !specialMissionsDone && !(deleteMethod = "Inject" && accountOpenPacks >= maxAccountPackNum || deleteMethod = "Inject Missions" && accountOpenPacks >= maxAccountPackNum)) {
-                GoToMain()
-                HomeAndMission(1)
-                GetEventRewards(true) ; collects all the Special mission hourglass
-                specialMissionsDone := 1
-                cantOpenMorePacks := 0
-                if (injectMethod && loadedAccount)
-                    setMetaData()
-            }
-
             ; Hourglass spending
             IniRead, spendHourGlass, %A_ScriptDir%\..\Settings.ini, UserSettings, spendHourGlass, 0
             if (spendHourGlass = 1 && !(deleteMethod = "Inject" && accountOpenPacks >= maxAccountPackNum || deleteMethod = "Inject Missions" && accountOpenPacks >= maxAccountPackNum)) {
@@ -787,6 +775,16 @@ Loop {
             if(deleteMethod = "Inject for Reroll" && openExtraPack) {
                 GoToMain(true)
                 GetAllRewards(false, true)
+            }
+			
+			; Bonus Week
+            IniRead, claimBonusWeek, %A_ScriptDir%\..\Settings.ini, UserSettings, claimBonusWeek, 0
+            if (claimBonusWeek = 1) {
+				if (!openExtraPack) {
+					GoToMain(true)
+					HomeAndMission(1)
+				}
+                GetEventRewards(False) ; collects all the Bonus week hourglass
             }
 
             if(deleteMethod = "Inject" && !renameAndSaveAndReload) {
@@ -1738,7 +1736,7 @@ DirectlyPositionWindow() {
 restartGameInstance(reason, RL := true) {
     global friended, scriptName, packsThisRun, injectMethod, loadedAccount, DeadCheck, starCount, packsInPool, openPack, invalid, accountFile, username, stopToggle
 
-    ; Screenshot("restartGameInstance", "Restart")
+    Screenshot("restartGameInstance", "Restart")
 
     if (Debug)
         CreateStatusMessage("Restarting game reason:`n" . reason)
@@ -4901,7 +4899,7 @@ SpendAllHourglass() {
     }
 }
 
-; For Special Missions 2025
+; For Bonus Week
 GetEventRewards(frommain := true){
     swipeSpeed := 300
     adbSwipeX3 := Round(211 / 277 * 535)
@@ -4914,7 +4912,7 @@ GetEventRewards(frommain := true){
     Delay(4)
 
     ; ADD LEVEL UP CHECK
-    LevelUp()
+    ; LevelUp()
 
     if(setSpeed > 1) {
         FindImageAndClick(25, 145, 70, 170, , "Platin", 18, 109, 2000) ; click mod settings
@@ -4940,7 +4938,8 @@ GetEventRewards(frommain := true){
         CreateStatusMessage("Waiting for Trace`n(" . failSafeTime . "/45 seconds)")
         Delay(1)
     }
-    adbClick_wbb(50, 465)
+    adbClick_wbb(130, 465)
+	sleep, 1000
     failSafe := A_TickCount
     failSafeTime := 0
     Loop{
@@ -4957,7 +4956,7 @@ GetEventRewards(frommain := true){
         }
         failSafeTime := (A_TickCount - failSafe) // 1000
     }
-    GoToMain()
+    ; GoToMain()
 }
 
 GetAllRewards(tomain := true, dailies := false) {
