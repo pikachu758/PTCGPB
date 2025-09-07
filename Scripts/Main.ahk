@@ -24,7 +24,7 @@ WinHide % "ahk_id " DllCall("GetConsoleWindow", "ptr")
 global RESTART_LOOP_EXCEPTION := { message: "Restarting main loop" }
 global winTitle, changeDate, failSafe, openPack, Delay, failSafeTime, StartSkipTime, Columns, failSafe, scriptName, GPTest, StatusText, defaultLanguage, setSpeed, jsonFileName, pauseToggle, SelectedMonitorIndex, swipeSpeed, godPack, scaleParam, skipInvalidGP, deleteXML, packs, FriendID, AddFriend, Instances, showStatus, AutoSolo
 global triggerTestNeeded, testStartTime, firstRun, minStars, minStarsA2b, vipIdsURL
-global autoUseGPTest, autotest, autotest_time, A_gptest, TestTime
+global autoUseGPTest, autotest, autotest_time, A_gptest, TestTime, captureWebhookURL
 
 deleteAccount := false
 scriptName := StrReplace(A_ScriptName, ".ahk")
@@ -59,6 +59,7 @@ IniRead, minStarsA2b, %A_ScriptDir%\..\Settings.ini, UserSettings, minStarsA2b, 
 
 IniRead, autoUseGPTest, %A_ScriptDir%\..\Settings.ini, UserSettings, autoUseGPTest, 0
 IniRead, TestTime, %A_ScriptDir%\..\Settings.ini, UserSettings, TestTime, 3600
+IniRead, captureWebhookURL, %A_ScriptDir%\..\Settings.ini, UserSettings, captureWebhookURL, ""
 ; connect adb
 instanceSleep := scriptName * 1000
 Sleep, %instanceSleep%
@@ -95,7 +96,7 @@ Loop {
         Gui, ToolBar:Add, Button, % "x" . (buttonWidth * 1) . " y0 w" . buttonWidth . " h25 gPauseScript", Pause (Shift+F6)
         Gui, ToolBar:Add, Button, % "x" . (buttonWidth * 2) . " y0 w" . buttonWidth . " h25 gResumeScript", Resume (Shift+F6)
         Gui, ToolBar:Add, Button, % "x" . (buttonWidth * 3) . " y0 w" . buttonWidth . " h25 gStopScript", Stop (Shift+F7)
-        Gui, ToolBar:Add, Button, % "x" . (buttonWidth * 4) . " y0 w" . buttonWidth . " h25 gSoloScript", Solo Battle (Shift+F8)
+        Gui, ToolBar:Add, Button, % "x" . (buttonWidth * 4) . " y0 w" . buttonWidth . " h25 gCaptureScript", Capture (Shift+F8)
         Gui, ToolBar:Add, Button, % "x" . (buttonWidth * 5) . " y0 w" . buttonWidth . " h25 gTestScript", GP Test (Shift+F9)
         DllCall("SetWindowPos", "Ptr", WinExist(), "Ptr", 1  ; HWND_BOTTOM
             , "Int", 0, "Int", 0, "Int", 0, "Int", 0, "UInt", 0x13)  ; SWP_NOSIZE, SWP_NOMOVE, SWP_NOACTIVATE
@@ -540,8 +541,44 @@ StopScript:
 ExitApp
 return
 
-SoloScript:
-    ToggleSoloScript()
+CaptureScript:
+    CreateStatusMessage("Capturing...",,,, false)
+    subDir := "Capture"
+    global adbShell, adbPath
+    SetWorkingDir %A_ScriptDir%  ; Ensures the working directory is the script's directory
+
+    ; Define folder and file paths
+    fileDir := A_ScriptDir "\..\Screenshots"
+    if !FileExist(fileDir)
+        FileCreateDir, fileDir
+    if (subDir) {
+        fileDir .= "\" . subDir
+        if !FileExist(fileDir)
+            FileCreateDir, fileDir
+    }
+
+    ; File path for saving the screenshot locally
+    fileName := A_Now . "_" . winTitle . "_capture.png"
+    filePath := fileDir "\" . fileName
+
+    pBitmapW := from_window(WinExist(winTitle))
+    ;posBox := FindOrLoseImage(9, 380, 29, 500, 25, "WpBox", 0, failSafeTime)
+    ;StringSplit, pos, posBox, `,  ; Split at ", "
+    
+    ;If (posBox)
+    ;    pBitmap := Gdip_CloneBitmapArea(pBitmapW, 10, pos2-264, 255, 293)
+    ;Else
+    pBitmap := Gdip_CloneBitmapArea(pBitmapW, 0, 100, 275, 304)
+    
+    ;pBitmap := Gdip_CloneBitmapArea(pBitmapW, 8, 100, 260, 272)
+    ;pBitmap := Gdip_CloneBitmapArea(pBitmapW, 10, 135, 255, 293)
+
+    Gdip_DisposeImage(pBitmapW)
+    Gdip_SaveBitmapToFile(pBitmap, filePath)
+    if (captureWebhookURL)
+        LogToDiscord("", filePath, True, , , captureWebhookURL)
+
+    Gdip_DisposeImage(pBitmap)
 return
 
 ReloadScript:
