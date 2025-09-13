@@ -24,7 +24,7 @@ WinHide % "ahk_id " DllCall("GetConsoleWindow", "ptr")
 global RESTART_LOOP_EXCEPTION := { message: "Restarting main loop" }
 global winTitle, changeDate, failSafe, openPack, Delay, failSafeTime, StartSkipTime, Columns, failSafe, scriptName, GPTest, StatusText, defaultLanguage, setSpeed, jsonFileName, pauseToggle, SelectedMonitorIndex, swipeSpeed, godPack, scaleParam, skipInvalidGP, deleteXML, packs, FriendID, AddFriend, Instances, showStatus, AutoSolo
 global triggerTestNeeded, testStartTime, firstRun, minStars, minStarsA2b, vipIdsURL
-global autoUseGPTest, autotest, autotest_time, A_gptest, TestTime, captureWebhookURL
+global autoUseGPTest, autotest, autotest_time, A_gptest, TestTime, captureWebhookURL, tesseractPath
 
 deleteAccount := false
 scriptName := StrReplace(A_ScriptName, ".ahk")
@@ -57,6 +57,7 @@ IniRead, clientLanguage, %A_ScriptDir%\..\Settings.ini, UserSettings, clientLang
 IniRead, minStars, %A_ScriptDir%\..\Settings.ini, UserSettings, minStars, 0
 IniRead, minStarsA2b, %A_ScriptDir%\..\Settings.ini, UserSettings, minStarsA2b, 0
 
+IniRead, tesseractPath, %A_ScriptDir%\..\Settings.ini, UserSettings, tesseractPath, C:\Program Files\Tesseract-OCR\tesseract.exe
 IniRead, autoUseGPTest, %A_ScriptDir%\..\Settings.ini, UserSettings, autoUseGPTest, 0
 IniRead, TestTime, %A_ScriptDir%\..\Settings.ini, UserSettings, TestTime, 3600
 IniRead, captureWebhookURL, %A_ScriptDir%\..\Settings.ini, UserSettings, captureWebhookURL, ""
@@ -561,15 +562,18 @@ CaptureScript:
     fileName := A_Now . "_" . winTitle . "_capture.png"
     filePath := fileDir "\" . fileName
 
-    pBitmapW := from_window(WinExist(winTitle))
-    ;posBox := FindOrLoseImage(9, 380, 29, 500, 25, "WpBox", 0, failSafeTime)
+    adbTakeScreenshot(filePath)
+    pBitmapW := Gdip_CreateBitmapFromFile(filePath)
+    ; pBitmap := Gdip_CloneBitmapArea(pBitmapW, 0, 108, 540, 596)
+    ;posBox := FindOrLoseImage(17, 120, 264, 400, , "WpBox7", 0, failSafeTime)
+    
+    ;posBox := FindOrLoseImage(72, 133, 79, 250, 60, "WpBox2", 0, failSafeTime)
     ;StringSplit, pos, posBox, `,  ; Split at ", "
-    
+
     ;If (posBox)
-    ;    pBitmap := Gdip_CloneBitmapArea(pBitmapW, 10, pos2-264, 255, 293)
+    ;    pBitmap := Gdip_CloneBitmapArea(pBitmapW, 18, (pos2-45)*960/489-16, 504, 574)
     ;Else
-    pBitmap := Gdip_CloneBitmapArea(pBitmapW, 0, 100, 275, 304)
-    
+    pBitmap := Gdip_CloneBitmapArea(pBitmapW, 0, 108, 540, 596)
     ;pBitmap := Gdip_CloneBitmapArea(pBitmapW, 8, 100, 260, 272)
     ;pBitmap := Gdip_CloneBitmapArea(pBitmapW, 10, 135, 255, 293)
 
@@ -1014,7 +1018,7 @@ ParseFriendInfo(ByRef friendCode, ByRef friendName, ByRef parseFriendCodeResult,
         if (!parseFriendCodeResult)
             parseFriendCodeResult := ParseFriendInfoLoop(fullScreenshotFile, 328, 57, 197, 28, "0123456789", "^\d{14,17}$", friendCode)
         if (includesIdsAndNames && !parseFriendNameResult)
-            parseFriendNameResult := ParseFriendInfoLoop(fullScreenshotFile, 107, 427, 325, 46, "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789", "^[a-zA-Z0-9]{5,20}$", friendName)
+            parseFriendNameResult := ParseFriendInfoLoop(fullScreenshotFile, 107, 427, 325, 46, "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-", "^[a-zA-Z0-9\-]{5,20}$", friendName)
         if (parseFriendCodeResult && (!includesIdsAndNames || parseFriendNameResult))
             break
 
@@ -1269,30 +1273,57 @@ CropAndFormatForOcr(inputFile, x := 0, y := 0, width := 200, height := 200, scal
 
 ; Extracts text from a bitmap using OCR (Optical Character Recognition). Converts the bitmap to a format usable by Windows OCR, performs OCR, and optionally removes characters not in the allowed character list.
 GetTextFromBitmap(pBitmap, charAllowList := "") {
-    ; ------------------------------------------------------------------------------
-    ; Parameters:
-    ;   pBitmap (Ptr)         - Pointer to the source GDI+ bitmap.
-    ;   charAllowList (String) - A list of allowed characters for OCR results (default: "").
-    ;
-    ; Returns:
-    ;   (String) - The OCR-extracted text, with disallowed characters removed.
-    ; -----------------------------------------------------------------------------
-    global ocrLanguage
-    ocrText := ""
-    ; OCR the bitmap directly
-    hBitmap := Gdip_CreateHBITMAPFromBitmap(pBitmap)
-    pIRandomAccessStream := HBitmapToRandomAccessStream(hBitmap)
-    ocrText := ocr(pIRandomAccessStream, ocrLanguage)
-    ; Cleanup references
-    ; ObjRelease(pIRandomAccessStream) ; TODO: do I need this?
-    DeleteObject(hBitmap)
-    ; Remove disallowed characters
-    if (charAllowList != "") {
-        allowedPattern := "[^" RegExEscape(charAllowList) "]"
-        ocrText := RegExReplace(ocrText, allowedPattern)
-    }
+	; ------------------------------------------------------------------------------
+	; Parameters:
+	;   pBitmap (Ptr)         - Pointer to the source GDI+ bitmap.
+	;   charAllowList (String) - A list of allowed characters for OCR results (default: "").
+	;
+	; Returns:
+	;   (String) - The OCR-extracted text, with disallowed characters removed.
+	; -----------------------------------------------------------------------------
+	global ocrLanguage, winTitle, tesseractPath
+	ocrText := ""
 
-    return Trim(ocrText, " `t`r`n")
+	if FileExist(tesseractPath) {
+		; ~~~~~~~~~~~~~~~~~~~~~~~~~
+		; ~~~ Use Tesseract OCR ~~~
+		; ~~~~~~~~~~~~~~~~~~~~~~~~~
+		; Save to file
+		filepath := GetTempDirectory() . "\" . winTitle . "_" . filename . ".png"
+		saveResult := Gdip_SaveBitmapToFile(pBitmap, filepath, 100)
+		if (saveResult != 0) {
+			CreateStatusMessage("Failed to save " . filepath . " screenshot.`nError code: " . saveResult)
+			return False
+		}
+		; OCR the file directly
+		command := """" . tesseractPath . """ """ . filepath . """ -"
+		if (charAllowList != "") {
+			command := command . " -c tessedit_char_whitelist=" . charAllowList
+		}
+		command := command . " --oem 3 --psm 7"
+		ocrText := CmdRet(command)
+	}
+	else {
+		; ~~~~~~~~~~~~~~~~~~~~~~~
+		; ~~~ Use Windows OCR ~~~
+		; ~~~~~~~~~~~~~~~~~~~~~~~
+		global ocrLanguage
+		ocrText := ""
+		; OCR the bitmap directly
+		hBitmap := Gdip_CreateHBITMAPFromBitmap(pBitmap)
+		pIRandomAccessStream := HBitmapToRandomAccessStream(hBitmap)
+		ocrText := ocr(pIRandomAccessStream, ocrLanguage)
+		; Cleanup references
+		; ObjRelease(pIRandomAccessStream) ; TODO: do I need this?
+		DeleteObject(hBitmapFriendCode)
+		; Remove disallowed characters
+		if (charAllowList != "") {
+			allowedPattern := "[^" RegExEscape(charAllowList) "]"
+			ocrText := RegExReplace(ocrText, allowedPattern)
+		}
+	}
+
+	return Trim(ocrText, " `t`r`n")
 }
 
 ; Escapes special characters in a string for use in a regular expression. It prepends a backslash to characters that have special meaning in regex.
