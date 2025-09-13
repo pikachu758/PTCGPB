@@ -14,11 +14,11 @@ global STATIC_BRUSH := 0
 
 githubUser := "pikachu758"
 repoName := "PTCGPB"
-localVersion := "v6.7.2"
+localVersion := "v6.7.3"
 scriptFolder := A_ScriptDir
 zipPath := A_Temp . "\update.zip"
 extractPath := A_Temp . "\update"
-intro := "Screen Capture and Bonus Week"
+intro := "OCR Improvement"
 
 ; GUI dimensions
 global GUI_WIDTH := 377 
