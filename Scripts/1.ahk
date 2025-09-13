@@ -28,10 +28,11 @@ global s4tEnabled, s4tSilent, s4t3Dmnd, s4t4Dmnd, s4t1Star, s4tGholdengo, s4tWP,
 global avgtotalSeconds
 global verboseLogging := false
 global showcaseEnabled
+global currentPackIs6Card := false
 global injectSortMethod := "ModifiedAsc"  ; Default sort method (oldest accounts first)
 global injectMinPacks := 0       ; Minimum pack count for injection (0 = no minimum)
 global injectMaxPacks := 39      ; Maximum pack count for injection (default for regular "Inject")
-
+global tesseractPath
 global waitForEligibleAccounts := 1  ; Enable/disable waiting (1 = wait, 0 = stop script)
 global maxWaitHours := 24             ; Maximum hours to wait before giving up (0 = wait forever)
 global DelayOfExtraPack
@@ -46,7 +47,7 @@ maxAccountPackNum := 40
 aminutes := 0
 aseconds := 0
 
-global beginnerMissionsDone, soloBattleMissionDone, intermediateMissionsDone, specialMissionsDone, resetSpecialMissionsDone, accountHasPackInTesting, currentLoadedAccountIndex
+global beginnerMissionsDone, soloBattleMissionDone, intermediateMissionsDone, specialMissionsDone, resetSpecialMissionsDone, accountHasPackInTesting, redeemTokensDone, currentLoadedAccountIndex
 
 beginnerMissionsDone := 0
 soloBattleMissionDone := 0
@@ -54,6 +55,7 @@ intermediateMissionsDone := 0
 specialMissionsDone := 0
 resetSpecialMissionsDone := 0
 accountHasPackInTesting := 0
+redeemTokensDone := 0
 
 global dbg_bbox, dbg_bboxNpause, dbg_bbox_click
 
@@ -151,6 +153,7 @@ IniRead, targetUsername, %A_ScriptDir%\..\Settings.ini, UserSettings, TargetUser
 IniRead, renameXML, %A_ScriptDir%\..\Settings.ini, UserSettings, renameXML, 0
 IniRead, renameXMLwithFC, %A_ScriptDir%\..\Settings.ini, UserSettings, renameXMLwithFC, 0
 IniRead, DelayOfExtraPack, %A_ScriptDir%\..\Settings.ini, UserSettings, DelayOfExtraPack%scriptName%, 4000
+IniRead, tesseractPath, %A_ScriptDir%\..\Settings.ini, UserSettings, tesseractPath, C:\Program Files\Tesseract-OCR\tesseract.exe
 
 pokemonList := ["Mewtwo", "Charizard", "Pikachu", "Mew", "Dialga", "Palkia", "Arceus", "Shining", "Solgaleo", "Lunala", "Buzzwole", "Eevee", "HoOh", "Lugia", "Suicune"]
 shinyPacks := {"Shining": 1, "Solgaleo": 1, "Lunala": 1, "Buzzwole": 1, "Eevee": 1, "HoOh": 1, "Lugia": 1, "Suicune": 1}
@@ -400,6 +403,8 @@ Loop {
             IniWrite, %now%, %A_ScriptDir%\%scriptName%.ini, Metrics, LastStartTimeUTC
             EnvSub, now, 1970, seconds
             IniWrite, %now%, %A_ScriptDir%\%scriptName%.ini, Metrics, LastStartEpoch
+
+			redeemTokensScript()
 
             if(!injectMethod || !loadedAccount) {
                 DoTutorial()
@@ -782,9 +787,10 @@ Loop {
             if (claimBonusWeek = 1) {
 				if (!openExtraPack) {
 					GoToMain(true)
-					HomeAndMission(1)
+					GetEventRewards(true)
 				}
-                GetEventRewards(False) ; collects all the Bonus week hourglass
+                else
+                    GetEventRewards(false) ; collects all the Bonus week hourglass
             }
 
             if(deleteMethod = "Inject" && !renameAndSaveAndReload) {
@@ -876,6 +882,7 @@ Loop {
                     intermediateMissionsDone := 0
                     specialMissionsDone := 0
                     accountHasPackInTesting := 0
+					redeemTokensDone := 0
                 }
                 restartGameInstance("New Run", false)
             }
@@ -1128,12 +1135,13 @@ TradeTutorial() {
 }
 
 AddFriends(renew := false, getFC := false) {
-    global FriendID, friendIds, waitTime, friendCode, scriptName, friended, startOfAdding, endOfAdding
+    global FriendID, friendIds, waitTime, friendCode, scriptName, friended, packsInPool, startOfAdding, endOfAdding
     friendIDs := ReadFile("ids")
     friended := true
     if(!getFC && !friendIDs && friendID = "")
         return false
-
+    if(renew)
+        packsInPool := 0
     failSafe := A_TickCount
     failSafeTime := 0
     Loop {
@@ -1917,6 +1925,8 @@ menuDeleteStart() {
 }
 
 CheckPack() {
+
+    currentPackIs6Card := false ; reset before each pack check
     ; Update pack count.
     accountOpenPacks += 1
     if (injectMethod && loadedAccount)
@@ -1934,8 +1944,11 @@ CheckPack() {
             break
         Delay(1)
     }
+    currentPackIs6Card := DetectSixCardPack()
 
-    ; Define a variable to contain whatever is found based on settings.
+    ; Determine total cards in pack for 4-diamond s4t calculations
+    totalCardsInPack := currentPackIs6Card ? 6 : 5
+
     foundLabel := false
 
     ; Before doing anything else, check if the current pack is valid.
@@ -1947,8 +1960,9 @@ CheckPack() {
     if (foundInvalid) {
         ; Pack is invalid...
         foundInvalidGP := FindGodPack(true) ; GP is never ignored
-        if(foundInvalidGP) {
-            restartGameInstance("Invalid God Pack found. Continuing...", "GodPack")
+
+        if (foundInvalidGP){
+            restartGameInstance("Invalid God Pack Found.", "GodPack")
         }
         else if (!InvalidCheck) {
             ; If not a GP and not "ignore invalid packs" , check what cards the current pack contains which make it invalid, and if user want to save them.
@@ -2017,7 +2031,7 @@ CheckPack() {
         }
 
         if (foundLabel) {
-            if (loadedAccount) {
+            if (loadedAccount && foundLabel = "Double two star") {
                 ;accountFoundGP()
                 accountHasPackInTesting := 1
                 setMetaData()
@@ -2044,8 +2058,8 @@ CheckPack() {
 
         if (s4t4Dmnd) {
             ; Detecting a 4-diamond EX card isn't possible using a needle.
-            ; Start with 5 and substract other card types as efficiently as possible.
-            found4Dmnd := 5 - FindBorders("normal")
+            ; Start with total cards (5 or 6) and subtract other card types as efficiently as possible.
+            found4Dmnd := totalCardsInPack - FindBorders("normal")
 
             if (found4Dmnd > 0) {
                 if (s4t3Dmnd)
@@ -2151,22 +2165,37 @@ FoundTradeable(found3Dmnd := 0, found4Dmnd := 0, found1Star := 0, foundGimmighou
         return
     }
 
+    ; WonderPick logic: foundTradeable >= s4tWPMinCards
     friendCode := getFriendCode()
 
     Sleep, 5000
     fcScreenshot := Screenshot("FRIENDCODE", "Trades")
 
+    tempDir := A_ScriptDir . "\..\Screenshots\temp"
+    if !FileExist(tempDir)
+        FileCreateDir, %tempDir%
+
+    usernameScreenshotFile := tempDir . "\" . winTitle . "_Username.png"
+    adbTakeScreenshot(usernameScreenshotFile)
+    Sleep, 100 
+
     ; If we're doing the inject method, try to OCR our Username
     try {
         if (injectMethod && IsFunc("ocr")) {
-            ; Region: x32, y120, 175x26
             playerName := ""
-            if(RefinedOCRText(fcScreenshot, 32, 120, 175, 26, "", "", playerName)) {
+            allowedUsernameChars := "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-+"
+            usernamePattern := "[\w-]+"
+
+            if(RefinedOCRText(usernameScreenshotFile, 125, 490, 290, 50, allowedUsernameChars, usernamePattern, playerName)) {
                 username := playerName
             }
         }
     } catch e {
         LogToFile("Failed to OCR the friend code: " . e.message, "OCR.txt")
+    }
+
+    if (FileExist(usernameScreenshotFile)) {
+        FileDelete, %usernameScreenshotFile%
     }
 
     statusMessage := "Tradeable cards found"
@@ -2186,6 +2215,31 @@ FoundTradeable(found3Dmnd := 0, found4Dmnd := 0, found1Star := 0, foundGimmighou
     restartGameInstance("Tradeable cards found. Continuing...", "GodPack")
 }
 
+DetectSixCardPack() {
+    global winTitle, defaultLanguage
+    searchVariation := 5 ; needed to tighten from 20 to avoid false positives
+    
+    imagePath := A_ScriptDir . "\" . defaultLanguage . "\"
+    
+    pBitmap := from_window(WinExist(winTitle))
+    
+    ; Look for 6cardpackindicator.png (background element visible only in 5-card packs)
+    Path = %imagePath%6cardpackindicator.png
+    if (FileExist(Path)) {
+        pNeedle := GetNeedle(Path)
+        vRet := Gdip_ImageSearch_wbb(pBitmap, pNeedle, vPosXY, 228, 324, 248, 351, searchVariation)
+        if (vRet = 1) {
+            ; Found the check image, so this is a 5-card pack
+            Gdip_DisposeImage(pBitmap)
+            return false  ; Return false = 5-card pack
+        }
+    }
+    
+    ; Did not find check image, so this must be a 6-card pack
+    Gdip_DisposeImage(pBitmap)
+    return true  ; Return true = 6-card pack
+}
+
 FoundStars(star) {
     global scriptName, ocrLanguage, injectMethod, openPack
 
@@ -2201,21 +2255,35 @@ FoundStars(star) {
     Sleep, 5000
     fcScreenshot := Screenshot("FRIENDCODE")
 
+    tempDir := A_ScriptDir . "\..\Screenshots\temp"
+    if !FileExist(tempDir)
+        FileCreateDir, %tempDir%
+
+    usernameScreenshotFile := tempDir . "\" . winTitle . "_Username.png"
+    adbTakeScreenshot(usernameScreenshotFile)
+    Sleep, 100 
+
     if(star = "Crown" || star = "Immersive" || star = "Shiny")
         RemoveFriends()
     else {
         ; If we're doing the inject method, try to OCR our Username
         try {
             if (injectMethod && IsFunc("ocr")) {
-                ; Region: x32, y120, 175x26
                 playerName := ""
-                if(RefinedOCRText(fcScreenshot, 32, 120, 175, 26, "", "", playerName)) {
+                allowedUsernameChars := "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-+"
+                usernamePattern := "[\w-]+"
+
+                if(RefinedOCRText(usernameScreenshotFile, 125, 490, 290, 50, allowedUsernameChars, usernamePattern, playerName)) {
                     username := playerName
                 }
             }
         } catch e {
             LogToFile("Failed to OCR the friend code: " . e.message, "OCR.txt")
         }
+    }
+
+    if (FileExist(usernameScreenshotFile)) {
+        FileDelete, %usernameScreenshotFile%
     }
 
     CreateStatusMessage(star . " found!",,,, false)
@@ -2234,45 +2302,102 @@ FoundStars(star) {
 }
 
 FindBorders(prefix) {
+    global currentPackIs6Card
     count := 0
     searchVariation := 40
+    searchVariation6Card := 60 ; looser tolerance for 6-card positions while we test if top row needles can be re-used for bottom row in 6-card packs
+    
+    is6CardPack := currentPackIs6Card
+    
+    if (is6CardPack) {
+        borderCoords := [[30, 284, 83, 286]      ; Top row card 1
+            ,[113, 284, 166, 286]                ; Top row card 2  
+            ,[196, 284, 249, 286]                ; Top row card 3
+            ,[30, 399, 83, 401]                  ; Bottom row card 1
+            ,[113, 399, 166, 401]                ; Bottom row card 2
+            ,[196, 399, 249, 401]]               ; Bottom row card 3
+    } else {
+        ; 5-card pack
     borderCoords := [[30, 284, 83, 286]
         ,[113, 284, 166, 286]
         ,[196, 284, 249, 286]
         ,[70, 399, 123, 401]
         ,[155, 399, 208, 401]]
-    if (prefix = "shiny1star" || prefix = "shiny2star") {
-        borderCoords := [[90, 261, 93, 283]
-            ,[173, 261, 176, 283]
-            ,[255, 261, 258, 283]
-            ,[130, 376, 133, 398]
-            ,[215, 376, 218, 398]]
     }
-    ; 100% scale changes
+    
+    if (prefix = "shiny1star" || prefix = "shiny2star") {
+        if (is6CardPack) {
+            borderCoords := [[90, 261, 93, 283]
+                ,[173, 261, 176, 283]
+                ,[255, 261, 258, 283]
+                ,[90, 376, 93, 398]
+                ,[173, 376, 176, 398]
+                ,[255, 376, 258, 398]]
+        } else {
+            borderCoords := [[90, 261, 93, 283]
+                ,[173, 261, 176, 283]
+                ,[255, 261, 258, 283]
+                ,[130, 376, 133, 398]
+                ,[215, 376, 218, 398]]
+        }
+    }
+    
+    ; 100% scale adjustments
     if (scaleParam = 287) {
         if (prefix = "shiny1star" || prefix = "shiny2star") {
+            if (is6CardPack) {
+                borderCoords := [[91, 253, 95, 278]
+                    ,[175, 253, 179, 278]
+                    ,[259, 253, 263, 278]
+                    ,[91, 370, 95, 395]
+                    ,[175, 371, 179, 394]
+                    ,[259, 371, 263, 394]]
+            } else {
             borderCoords := [[91, 253, 95, 278]
                 ,[175, 253, 179, 278]
                 ,[259, 253, 263, 278]
                 ,[132, 370, 136, 395]
                 ,[218, 371, 222, 394]]
-        } else {
-            borderCoords := [[26, 278, 84, 280]
-                ,[110, 278, 168, 280]
-                ,[194, 278, 252, 280]
-                ,[67, 395, 125, 397]
-                ,[153, 395, 211, 397]]
-        }
+            }
+            } else {
+                if (is6CardPack) {
+                    borderCoords := [[26, 278, 84, 280]
+                        ,[110, 278, 168, 280]
+                        ,[194, 278, 252, 280]
+                        ,[26, 395, 84, 397]
+                        ,[110, 395, 168, 397]
+                        ,[194, 395, 252, 397]]
+            } else {
+                borderCoords := [[26, 278, 84, 280]
+                    ,[110, 278, 168, 280]
+                    ,[194, 278, 252, 280]
+                    ,[67, 395, 125, 397]
+                    ,[153, 395, 211, 397]]
+            }
     }
+    }
+    
     pBitmap := from_window(WinExist(winTitle))
-    ; imagePath := "C:\Users\Arturo\Desktop\PTCGP\GPs\" . Clipboard . ".png"
-    ; pBitmap := Gdip_CreateBitmapFromFile(imagePath)
     for index, value in borderCoords {
         coords := borderCoords[A_Index]
-        Path = %A_ScriptDir%\%defaultLanguage%\%prefix%%A_Index%.png
+        imageName := "" ; prevents accidentally reusing previously loaded imageName if imageName is undefined in custom one-off needles
+        currentSearchVariation := searchVariation
+        
+        if (is6CardPack && A_Index >= 4) {
+            ; Bottom row of 6-card pack (positions 4, 5, 6), re-use top row images
+            imageIndex := A_Index - 3  ; Card 4 -> uses Card 1 needle, 5->2, 6->3
+            imageName := prefix . imageIndex
+            currentSearchVariation := searchVariation6Card
+        } else {
+            ; Top row of 6-card pack, or any position in 5-card pack, use the 'real' needles
+            imageName := prefix . A_Index
+            currentSearchVariation := searchVariation
+        }
+        
+        Path := A_ScriptDir . "\" . defaultLanguage . "\" . imageName . ".png"
         if (FileExist(Path)) {
             pNeedle := GetNeedle(Path)
-            vRet := Gdip_ImageSearch_wbb(pBitmap, pNeedle, vPosXY, coords[1], coords[2], coords[3], coords[4], searchVariation)
+            vRet := Gdip_ImageSearch_wbb(pBitmap, pNeedle, vPosXY, coords[1], coords[2], coords[3], coords[4], currentSearchVariation)
             if (vRet = 1) {
                 count += 1
             }
@@ -2315,9 +2440,7 @@ FindCard(prefix) {
 }
 
 FindGodPack(invalidPack := false) {
-    global openExtraPack, spendHourGlass
-
-    ; Check for normal borders.
+        ; Check for normal borders.
     normalBorders := FindBorders("normal")
     if (normalBorders) {
         CreateStatusMessage("Not a God Pack...",,,, false)
@@ -2329,7 +2452,7 @@ FindGodPack(invalidPack := false) {
     requiredStars := (shinyPacks.HasKey(openPack)) ? minStarsShiny : minStars
     ; Check if pack meets minimum stars requirement
     if (!invalidPack && requiredStars > 0) {
-        starCount := 5 - FindBorders("1star")
+        starCount := FindBorders("fullart") + FindBorders("rainbow") + FindBorders("trainer")
         if (starCount < requiredStars) {
             CreateStatusMessage("Pack doesn't contain enough 2 stars...",,,, false)
             invalidPack := true
@@ -2359,7 +2482,11 @@ GodPackFound(validity) {
     Randmax := Praise.Length()
     Random, rand, 1, Randmax
     Interjection := Praise[rand]
-    starCount := 5 - FindBorders("1star") - FindBorders("shiny1star")
+    
+    ; Calculate star count by only counting valid 2-star cards (fullart, rainbow, trainer)
+    ; Don't subtract invalid cards, instead count only the valid ones
+    starCount := FindBorders("fullart") + FindBorders("rainbow") + FindBorders("trainer")
+    
     screenShot := Screenshot(validity)
     accountFullPath := ""
     accountFile := saveAccount(validity, accountFullPath)
@@ -2369,17 +2496,31 @@ GodPackFound(validity) {
     Sleep, 5000
     fcScreenshot := Screenshot("FRIENDCODE")
 
+    tempDir := A_ScriptDir . "\..\Screenshots\temp"
+    if !FileExist(tempDir)
+        FileCreateDir, %tempDir%
+
+    usernameScreenshotFile := tempDir . "\" . winTitle . "_Username.png"
+    adbTakeScreenshot(usernameScreenshotFile)
+    Sleep, 100 
+
     ; If we're doing the inject method, try to OCR our Username
     try {
         if (injectMethod && IsFunc("ocr")) {
-            ; Region: x32, y120, 175x26
             playerName := ""
-            if(RefinedOCRText(fcScreenshot, 32, 120, 175, 26, "", "", playerName)) {
+            allowedUsernameChars := "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-+"
+            usernamePattern := "[\w-]+"
+
+            if(RefinedOCRText(usernameScreenshotFile, 125, 490, 290, 50, allowedUsernameChars, usernamePattern, playerName)) {
                 username := playerName
             }
         }
     } catch e {
         LogToFile("Failed to OCR the friend code: " . e.message, "OCR.txt")
+    }
+
+    if (FileExist(usernameScreenshotFile)) {
+        FileDelete, %usernameScreenshotFile%
     }
 
     CreateStatusMessage(Interjection . (invalid ? " " . invalid : "") . " God Pack found!",,,, false)
@@ -2403,6 +2544,7 @@ loadAccount() {
     specialMissionsDone := 0
     accountHasPackInTesting := 0
     resetSpecialMissionsDone := 0
+	redeemTokensDone := 0
 
     if (stopToggle) {
         CreateStatusMessage("Stopping...",,,, false)
@@ -2566,6 +2708,8 @@ saveAccount(file := "Valid", ByRef filePath := "", packDetails := "") {
             metadata .= "X"
         if(accountHasPackInTesting)
             metadata .= "T"
+		if(redeemTokensDone)
+			metadata .= "R"
 
         saveDir := A_ScriptDir "\..\Accounts\Saved\" . winTitle
         filePath := saveDir . "\" . accountOpenPacks . "P_" . A_Now . "_" . winTitle . "(" . metadata . ").xml"
@@ -3762,7 +3906,7 @@ SelectPack(HG := false) {
         PackIsLatest := 0
     }
 
-    if (openPack == "Eevee" || openPack == "HoOh" || openPack == "Suicune") {
+    if (openPack == "Lugia" || openPack == "HoOh" || openPack == "Suicune") {
         packInTopRowsOfSelectExpansion := 1
     } else {
         packInTopRowsOfSelectExpansion := 0
@@ -4050,7 +4194,6 @@ PackOpening() {
 }
 
 HourglassOpening(HG := false, NEIRestart := true) {
-    global openExtraPack, DelayOfExtraPack
     if(!HG) {
         Delay(3)
         adbClick_wbb(146, 441) ; 146 440
@@ -4787,6 +4930,7 @@ getMetaData() {
     intermediateMissionsDone := 0
     specialMissionsDone := 0
     accountHasPackInTesting := 0
+	redeemTokensDone := 0
 
     ; check if account file has metadata information
     if(InStr(accountFileName, "(")) {
@@ -4803,6 +4947,8 @@ getMetaData() {
                 intermediateMissionsDone := 1
             if(InStr(metadata, "X"))
                 specialMissionsDone := 1
+            if(InStr(metadata, "R"))
+                redeemTokensDone := 1
             if(InStr(metadata, "T")) {
                 saveDir := A_ScriptDir "\..\Accounts\Saved\" . winTitle
                 accountFile := saveDir . "\" . accountFileName
@@ -4853,6 +4999,8 @@ setMetaData() {
         metadata .= "X"
     if(accountHasPackInTesting)
         metadata .= "T"
+	if(redeemTokensDone)
+		metadata .= "R"
 
     ; Remove parentheses if no flags remain, helpful if there is only a T flag or manual removal of X flag
     if(hasMetaData) {
@@ -4977,6 +5125,7 @@ GetAllRewards(tomain := true, dailies := false) {
         }
 
         if(FindOrLoseImage(244, 406, 273, 449, , "GotAllMissions", 0, 0)) {
+            adbClick(172, 427)
             break
         }
         else if (failSafeTime > 20) {
@@ -4987,6 +5136,30 @@ GetAllRewards(tomain := true, dailies := false) {
     }
     if (tomain) {
         GoToMain()
+    }
+}
+redeemTokensScript() {
+	global redeemTokensDone
+	IniRead, redeemTokens, %A_ScriptDir%\..\Settings.ini, UserSettings, RedeemTokens, 0
+    if (redeemTokens = 1 && redeemTokensDone = 0) {
+        FindImageAndClick(191, 393, 211, 411, , "Shop", 138, 488, , 90)
+        FindImageAndClick(244, 66, 272, 94, , "ShopInfo", 196, 364, , 45)
+		FindImageAndClick(139, 454, 149, 475, , "eventshop", 146, 461, ,5)
+		FindImageAndClick(165, 424, 184, 446, , "Other", 254, 434, ,5)
+		FindImageAndClick(202, 317, 226, 341, , "Max", 53, 381, ,1)
+		FindImageAndClick(203, 313, 230, 339, , "Max2", 216, 326, ,1)
+		FindImageAndClick(165, 424, 184, 446, , "Other", 170, 379, ,5)
+		sleep, 500
+		FindImageAndClick(165, 424, 184, 446, , "Other", 170, 379, ,2)
+		FindImageAndClick(202, 317, 226, 341, , "Max", 127, 230, ,1)
+		FindImageAndClick(203, 313, 230, 339, , "Max2", 216, 326, ,1)
+		FindImageAndClick(165, 424, 184, 446, , "Other", 170, 379, ,5)
+		sleep, 500
+		FindImageAndClick(165, 424, 184, 446, , "Other", 170, 379, ,2)
+
+        GoToMain()
+		redeemTokensDone := 1
+		setMetaData()
     }
 }
 
@@ -5126,7 +5299,7 @@ RefinedOCRText(screenshotFile, x, y, w, h, allowedChars, validPattern, ByRef out
     if(output = "trophyOCR"){
         blowUp := [500, 1000, 2000, 100, 200, 250, 300, 350, 400, 450, 550, 600, 700, 800, 900]
     } else {
-        blowUp := [350, 500, 1000, 2000, 100, 200, 250, 300, 400, 450, 550, 600, 700, 800, 900]
+        blowUp := [200, 500, 1000, 2000, 100, 200, 250, 300, 400, 450, 550, 600, 700, 800, 900]
     }
     Loop, % blowUp.Length() {
         ; Get the formatted pBitmap
@@ -5156,23 +5329,59 @@ CropAndFormatForOcr(inputFile, x := 0, y := 0, width := 200, height := 200, scal
     return pBitmapFormatted
 }
 
-; Extracts text from a bitmap using OCR. Converts the bitmap to a format usable by Windows OCR, performs OCR, and optionally removes characters not in the allowed character list.
+; Extracts text from a bitmap using OCR (Optical Character Recognition). Converts the bitmap to a format usable by Windows OCR, performs OCR, and optionally removes characters not in the allowed character list.
 GetTextFromBitmap(pBitmap, charAllowList := "") {
-    global ocrLanguage
-    ocrText := ""
-    ; OCR the bitmap directly
-    hBitmap := Gdip_CreateHBITMAPFromBitmap(pBitmap)
-    pIRandomAccessStream := HBitmapToRandomAccessStream(hBitmap)
-    ocrText := ocr(pIRandomAccessStream, ocrLanguage)
-    ; Cleanup references
-    DeleteObject(hBitmap)
-    ; Remove disallowed characters
-    if (charAllowList != "") {
-        allowedPattern := "[^" RegExEscape(charAllowList) "]"
-        ocrText := RegExReplace(ocrText, allowedPattern)
-    }
+	; ------------------------------------------------------------------------------
+	; Parameters:
+	;   pBitmap (Ptr)         - Pointer to the source GDI+ bitmap.
+	;   charAllowList (String) - A list of allowed characters for OCR results (default: "").
+	;
+	; Returns:
+	;   (String) - The OCR-extracted text, with disallowed characters removed.
+	; -----------------------------------------------------------------------------
+	global ocrLanguage, winTitle, tesseractPath
+	ocrText := ""
 
-    return Trim(ocrText, " `t`r`n")
+	if FileExist(tesseractPath) {
+		; ~~~~~~~~~~~~~~~~~~~~~~~~~
+		; ~~~ Use Tesseract OCR ~~~
+		; ~~~~~~~~~~~~~~~~~~~~~~~~~
+		; Save to file
+		filepath := GetTempDirectory() . "\" . winTitle . "_" . filename . ".png"
+		saveResult := Gdip_SaveBitmapToFile(pBitmap, filepath, 100)
+		if (saveResult != 0) {
+			CreateStatusMessage("Failed to save " . filepath . " screenshot.`nError code: " . saveResult)
+			return False
+		}
+		; OCR the file directly
+		command := """" . tesseractPath . """ """ . filepath . """ -"
+		if (charAllowList != "") {
+			command := command . " -c tessedit_char_whitelist=" . charAllowList
+		}
+		command := command . " --oem 3 --psm 7"
+		ocrText := CmdRet(command)
+	}
+	else {
+		; ~~~~~~~~~~~~~~~~~~~~~~~
+		; ~~~ Use Windows OCR ~~~
+		; ~~~~~~~~~~~~~~~~~~~~~~~
+		global ocrLanguage
+		ocrText := ""
+		; OCR the bitmap directly
+		hBitmap := Gdip_CreateHBITMAPFromBitmap(pBitmap)
+		pIRandomAccessStream := HBitmapToRandomAccessStream(hBitmap)
+		ocrText := ocr(pIRandomAccessStream, ocrLanguage)
+		; Cleanup references
+		; ObjRelease(pIRandomAccessStream) ; TODO: do I need this?
+		DeleteObject(hBitmapFriendCode)
+		; Remove disallowed characters
+		if (charAllowList != "") {
+			allowedPattern := "[^" RegExEscape(charAllowList) "]"
+			ocrText := RegExReplace(ocrText, allowedPattern)
+		}
+	}
+
+	return Trim(ocrText, " `t`r`n")
 }
 
 ; Escapes special characters in a string for use in a regular expression.
@@ -5353,3 +5562,14 @@ ParseUsername(screenshotFile, x, y, w, h, targetUsername) {
     return success
 }
 
+; Retrieves the path to the temporary directory for the script. If the directory does not exist, it is created.
+GetTempDirectory() {
+    ; ------------------------------------------------------------------------------
+    ; Returns:
+    ;   (String) - The full path to the temporary directory.
+    ; ------------------------------------------------------------------------------
+    tempDir := A_ScriptDir . "\temp"
+    if !FileExist(tempDir)
+        FileCreateDir, %tempDir%
+    return tempDir
+}
