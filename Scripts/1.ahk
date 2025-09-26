@@ -21,6 +21,7 @@ WinHide % "ahk_id " DllCall("GetConsoleWindow", "ptr")
 
 global RESTART_LOOP_EXCEPTION := { message: "Restarting main loop" }
 global winTitle, changeDate, failSafe, openPack, Delay, failSafeTime, StartSkipTime, Columns, failSafe, scriptName, GPTest, StatusText, defaultLanguage, setSpeed, jsonFileName, pauseToggle, SelectedMonitorIndex, swipeSpeed, godPack, scaleParam, deleteMethod, packs, FriendID, friendIDs, Instances, username, friendCode, stopToggle, friended, runMain, Mains, showStatus, injectMethod, packMethod, loadDir, loadedAccount, nukeAccount, CheckShinyPackOnly, TrainerCheck, FullArtCheck, RainbowCheck, ShinyCheck, dateChange, foundGP, friendsAdded, PseudoGodPack, packArray, CrownCheck, ImmersiveCheck, InvalidCheck, slowMotion, screenShot, accountFile, invalid, starCount, keepAccount
+global twoPlusOne, twoPlusDia
 global Mewtwo, Charizard, Pikachu, Mew, Dialga, Palkia, Arceus, Shining, Solgaleo, Lunala, Buzzwole, Eevee, HoOh, Lugia, Suicune
 global shinyPacks, minStars, minStarsShiny
 global DeadCheck
@@ -102,6 +103,8 @@ IniRead, InvalidCheck, %A_ScriptDir%\..\Settings.ini, UserSettings, InvalidCheck
 IniRead, PseudoGodPack, %A_ScriptDir%\..\Settings.ini, UserSettings, PseudoGodPack, 0
 IniRead, minStars, %A_ScriptDir%\..\Settings.ini, UserSettings, minStars, 0
 IniRead, minStarsShiny, %A_ScriptDir%\..\Settings.ini, UserSettings, minStarsShiny, 0
+IniRead, twoPlusOne, %A_ScriptDir%\..\Settings.ini, UserSettings, twoPlusOne, 0
+IniRead, twoPlusDia, %A_ScriptDir%\..\Settings.ini, UserSettings, twoPlusDia, 0
 
 IniRead, Suicune, %A_ScriptDir%\..\Settings.ini, UserSettings, Suicune, 1
 IniRead, HoOh, %A_ScriptDir%\..\Settings.ini, UserSettings, HoOh, 0
@@ -1744,7 +1747,7 @@ DirectlyPositionWindow() {
 restartGameInstance(reason, RL := true) {
     global friended, scriptName, packsThisRun, injectMethod, loadedAccount, DeadCheck, starCount, packsInPool, openPack, invalid, accountFile, username, stopToggle
 
-    Screenshot("restartGameInstance", "Restart")
+    ;Screenshot("restartGameInstance", "Restart")
 
     if (Debug)
         CreateStatusMessage("Restarting game reason:`n" . reason)
@@ -1754,8 +1757,8 @@ restartGameInstance(reason, RL := true) {
         CreateStatusMessage("Restarting game...",,,, false)
     LogToFile("Restarted game for instance " . scriptName . ". Reason: " reason, "Restart.txt")
     
-    adbShell.StdIn.WriteLine("rm /data/data/jp.pokemon.pokemontcgp/files/UserPreferences/v1/PackUserPrefs")
-    waitadb()
+    ;adbShell.StdIn.WriteLine("rm /data/data/jp.pokemon.pokemontcgp/files/UserPreferences/v1/PackUserPrefs")
+    ;waitadb()
 
     if (RL = "GodPack") {
         AppendToJsonFile(packsThisRun)
@@ -2010,6 +2013,24 @@ CheckPack() {
             2starCount := foundTrainer + foundRainbow + foundFullArt
             if (2starCount > 1)
                 foundLabel := "Double two star"
+        }
+        if ((twoPlusOne||twoPlusDia) && !foundLabel && packsInPool=1) {
+            if (!PseudoGodPack) {
+                foundTrainer := FindBorders("trainer")
+                foundRainbow := FindBorders("rainbow")
+                foundFullArt := FindBorders("fullart")
+                2starCount := foundTrainer + foundRainbow + foundFullArt
+            }
+            found3Dmnd := FindBorders("3diamond")
+            foundNormal := FindBorders("normal")
+            found1Star := FindBorders("1star")
+            found4Dmnd := totalCardsInPack - found3Dmnd - foundNormal - found1Star - 2starCount
+            if (2starCount) {
+                if (twoPlusDia && found4Dmnd)
+                    foundLabel := "2+d"
+                else if (twoPlusOne && found1Star)
+                    foundLabel := "2+1"
+            }
         }
         if (TrainerCheck && !foundLabel) {
             if(!PseudoGodPack)
@@ -3988,8 +4009,8 @@ SelectPack(HG := false) {
     if(inselectexpansionscreen) {
         if (openPack = "Shining" || openPack = "Solgaleo" || openPack = "Lunala") {
             ; One swipe
-            adbSwipe("266 770 266 50 250")
-            Sleep, 250
+            adbSwipe("266 770 266 50 500")
+            ;Sleep, 250
 
             packy := 433
 
@@ -4002,10 +4023,10 @@ SelectPack(HG := false) {
             }
         } else if (openPack = "Mew" || openPack = "Charizard" || openPack = "Mewtwo" || openPack = "Pikachu" || openPack = "Dialga" || openPack = "Palkia" || openPack = "Arceus") {
             ; Two swipes
-            adbSwipe("266 770 266 50 250")
-            Sleep, 250
-            adbSwipe("266 770 266 50 250")
-            Sleep, 250
+            adbSwipe("266 770 266 50 500")
+            ;Sleep, 250
+            adbSwipe("266 770 266 50 500")
+            ;Sleep, 250
 
             if (openPack = "Arceus") {
                 packy := SelectExpansionFirstRowY
@@ -4274,7 +4295,7 @@ HourglassOpening(HG := false, NEIRestart := true) {
         if(FindOrLoseImage(191, 393, 211, 411, , "Shop", 0, failSafeTime)){
             DelayOfExtraPack += 1000
             SelectPack("HGPack")
-            LogToFile("Instance " scriptName ": extra pack error", "Error.txt")
+            ; LogToFile("Instance " scriptName ": extra pack error", "Error.txt")
         }
 
         clickButton := FindOrLoseImage(145, 440, 258, 480, 80, "Button", 0, failSafeTime)
