@@ -2338,8 +2338,8 @@ FindBorders(prefix) {
     
     is6CardPack := currentPackIs6Card
     if (openPack = "Deluxe") {
-        borderCoords := [[70, 284, 123, 286]
-            ,[155, 284, 208, 286]
+        borderCoords := [[69, 283, 124, 287]
+            ,[154, 283, 209, 287]
             ,[70, 399, 123, 401]
             ,[155, 399, 208, 401]]
     } else if (is6CardPack) {
