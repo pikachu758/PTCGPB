@@ -225,12 +225,13 @@ Loop {
             LogToFile("Instance " scriptName ": Error in " e.What ", which was called at line " e.Line " in " e.File, "Error.txt")
             restartGameInstance("Stuck at " . e.What . "...")
         }
-        CreateStatusMessage("Restarting mission loop...",,,, false)
+        CreateStatusMessage("Restarting...",,,, false)
         GPTest := false
         triggerTestNeeded := false
         A_gptest := 0
         AutoSolo := false
-        sleep, 1000
+        adbShell := ""
+        initializeAdbShell()
         continue
     }
 
@@ -482,7 +483,8 @@ restartGameInstance(reason, RL := true) {
     adbShell.StdIn.WriteLine("rm /data/data/jp.pokemon.pokemontcgp/files/UserPreferences/v1/SoloBattleResumeUserPrefs")
     waitadb()
     adbShell.StdIn.WriteLine("am start -S -n jp.pokemon.pokemontcgp/com.unity3d.player.UnityPlayerActivity")
-    Sleep, 5000
+    waitadb()
+    Sleep, 1000
     throw RESTART_LOOP_EXCEPTION
 
 }
@@ -579,6 +581,9 @@ CaptureScript:
 
     Gdip_DisposeImage(pBitmapW)
     Gdip_SaveBitmapToFile(pBitmap, filePath)
+    Gdip_DisposeImage(pBitmapW)
+    Gdip_DisposeImage(pBitmap)
+    Sleep, 1000
     if (captureWebhookURL)
         LogToDiscord("", filePath, True, , , captureWebhookURL)
 

@@ -22,7 +22,7 @@ WinHide % "ahk_id " DllCall("GetConsoleWindow", "ptr")
 global RESTART_LOOP_EXCEPTION := { message: "Restarting main loop" }
 global winTitle, changeDate, failSafe, openPack, Delay, failSafeTime, StartSkipTime, Columns, failSafe, scriptName, GPTest, StatusText, defaultLanguage, setSpeed, jsonFileName, pauseToggle, SelectedMonitorIndex, swipeSpeed, godPack, scaleParam, deleteMethod, packs, FriendID, friendIDs, Instances, username, friendCode, stopToggle, friended, runMain, Mains, showStatus, injectMethod, packMethod, loadDir, loadedAccount, nukeAccount, CheckShinyPackOnly, TrainerCheck, FullArtCheck, RainbowCheck, ShinyCheck, dateChange, foundGP, friendsAdded, PseudoGodPack, packArray, CrownCheck, ImmersiveCheck, InvalidCheck, slowMotion, screenShot, accountFile, invalid, starCount, keepAccount
 global twoPlusOne, twoPlusDia
-global Mewtwo, Charizard, Pikachu, Mew, Dialga, Palkia, Arceus, Shining, Solgaleo, Lunala, Buzzwole, Eevee, HoOh, Lugia, Suicune
+global Mewtwo, Charizard, Pikachu, Mew, Dialga, Palkia, Arceus, Shining, Solgaleo, Lunala, Buzzwole, Eevee, HoOh, Lugia, Suicune, Deluxe
 global shinyPacks, minStars, minStarsShiny
 global DeadCheck
 global s4tEnabled, s4tSilent, s4t3Dmnd, s4t4Dmnd, s4t1Star, s4tGholdengo, s4tWP, s4tWPMinCards, s4tDiscordWebhookURL, s4tDiscordUserId, s4tSendAccountXml
@@ -106,7 +106,8 @@ IniRead, minStarsShiny, %A_ScriptDir%\..\Settings.ini, UserSettings, minStarsShi
 IniRead, twoPlusOne, %A_ScriptDir%\..\Settings.ini, UserSettings, twoPlusOne, 0
 IniRead, twoPlusDia, %A_ScriptDir%\..\Settings.ini, UserSettings, twoPlusDia, 0
 
-IniRead, Suicune, %A_ScriptDir%\..\Settings.ini, UserSettings, Suicune, 1
+IniRead, Deluxe, %A_ScriptDir%\..\Settings.ini, UserSettings, Deluxe, 1
+IniRead, Suicune, %A_ScriptDir%\..\Settings.ini, UserSettings, Suicune, 0
 IniRead, HoOh, %A_ScriptDir%\..\Settings.ini, UserSettings, HoOh, 0
 IniRead, Lugia, %A_ScriptDir%\..\Settings.ini, UserSettings, Lugia, 0
 IniRead, Eevee, %A_ScriptDir%\..\Settings.ini, UserSettings, Eevee, 0
@@ -158,8 +159,8 @@ IniRead, renameXMLwithFC, %A_ScriptDir%\..\Settings.ini, UserSettings, renameXML
 IniRead, DelayOfExtraPack, %A_ScriptDir%\..\Settings.ini, UserSettings, DelayOfExtraPack%scriptName%, 4000
 IniRead, tesseractPath, %A_ScriptDir%\..\Settings.ini, UserSettings, tesseractPath, C:\Program Files\Tesseract-OCR\tesseract.exe
 
-pokemonList := ["Mewtwo", "Charizard", "Pikachu", "Mew", "Dialga", "Palkia", "Arceus", "Shining", "Solgaleo", "Lunala", "Buzzwole", "Eevee", "HoOh", "Lugia", "Suicune"]
-shinyPacks := {"Shining": 1, "Solgaleo": 1, "Lunala": 1, "Buzzwole": 1, "Eevee": 1, "HoOh": 1, "Lugia": 1, "Suicune": 1}
+pokemonList := ["Mewtwo", "Charizard", "Pikachu", "Mew", "Dialga", "Palkia", "Arceus", "Shining", "Solgaleo", "Lunala", "Buzzwole", "Eevee", "HoOh", "Lugia", "Suicune", "Deluxe"]
+shinyPacks := {"Shining": 1, "Solgaleo": 1, "Lunala": 1, "Buzzwole": 1, "Eevee": 1, "HoOh": 1, "Lugia": 1, "Suicune": 1, "Deluxe": 1}
 
 packArray := []  ; Initialize an empty array
 
@@ -666,16 +667,14 @@ Loop {
             if(deleteMethod = "Inject" || deleteMethod = "Inject Missions" && accountOpenPacks >= maxAccountPackNum)
                 Goto, EndOfRun
 
-            if(deleteMethod = "Inject for Reroll" && openExtraPack && packMethod) {
-                friendsAdded := AddFriends(true)
-                SelectPack("HGPack")
-                HourglassOpening(true)
-
-            } else if(deleteMethod = "Inject for Reroll" && !openExtraPack && !packMethod) {
+            if(deleteMethod = "Inject for Reroll" && openExtraPack) {
+                if (packMethod){
+                    friendsAdded := AddFriends(true)
+                    SelectPack("HGPack")
+                }
+                ;HourglassOpening(true)
                 Goto, EndOfRun
-
-            } else if(deleteMethod = "Inject for Reroll" && openExtraPack && !packMethod) {
-                HourglassOpening(true)
+            } else if(deleteMethod = "Inject for Reroll" && !openExtraPack) {
                 Goto, EndOfRun
             }
 
@@ -898,6 +897,8 @@ Loop {
         else {
             LogToFile("Instance " scriptName ": Error in " e.What ", which was called at line " e.Line " in " e.File, "Error.txt")
         }
+        adbShell := ""
+        initializeAdbShell()
         sleep, 1000
         continue
     }
@@ -1109,7 +1110,7 @@ RemoveFriends() {
             FindImageAndClick(135, 355, 160, 385, , "Remove", 145, 407)
             FindImageAndClick(70, 395, 100, 420, , "Send2", 200, 372)
         }
-        FindImageAndClick(226, 100, 270, 135, , "Add", 143, 507)
+        FindImageAndClick(226, 100, 270, 135, , "Add", 143, 507, 250)
         friendsProcessed++
     }
     endOfRemoving := A_TickCount
@@ -1399,6 +1400,7 @@ FindOrLoseImage(X1, Y1, X2, Y2, searchVariation := "", imageName := "DEFAULT", E
     ; ImageSearch within the region
     vRet := Gdip_ImageSearch_wbb(pBitmap, pNeedle, vPosXY, 225, 300, 242, 314, searchVariation)
     if (vRet = 1) {
+        Gdip_DisposeImage(pBitmap)
         restartGameInstance("*Stuck at " . imageName . "...")
     }
     if(imageName = "Social" || imageName = "Add" || imageName = "Add2") {
@@ -1435,6 +1437,7 @@ FindOrLoseImage(X1, Y1, X2, Y2, searchVariation := "", imageName := "DEFAULT", E
     else
         FSTime := 45
     if (safeTime >= FSTime) {
+        Gdip_DisposeImage(pBitmap)
         restartGameInstance("Stuck at " . imageName . "...")
         failSafe := A_TickCount
     }
@@ -1571,6 +1574,7 @@ FindImageAndClick(X1, Y1, X2, Y2, searchVariation := "", imageName := "DEFAULT",
             }
             if (ElapsedTime >= FSTime || safeTime >= FSTime) {
                 CreateStatusMessage("Instance " . scriptName . " has been stuck for 90s. Killing it...")
+                Gdip_DisposeImage(pBitmap)
                 restartGameInstance("Stuck at " . imageName . "...") ; change to reset the instance and delete data then reload script
             }
         }
@@ -1588,6 +1592,7 @@ FindImageAndClick(X1, Y1, X2, Y2, searchVariation := "", imageName := "DEFAULT",
         ; ImageSearch within the region
         vRet := Gdip_ImageSearch_wbb(pBitmap, pNeedle, vPosXY, 225, 300, 242, 314, searchVariation)
         if (vRet = 1) {
+            Gdip_DisposeImage(pBitmap)
             restartGameInstance("*Stuck at " . imageName . "...")
         }
         if(imageName = "Social" || imageName = "Country" || imageName = "Account2" || imageName = "Account") { ;only look for deleted account on start up.
@@ -1629,6 +1634,7 @@ FindImageAndClick(X1, Y1, X2, Y2, searchVariation := "", imageName := "DEFAULT",
             vRet := Gdip_ImageSearch_wbb(pBitmap, pNeedle, vPosXY, 92, 299, 115, 317, 0)
             if(vRet = 1) {
                 cantOpenMorePacks := 1
+                Gdip_DisposeImage(pBitmap)
                 return 0
                 ;restartGameInstance("Not Enough Items")
             }
@@ -1641,6 +1647,7 @@ FindImageAndClick(X1, Y1, X2, Y2, searchVariation := "", imageName := "DEFAULT",
                 beginnerMissionsDone := 1
                 if(injectMethod && loadedAccount)
                     setMetaData()
+                Gdip_DisposeImage(pBitmap)
                 return
                 ;restartGameInstance("beginner missions done except solo battle")
 			}
@@ -1951,6 +1958,7 @@ CheckPack() {
 
     ; Determine total cards in pack for 4-diamond s4t calculations
     totalCardsInPack := currentPackIs6Card ? 6 : 5
+    totalCardsInPack := (openPack = "Deluxe") ? 4 : totalCardsInPack
 
     foundLabel := false
 
@@ -2329,8 +2337,12 @@ FindBorders(prefix) {
     searchVariation6Card := 60 ; looser tolerance for 6-card positions while we test if top row needles can be re-used for bottom row in 6-card packs
     
     is6CardPack := currentPackIs6Card
-    
-    if (is6CardPack) {
+    if (openPack = "Deluxe") {
+        borderCoords := [[70, 284, 123, 286]
+            ,[155, 284, 208, 286]
+            ,[70, 399, 123, 401]
+            ,[155, 399, 208, 401]]
+    } else if (is6CardPack) {
         borderCoords := [[30, 284, 83, 286]      ; Top row card 1
             ,[113, 284, 166, 286]                ; Top row card 2  
             ,[196, 284, 249, 286]                ; Top row card 3
@@ -2339,15 +2351,20 @@ FindBorders(prefix) {
             ,[196, 399, 249, 401]]               ; Bottom row card 3
     } else {
         ; 5-card pack
-    borderCoords := [[30, 284, 83, 286]
-        ,[113, 284, 166, 286]
-        ,[196, 284, 249, 286]
-        ,[70, 399, 123, 401]
-        ,[155, 399, 208, 401]]
+        borderCoords := [[30, 284, 83, 286]
+            ,[113, 284, 166, 286]
+            ,[196, 284, 249, 286]
+            ,[70, 399, 123, 401]
+            ,[155, 399, 208, 401]]
     }
     
     if (prefix = "shiny1star" || prefix = "shiny2star") {
-        if (is6CardPack) {
+        if (openPack = "Deluxe") {
+            borderCoords := [[130, 261, 133, 283]
+                ,[215, 261, 218, 283]
+                ,[130, 376, 133, 398]
+                ,[215, 376, 218, 398]]
+        } else if (is6CardPack) {
             borderCoords := [[90, 261, 93, 283]
                 ,[173, 261, 176, 283]
                 ,[255, 261, 258, 283]
@@ -2362,49 +2379,18 @@ FindBorders(prefix) {
                 ,[215, 376, 218, 398]]
         }
     }
-    
-    ; 100% scale adjustments
-    if (scaleParam = 287) {
-        if (prefix = "shiny1star" || prefix = "shiny2star") {
-            if (is6CardPack) {
-                borderCoords := [[91, 253, 95, 278]
-                    ,[175, 253, 179, 278]
-                    ,[259, 253, 263, 278]
-                    ,[91, 370, 95, 395]
-                    ,[175, 371, 179, 394]
-                    ,[259, 371, 263, 394]]
-            } else {
-            borderCoords := [[91, 253, 95, 278]
-                ,[175, 253, 179, 278]
-                ,[259, 253, 263, 278]
-                ,[132, 370, 136, 395]
-                ,[218, 371, 222, 394]]
-            }
-            } else {
-                if (is6CardPack) {
-                    borderCoords := [[26, 278, 84, 280]
-                        ,[110, 278, 168, 280]
-                        ,[194, 278, 252, 280]
-                        ,[26, 395, 84, 397]
-                        ,[110, 395, 168, 397]
-                        ,[194, 395, 252, 397]]
-            } else {
-                borderCoords := [[26, 278, 84, 280]
-                    ,[110, 278, 168, 280]
-                    ,[194, 278, 252, 280]
-                    ,[67, 395, 125, 397]
-                    ,[153, 395, 211, 397]]
-            }
-    }
-    }
+
     
     pBitmap := from_window(WinExist(winTitle))
     for index, value in borderCoords {
         coords := borderCoords[A_Index]
         imageName := "" ; prevents accidentally reusing previously loaded imageName if imageName is undefined in custom one-off needles
         currentSearchVariation := searchVariation
-        
-        if (is6CardPack && A_Index >= 4) {
+        if (openPack = "Deluxe") {
+            imageIndex := (A_Index >= 3) ? (A_Index + 1) : (A_Index + 3)
+            imageName := prefix . A_Index
+            currentSearchVariation := searchVariation
+        } else if (is6CardPack && A_Index >= 4) {
             ; Bottom row of 6-card pack (positions 4, 5, 6), re-use top row images
             imageIndex := A_Index - 3  ; Card 4 -> uses Card 1 needle, 5->2, 6->3
             imageName := prefix . imageIndex
@@ -2653,7 +2639,6 @@ loadAccount() {
     adbShell.StdIn.WriteLine("am force-stop jp.pokemon.pokemontcgp")
     waitadb()
     RunWait, % adbPath . " -s 127.0.0.1:" . adbPort . " push " . loadFile . " /sdcard/deviceAccount.xml",, Hide
-    waitadb()
     ;adbShell.StdIn.WriteLine("rm /data/data/jp.pokemon.pokemontcgp/files/UserPreferences/v1/PackUserPrefs")
     ;waitadb()
     adbShell.StdIn.WriteLine("cp /sdcard/deviceAccount.xml /data/data/jp.pokemon.pokemontcgp/shared_prefs/deviceAccount:.xml")
@@ -2768,6 +2753,7 @@ saveAccount(file := "Valid", ByRef filePath := "", packDetails := "") {
         Sleep, 500
 
         adbShell.StdIn.WriteLine("rm /sdcard/deviceAccount.xml")
+        waitadb()
 
         Sleep, 500
 
@@ -3894,6 +3880,7 @@ SelectPack(HG := false) {
 
     PackScreenAllPackY := 320
 
+    SelectExpansionTopRowY := 170
     SelectExpansionFirstRowY := 275
     SelectExpansionSecondRowY := 410
 
@@ -3907,30 +3894,24 @@ SelectPack(HG := false) {
     inselectexpansionscreen := 0
 
     packy := HomeScreenAllPackY
-    if (openPack == "Eevee") {
+    if (openPack == "HoOh") {
         packx := LeftPackX
-    } else if (openPack == "HoOh") {
+    } else if (openPack == "Suicune") {
         packx := RightPackX
     } else {
         packx := MiddlePackX
     }
 
-    if(openPack == "Suicune" || openPack == "HoOh" || openPack == "Eevee") {
+    if(openPack == "Suicune" || openPack == "HoOh" || openPack == "Deluxe") {
         PackIsInHomeScreen := 1
     } else {
         PackIsInHomeScreen := 0
     }
 
-    if(openPack == "Suicune") {
+    if(openPack == "Deluxe") {
         PackIsLatest := 1
     } else {
         PackIsLatest := 0
-    }
-
-    if (openPack == "Lugia" || openPack == "HoOh" || openPack == "Suicune") {
-        packInTopRowsOfSelectExpansion := 1
-    } else {
-        packInTopRowsOfSelectExpansion := 0
     }
 
     if(HG = "First" && injectMethod && loadedAccount ){
@@ -4007,66 +3988,70 @@ SelectPack(HG := false) {
     }
 
     if(inselectexpansionscreen) {
-        if (openPack = "Shining" || openPack = "Solgaleo" || openPack = "Lunala") {
+        if (openPack == "Deluxe" || openPack == "Suicune" || openPack == "HoOh" || openPack == "Lugia" || openPack == "Eevee") {
+            ; No swipe, top row
+            if (openPack == "Deluxe") {
+                packy := SelectExpansionFirstRowY
+                packx := SelectExpansionLeftCollumnMiddleX
+            } else if (openPack == "Suicune") {
+                packy := SelectExpansionFirstRowY
+                packx := SelectExpansionRightCollumnMiddleX
+            } else if (openPack == "HoOh") {
+                packy := SelectExpansionSecondRowY
+                packx := SelectExpansionLeftCollumnMiddleX + 2PackExpansionLeft
+            } else if (openPack == "Lugia") {
+                packy := SelectExpansionSecondRowY
+                packx := SelectExpansionLeftCollumnMiddleX + 2PackExpansionRight
+            } else if (openPack == "Eevee") {
+                packy := SelectExpansionSecondRowY
+                packx := SelectExpansionRightCollumnMiddleX
+            }
+        } else if (openPack = "Buzzwole" || openPack = "Solgaleo" || openPack = "Lunala") {
             ; One swipe
             adbSwipe("266 770 266 50 500")
             ;Sleep, 250
 
             packy := 433
 
-            if (openPack = "Solgaleo") {
-                packx := SelectExpansionLeftCollumnMiddleX + 2PackExpansionLeft
+            if (openPack = "Buzzwole") {
+                packx := SelectExpansionLeftCollumnMiddleX
+            } else if (openPack = "Solgaleo") {
+                packx := SelectExpansionRightCollumnMiddleX + 2PackExpansionLeft
             } else if (openPack = "Lunala") {
-                packx := SelectExpansionLeftCollumnMiddleX + 2PackExpansionRight
-            } else if (openPack = "Shining") {
-                packx := SelectExpansionRightCollumnMiddleX
+                packx := SelectExpansionRightCollumnMiddleX + 2PackExpansionRight
             }
-        } else if (openPack = "Mew" || openPack = "Charizard" || openPack = "Mewtwo" || openPack = "Pikachu" || openPack = "Dialga" || openPack = "Palkia" || openPack = "Arceus") {
+        } else {
             ; Two swipes
             adbSwipe("266 770 266 50 500")
             ;Sleep, 250
-            adbSwipe("266 770 266 50 500")
-            ;Sleep, 250
+            adbSwipe("266 785 266 -50 500")
+            Sleep, 250
 
-            if (openPack = "Arceus") {
-                packy := SelectExpansionFirstRowY
-                packx := SelectExpansionLeftCollumnMiddleX + 2PackExpansionLeft
+            if (openPack = "Shining") {
+                packy := SelectExpansionTopRowY
+                packx := SelectExpansionLeftCollumnMiddleX
+            }
+            else if (openPack = "Arceus") {
+                packy := SelectExpansionTopRowY
+                packx := SelectExpansionRightCollumnMiddleX
             } else if (openPack = "Dialga") {
                 packy := SelectExpansionFirstRowY
-                packx := SelectExpansionRightCollumnMiddleX + 2PackExpansionLeft
+                packx := SelectExpansionLeftCollumnMiddleX + 2PackExpansionLeft
             } else if (openPack = "Palkia") {
                 packy := SelectExpansionFirstRowY
-                packx := SelectExpansionRightCollumnMiddleX + 2PackExpansionRight
+                packx := SelectExpansionLeftCollumnMiddleX + 2PackExpansionRight
             } else if (openPack = "Mew") {
-                packy := SelectExpansionSecondRowY
-                packx := SelectExpansionLeftCollumnMiddleX
+                packy := SelectExpansionFirstRowY
+                packx := SelectExpansionRightCollumnMiddleX
             } else if (openPack = "Charizard") {
                 packy := SelectExpansionSecondRowY
-                packx := SelectExpansionRightCollumnMiddleX + 3PackExpansionLeft
+                packx := SelectExpansionLeftCollumnMiddleX + 3PackExpansionLeft
             } else if (openPack = "Mewtwo") {
                 packy := SelectExpansionSecondRowY
-                packx := SelectExpansionRightCollumnMiddleX
+                packx := SelectExpansionLeftCollumnMiddleX
             } else if (openPack = "Pikachu") {
                 packy := SelectExpansionSecondRowY
-                packx := SelectExpansionRightCollumnMiddleX + 3PackExpansionRight
-            }
-        } else {
-            ; No swipe, top row
-            if (openPack == "Suicune") {
-                packy := SelectExpansionFirstRowY
-                packx := SelectExpansionLeftCollumnMiddleX
-            } else if (openPack == "HoOh") {
-                packy := SelectExpansionFirstRowY
-                packx := SelectExpansionRightCollumnMiddleX + 2PackExpansionLeft
-            } else if (openPack == "Lugia") {
-                packy := SelectExpansionFirstRowY
-                packx := SelectExpansionRightCollumnMiddleX + 2PackExpansionRight
-            } else if (openPack == "Eevee") {
-                packy := SelectExpansionSecondRowY
-                packx := SelectExpansionLeftCollumnMiddleX
-            } else if (openPack == "Buzzwole") {
-                packy := SelectExpansionSecondRowY
-                packx := SelectExpansionRightCollumnMiddleX
+                packx := SelectExpansionLeftCollumnMiddleX + 3PackExpansionRight
             }
         }
 
@@ -5201,7 +5186,7 @@ GoToMain(fromSocial := false) {
         }
     }
     else {
-        FindImageAndClick(120, 500, 155, 530, , "Social", 143, 493)
+        FindImageAndClick(120, 500, 155, 530, , "Social", 143, 518)
         FindImageAndClick(191, 393, 211, 411, , "Shop", 20, 515, 500) ;click until at main menu
     }
 }
