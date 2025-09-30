@@ -672,7 +672,7 @@ Loop {
                     friendsAdded := AddFriends(true)
                     SelectPack("HGPack")
                 }
-                ;HourglassOpening(true)
+                HourglassOpening(true)
                 Goto, EndOfRun
             } else if(deleteMethod = "Inject for Reroll" && !openExtraPack) {
                 Goto, EndOfRun
