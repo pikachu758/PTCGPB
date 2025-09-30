@@ -579,7 +579,6 @@ CaptureScript:
     ;pBitmap := Gdip_CloneBitmapArea(pBitmapW, 8, 100, 260, 272)
     ;pBitmap := Gdip_CloneBitmapArea(pBitmapW, 10, 135, 255, 293)
 
-    Gdip_DisposeImage(pBitmapW)
     Gdip_SaveBitmapToFile(pBitmap, filePath)
     Gdip_DisposeImage(pBitmapW)
     Gdip_DisposeImage(pBitmap)
@@ -587,7 +586,6 @@ CaptureScript:
     if (captureWebhookURL)
         LogToDiscord("", filePath, True, , , captureWebhookURL)
 
-    Gdip_DisposeImage(pBitmap)
 return
 
 ReloadScript:
