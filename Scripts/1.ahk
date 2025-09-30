@@ -5091,6 +5091,7 @@ GetEventRewards(frommain := true){
                 else
                     FindImageAndClick(100, 303, 113, 323, , "Two", 107, 313) ; click mod settings
             }
+            adbClick_wbb(41, 366)
             break
         }
         failSafeTime := (A_TickCount - failSafe) // 1000
