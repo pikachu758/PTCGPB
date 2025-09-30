@@ -284,12 +284,12 @@ Loop {
         if(DeadCheck = 1 && deleteMethod != "13 Pack") {
             CreateStatusMessage("Account is stuck! Restarting and unfriending...")
             friended := true
-            FindImageAndClick(25, 145, 70, 170, , "Platin", 18, 109, 2000) ; click mod settings
+            FindImageAndClick(38, 290, 65, 302, , "Platin", 18, 109, 2000) ; click mod settings
             if(setSpeed = 3)
-                FindImageAndClick(182, 170, 194, 190, , "Three", 187, 180) ; click mod settings
+                FindImageAndClick(182, 303, 194, 323, , "Three", 187, 313) ; click mod settings
             else
-                FindImageAndClick(100, 170, 113, 190, , "Two", 107, 180) ; click mod settings
-            adbClick_wbb(41, 296)
+                FindImageAndClick(100, 303, 113, 323, , "Two", 107, 313) ; click mod settings
+            adbClick_wbb(41, 366)
             Delay(1)
             RemoveFriends()
             DeadCheck := 0
@@ -388,13 +388,13 @@ Loop {
                 LogToFile("Successfully loaded account for injection: " . accountFileName)
             }
 
-            FindImageAndClick(25, 145, 70, 170, , "Platin", 18, 109, 2000) ; click mod settings
+            FindImageAndClick(38, 290, 65, 302, , "Platin", 18, 109, 2000) ; click mod settings
             if(setSpeed = 3)
-                FindImageAndClick(182, 170, 194, 190, , "Three", 187, 180) ; click mod settings
+                FindImageAndClick(182, 303, 194, 323, , "Three", 187, 313) ; click mod settings
             else
-                FindImageAndClick(100, 170, 113, 190, , "Two", 107, 180) ; click mod settings
+                FindImageAndClick(100, 303, 113, 323, , "Two", 107, 313) ; click mod settings
             Delay(1)
-            adbClick_wbb(41, 296)
+            adbClick_wbb(41, 366)
             Delay(1)
 
             cantOpenMorePacks := 0
@@ -1871,13 +1871,13 @@ menuDeleteStart() {
         return keepAccount
     }
     if(friended) {
-        FindImageAndClick(25, 145, 70, 170, , "Platin", 18, 109, 2000) ; click mod settings
+        FindImageAndClick(38, 290, 65, 302, , "Platin", 18, 109, 2000) ; click mod settings
         if(setSpeed = 3)
-            FindImageAndClick(182, 170, 194, 190, , "Three", 187, 180) ; click mod settings
+            FindImageAndClick(182, 303, 194, 323, , "Three", 187, 313) ; click mod settings
         else
-            FindImageAndClick(100, 170, 113, 190, , "Two", 107, 180) ; click mod settings
+            FindImageAndClick(100, 303, 113, 323, , "Two", 107, 313) ; click mod settings
         Delay(1)
-        adbClick_wbb(41, 296)
+        adbClick_wbb(41, 366)
         Delay(1)
     }
     failSafe := A_TickCount
@@ -2388,7 +2388,7 @@ FindBorders(prefix) {
         currentSearchVariation := searchVariation
         if (openPack = "Deluxe") {
             imageIndex := (A_Index >= 3) ? (A_Index + 1) : (A_Index + 3)
-            imageName := prefix . A_Index
+            imageName := prefix . imageIndex
             currentSearchVariation := searchVariation
         } else if (is6CardPack && A_Index >= 4) {
             ; Bottom row of 6-card pack (positions 4, 5, 6), re-use top row images
@@ -3591,21 +3591,21 @@ DoTutorial() {
     }
 
     if(setSpeed = 3) {
-        FindImageAndClick(25, 145, 70, 170, , "Platin", 18, 109, 2000) ; click mod settings
-        FindImageAndClick(9, 170, 25, 190, , "One", 26, 180) ; click mod settings
+        FindImageAndClick(38, 290, 65, 302, , "Platin", 18, 109, 2000) ; click mod settings
+        FindImageAndClick(9, 303, 25, 323, , "One", 26, 313) ; click mod settings
         Delay(1)
-        adbClick_wbb(41, 296)
+        adbClick_wbb(41, 366)
         Delay(1)
     }
 
     FindImageAndClick(110, 230, 182, 257, , "Welcome", 253, 506, 110) ;click through cutscene until welcome page
 
     if(setSpeed = 3) {
-        FindImageAndClick(25, 145, 70, 170, , "Platin", 18, 109, 2000) ; click mod settings
+        FindImageAndClick(38, 290, 65, 302, , "Platin", 18, 109, 2000) ; click mod settings
 
-        FindImageAndClick(182, 170, 194, 190, , "Three", 187, 180) ; click mod settings
+        FindImageAndClick(182, 303, 194, 323, , "Three", 187, 313) ; click mod settings
         Delay(1)
-        adbClick_wbb(41, 296)
+        adbClick_wbb(41, 366)
     }
     FindImageAndClick(190, 241, 225, 270, , "Name", 189, 438) ;wait for name input screen
     /* ; Picks Erika at creation - disabled
@@ -3670,8 +3670,8 @@ DoTutorial() {
 
     FindImageAndClick(225, 273, 235, 290, , "Pack", 140, 424) ;wait for pack to be ready  to trace
     if(setSpeed > 1) {
-        FindImageAndClick(25, 145, 70, 170, , "Platin", 18, 109, 2000) ; click mod settings
-        FindImageAndClick(9, 170, 25, 190, , "One", 26, 180) ; click mod settings
+        FindImageAndClick(38, 290, 65, 302, , "Platin", 18, 109, 2000) ; click mod settings
+        FindImageAndClick(9, 303, 25, 323, , "One", 26, 313) ; click mod settings
         Delay(1)
     }
     failSafe := A_TickCount
@@ -3682,11 +3682,11 @@ DoTutorial() {
         if (FindOrLoseImage(225, 273, 235, 290, , "Pack", 1, failSafeTime)){
             if(setSpeed > 1) {
                 if(setSpeed = 3)
-                    FindImageAndClick(182, 170, 194, 190, , "Three", 187, 180) ; click 3x
+                    FindImageAndClick(182, 303, 194, 323, , "Three", 187, 313) ; click 3x
                 else
-                    FindImageAndClick(100, 170, 113, 190, , "Two", 107, 180) ; click 2x
+                    FindImageAndClick(100, 303, 113, 323, , "Two", 107, 313) ; click 2x
             }
-            adbClick_wbb(41, 296)
+            adbClick_wbb(41, 366)
             break
         }
         failSafeTime := (A_TickCount - failSafe) // 1000
@@ -3695,8 +3695,8 @@ DoTutorial() {
 
     FindImageAndClick(34, 99, 74, 131, , "Swipe", 140, 375) ;click through cards until needing to swipe up
     if(setSpeed > 1) {
-        FindImageAndClick(25, 145, 70, 170, , "Platin", 18, 109, 2000) ; click mod settings
-        FindImageAndClick(9, 170, 25, 190, , "One", 26, 180) ; click mod settings
+        FindImageAndClick(38, 290, 65, 302, , "Platin", 18, 109, 2000) ; click mod settings
+        FindImageAndClick(9, 303, 25, 323, , "One", 26, 313) ; click mod settings
         Delay(1)
     }
     failSafe := A_TickCount
@@ -3707,11 +3707,11 @@ DoTutorial() {
         if (FindOrLoseImage(120, 70, 150, 95, , "SwipeUp", 0, failSafeTime)){
             if(setSpeed > 1) {
                 if(setSpeed = 3)
-                    FindImageAndClick(182, 170, 194, 190, , "Three", 187, 180) ; click mod settings
+                    FindImageAndClick(182, 303, 194, 323, , "Three", 187, 313) ; click mod settings
                 else
-                    FindImageAndClick(100, 170, 113, 190, , "Two", 107, 180) ; click mod settings
+                    FindImageAndClick(100, 303, 113, 323, , "Two", 107, 313) ; click mod settings
             }
-            adbClick_wbb(41, 296)
+            adbClick_wbb(41, 366)
             break
         }
         failSafeTime := (A_TickCount - failSafe) // 1000
@@ -3765,8 +3765,9 @@ DoTutorial() {
 
     FindImageAndClick(225, 273, 235, 290, , "Pack", 239, 497) ;wait for pack to be ready  to Trace
     if(setSpeed > 1) {
-        FindImageAndClick(25, 145, 70, 170, , "Platin", 18, 109, 2000) ; click mod settings
-        FindImageAndClick(9, 170, 25, 190, , "One", 26, 180) ; click mod settings
+        FindImageAndClick(38, 290, 65, 302, , "Platin", 18, 109, 2000) ; click mod settings
+        FindImageAndClick(9, 303, 25, 323, , "One", 26, 313) ; click mod settings
+        adbClick_wbb(41, 366)
         Delay(1)
     }
     failSafe := A_TickCount
@@ -3776,12 +3777,13 @@ DoTutorial() {
         Sleep, 10
         if (FindOrLoseImage(225, 273, 235, 290, , "Pack", 1, failSafeTime)){
             if(setSpeed > 1) {
+                FindImageAndClick(38, 290, 65, 302, , "Platin", 18, 109, 2000) ; click mod settings
                 if(setSpeed = 3)
-                    FindImageAndClick(182, 170, 194, 190, , "Three", 187, 180) ; click mod settings
+                    FindImageAndClick(182, 303, 194, 323, , "Three", 187, 313) ; click mod settings
                 else
-                    FindImageAndClick(100, 170, 113, 190, , "Two", 107, 180) ; click mod settings
+                    FindImageAndClick(100, 303, 113, 323, , "Two", 107, 313) ; click mod settings
             }
-            adbClick_wbb(41, 296)
+            adbClick_wbb(41, 366)
             break
         }
         failSafeTime := (A_TickCount - failSafe) // 1000
@@ -4142,8 +4144,9 @@ PackOpening() {
     ;waitadb()
 
     if(setSpeed > 1) {
-        FindImageAndClick(25, 145, 70, 170, , "Platin", 18, 109, 2000) ; click mod settings
-        FindImageAndClick(9, 170, 25, 190, , "One", 26, 180) ; click mod settings
+        FindImageAndClick(38, 290, 65, 302, , "Platin", 18, 109, 2000) ; click mod settings
+        FindImageAndClick(9, 303, 25, 323, , "One", 26, 313) ; click mod settings
+        adbClick_wbb(41, 366)
         Delay(1)
     }
     failSafe := A_TickCount
@@ -4152,13 +4155,14 @@ PackOpening() {
         adbSwipe_wbb(adbSwipeParams)
         Sleep, 10
         if (FindOrLoseImage(225, 273, 235, 290, , "Pack", 1, failSafeTime)){
+            FindImageAndClick(38, 290, 65, 302, , "Platin", 18, 109, 2000) ; click mod settings
             if(setSpeed > 1) {
                 if(setSpeed = 3)
-                    FindImageAndClick(182, 170, 194, 190, , "Three", 187, 180) ; click mod settings
+                    FindImageAndClick(182, 303, 194, 323, , "Three", 187, 313) ; click mod settings
                 else
-                    FindImageAndClick(100, 170, 113, 190, , "Two", 107, 180) ; click mod settings
+                    FindImageAndClick(100, 303, 113, 323, , "Two", 107, 313) ; click mod settings
             }
-            adbClick_wbb(41, 296)
+            adbClick_wbb(41, 366)
             break
         }
         failSafeTime := (A_TickCount - failSafe) // 1000
@@ -4298,8 +4302,9 @@ HourglassOpening(HG := false, NEIRestart := true) {
     }
 
     if(setSpeed > 1) {
-        FindImageAndClick(25, 145, 70, 170, , "Platin", 18, 109, 2000) ; click mod settings
-        FindImageAndClick(9, 170, 25, 190, , "One", 26, 180) ; click mod settings
+        FindImageAndClick(38, 290, 65, 302, , "Platin", 18, 109, 2000) ; click mod settings
+        FindImageAndClick(9, 303, 25, 323, , "One", 26, 313) ; click mod settings
+        adbClick_wbb(41, 366)
         Delay(1)
     }
     failSafe := A_TickCount
@@ -4309,12 +4314,13 @@ HourglassOpening(HG := false, NEIRestart := true) {
         Sleep, 10
         if (FindOrLoseImage(225, 273, 235, 290, , "Pack", 1, failSafeTime)){
             if(setSpeed > 1) {
+                FindImageAndClick(38, 290, 65, 302, , "Platin", 18, 109, 2000) ; click mod settings
                 if(setSpeed = 3)
-                    FindImageAndClick(182, 170, 194, 190, , "Three", 187, 180) ; click mod settings
+                    FindImageAndClick(182, 303, 194, 323, , "Three", 187, 313) ; click mod settings
                 else
-                    FindImageAndClick(100, 170, 113, 190, , "Two", 107, 180) ; click mod settings
+                    FindImageAndClick(100, 303, 113, 323, , "Two", 107, 313) ; click mod settings
             }
-            adbClick_wbb(41, 296)
+            adbClick_wbb(41, 366)
             break
         }
         failSafeTime := (A_TickCount - failSafe) // 1000
@@ -5069,8 +5075,8 @@ GetEventRewards(frommain := true){
     ; LevelUp()
 
     if(setSpeed > 1) {
-        FindImageAndClick(25, 145, 70, 170, , "Platin", 18, 109, 2000) ; click mod settings
-        FindImageAndClick(9, 170, 25, 190, , "One", 26, 180) ; click mod settings
+        FindImageAndClick(38, 290, 65, 302, , "Platin", 18, 109, 2000) ; click mod settings
+        FindImageAndClick(9, 303, 25, 323, , "One", 26, 313) ; click mod settings
         Delay(1)
     }
     failSafe := A_TickCount
@@ -5081,11 +5087,10 @@ GetEventRewards(frommain := true){
         if (FindOrLoseImage(225, 444, 272, 470, , "Premium", 0, failSafeTime)){
             if(setSpeed > 1) {
                 if(setSpeed = 3)
-                    FindImageAndClick(182, 170, 194, 190, , "Three", 187, 180) ; click mod settings
+                    FindImageAndClick(182, 303, 194, 323, , "Three", 187, 313) ; click mod settings
                 else
-                    FindImageAndClick(100, 170, 113, 190, , "Two", 107, 180) ; click mod settings
+                    FindImageAndClick(100, 303, 113, 323, , "Two", 107, 313) ; click mod settings
             }
-            adbClick_wbb(41, 296)
             break
         }
         failSafeTime := (A_TickCount - failSafe) // 1000
