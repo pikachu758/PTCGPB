@@ -207,7 +207,7 @@ Loop {
                 break
             } else if(FindOrLoseImage(75, 340, 195, 530, 80, "Button", 0, failSafeTime)) {
                 Sleep, 1000
-                if(FindImageAndClick(190, 195, 215, 220, , "DeleteFriend", 169, 365, 4000)) {
+                if(FindImageAndClick(190, 195, 215, 220, , "DeleteFriend", 169, 365, 4000, 20)) {
                     Sleep, %Delay%
                     adbClick(210, 210)
                 }
@@ -478,12 +478,15 @@ restartGameInstance(reason, RL := true) {
         CreateStatusMessage("Restarting game reason:`n" . reason)
     else
         CreateStatusMessage("Restarting game...",,,, false)
-    LogToFile("Restarted game for instance " . scriptName . ". Reason: " reason, "Restart.txt")
-
-    adbShell.StdIn.WriteLine("rm /data/data/jp.pokemon.pokemontcgp/files/UserPreferences/v1/SoloBattleResumeUserPrefs")
-    waitadb()
-    adbShell.StdIn.WriteLine("am start -S -n jp.pokemon.pokemontcgp/com.unity3d.player.UnityPlayerActivity")
-    waitadb()
+    LogToFile("Restarted game for instance " . scriptName . ". Reason: " . reason, "Restart.txt")
+    try {
+        adbShell.StdIn.WriteLine("rm /data/data/jp.pokemon.pokemontcgp/files/UserPreferences/v1/SoloBattleResumeUserPrefs")
+        waitadb()
+        adbShell.StdIn.WriteLine("am start -S -n jp.pokemon.pokemontcgp/com.unity3d.player.UnityPlayerActivity")
+        waitadb()
+    } catch e {
+        LogToFile("Device not responsive during restartGameInstance. Error: " . e.Message, "Error.txt")
+    }
     Sleep, 1000
     throw RESTART_LOOP_EXCEPTION
 
@@ -566,23 +569,11 @@ CaptureScript:
 
     adbTakeScreenshot(filePath)
     pBitmapW := Gdip_CreateBitmapFromFile(filePath)
-    ; pBitmap := Gdip_CloneBitmapArea(pBitmapW, 0, 108, 540, 596)
-    ;posBox := FindOrLoseImage(17, 120, 264, 400, , "WpBox7", 0, failSafeTime)
-    
-    ;posBox := FindOrLoseImage(72, 133, 79, 250, 60, "WpBox2", 0, failSafeTime)
-    ;StringSplit, pos, posBox, `,  ; Split at ", "
-
-    ;If (posBox)
-    ;    pBitmap := Gdip_CloneBitmapArea(pBitmapW, 18, (pos2-45)*960/489-16, 504, 574)
-    ;Else
     pBitmap := Gdip_CloneBitmapArea(pBitmapW, 0, 108, 540, 596)
-    ;pBitmap := Gdip_CloneBitmapArea(pBitmapW, 8, 100, 260, 272)
-    ;pBitmap := Gdip_CloneBitmapArea(pBitmapW, 10, 135, 255, 293)
+    Gdip_DisposeImage(pBitmapW)
 
     Gdip_SaveBitmapToFile(pBitmap, filePath)
-    Gdip_DisposeImage(pBitmapW)
     Gdip_DisposeImage(pBitmap)
-    Sleep, 1000
     if (captureWebhookURL)
         LogToDiscord("", filePath, True, , , captureWebhookURL)
 
