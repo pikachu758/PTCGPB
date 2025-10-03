@@ -14,7 +14,7 @@ global STATIC_BRUSH := 0
 
 githubUser := "pikachu758"
 repoName := "PTCGPB"
-localVersion := "v6.8.3"
+localVersion := "v6.8.4"
 scriptFolder := A_ScriptDir
 zipPath := A_Temp . "\update.zip"
 extractPath := A_Temp . "\update"
@@ -491,6 +491,9 @@ NextStep:
         Lugia := 0
         Suicune := 0
         Deluxe := 1
+        minStarsShiny := 0
+        openExtraPack := 1
+        
         ; Save pack selections directly without resetting them
         IniWrite, %Palkia%, Settings.ini, UserSettings, Palkia
         IniWrite, %Dialga%, Settings.ini, UserSettings, Dialga
@@ -543,6 +546,7 @@ NextStep:
         IniWrite, %ImmersiveCheck%, Settings.ini, UserSettings, ImmersiveCheck
         IniWrite, %PseudoGodPack%, Settings.ini, UserSettings, PseudoGodPack
         IniWrite, %minStars%, Settings.ini, UserSettings, minStars
+        IniWrite, %minStarsShiny%, Settings.ini, UserSettings, minStarsShiny
         IniWrite, %slowMotion%, Settings.ini, UserSettings, slowMotion
         IniWrite, %ocrLanguage%, Settings.ini, UserSettings, ocrLanguage
         IniWrite, %clientLanguage%, Settings.ini, UserSettings, clientLanguage
@@ -577,7 +581,6 @@ NextStep:
         IniWrite, %s4tDiscordUserId%, Settings.ini, UserSettings, s4tDiscordUserId
         IniWrite, %s4tDiscordWebhookURL%, Settings.ini, UserSettings, s4tDiscordWebhookURL
         IniWrite, %s4tSendAccountXml%, Settings.ini, UserSettings, s4tSendAccountXml
-        IniWrite, %minStarsShiny%, Settings.ini, UserSettings, minStarsShiny
         
         ; Save extra settings
         IniWrite, %tesseractPath%, Settings.ini, UserSettings, tesseractPath
