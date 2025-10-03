@@ -1110,7 +1110,7 @@ RemoveFriends() {
             FindImageAndClick(135, 355, 160, 385, , "Remove", 145, 407)
             FindImageAndClick(70, 395, 100, 420, , "Send2", 200, 372)
         }
-        FindImageAndClick(226, 100, 270, 135, , "Add", 143, 507, 250)
+        FindImageAndClick(226, 100, 270, 135, , "Add", 143, 507)
         friendsProcessed++
     }
     endOfRemoving := A_TickCount
@@ -1559,7 +1559,7 @@ FindImageAndClick(X1, Y1, X2, Y2, searchVariation := "", imageName := "DEFAULT",
             confirmed := vPosXY
         } else {
             ElapsedTime := (A_TickCount - StartSkipTime) // 1000
-            if(imageName = "Country")
+            if(imageName = "Country" || imageName = "Shop")
                 FSTime := 90
             else if(imageName = "Proceed") ; Decrease time for Marowak
                 FSTime := 8
@@ -1786,7 +1786,7 @@ restartGameInstance(reason, RL := true) {
             waitadb()
             adbShell.StdIn.WriteLine("am start -n jp.pokemon.pokemontcgp/com.unity3d.player.UnityPlayerActivity -f 0x10018000")
             waitadb()
-            Sleep, 500
+            Sleep, 3000
         }
         else {
             AppendToJsonFile(packsThisRun)
@@ -1794,7 +1794,7 @@ restartGameInstance(reason, RL := true) {
             waitadb()
             adbShell.StdIn.WriteLine("am start -n jp.pokemon.pokemontcgp/com.unity3d.player.UnityPlayerActivity -f 0x10018000")
             waitadb()
-            sleep, 500
+            sleep, 3000
             throw RESTART_LOOP_EXCEPTION
         }
     }
@@ -1963,7 +1963,7 @@ CheckPack() {
     foundLabel := false
 
     ; Before doing anything else, check if the current pack is valid.
-    foundShiny := FindBorders("shiny2star") + FindBorders("shiny1star")
+    foundShiny := FindBorders("shiny")
     foundCrown := FindBorders("crown")
     foundImmersive := FindBorders("immersive")
     foundInvalid := foundShiny + foundCrown + foundImmersive
@@ -2338,8 +2338,8 @@ FindBorders(prefix) {
     
     is6CardPack := currentPackIs6Card
     if (openPack = "Deluxe") {
-        borderCoords := [[69, 283, 124, 287]
-            ,[154, 283, 209, 287]
+        borderCoords := [[70, 284, 123, 286]
+            ,[155, 284, 208, 286]
             ,[70, 399, 123, 401]
             ,[155, 399, 208, 401]]
     } else if (is6CardPack) {
@@ -2648,7 +2648,7 @@ loadAccount() {
     ; Reliably restart the app: Wait for launch, and start in a clean, new task without animation.
     adbShell.StdIn.WriteLine("am start -n jp.pokemon.pokemontcgp/com.unity3d.player.UnityPlayerActivity -f 0x10018000")
     waitadb()
-    Sleep, 500   ; Reduced from 1000
+    Sleep, 3000   ; Reduced from 1000
     ; Parse account filename for pack info (unchanged)
     if (InStr(accountFileName, "P")) {
         accountFileNameParts := StrSplit(accountFileName, "P")
