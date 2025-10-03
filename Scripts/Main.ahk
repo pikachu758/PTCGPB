@@ -371,10 +371,6 @@ FindImageAndClick(X1, Y1, X2, Y2, searchVariation := "", imageName := "DEFAULT",
             }
         }
 
-        if (confirmed) {
-            continue
-        }
-
         pBitmap := from_window(WinExist(winTitle))
         Path = %imagePath%%imageName%.png
         pNeedle := GetNeedle(Path)
