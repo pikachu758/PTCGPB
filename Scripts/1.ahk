@@ -310,7 +310,6 @@ Loop {
             Random, rand, 1, Randmax
             openPack := packArray[rand]
             friended := false
-            IniWrite, 1, %A_ScriptDir%\..\HeartBeat.ini, HeartBeat, Instance%scriptName%
             startOfRun := A_TickCount
 
             changeDate := getChangeDateTime() ; get server reset time
@@ -829,6 +828,8 @@ Loop {
 			packsTotal += packsThisRun
 			pphfs := packsTotal / (timeTotal / 3600000) / occupancy
             IniWrite, %pphfs%, %A_ScriptDir%\..\HeartBeat.ini, PPHFS, Instance%scriptName%
+            
+            IniWrite, 1, %A_ScriptDir%\..\HeartBeat.ini, HeartBeat, Instance%scriptName%
             ; Display the times
             CreateStatusMessage("Avg: " . aminutes . "m " . aseconds . "s | Runs: " . rerolls . " | PPHFS: " . pphfs, "AvgRuns", 0, 605, false, true)
 			; LogToFile(timeTotal/rerolls_local . " " . timeOccupied/rerolls_local . " " . occupancy . " " . packsTotal/rerolls_local . " " . pphfs)
