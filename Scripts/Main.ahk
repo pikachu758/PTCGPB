@@ -185,8 +185,6 @@ Loop {
             Continue
         }
 
-        if(heartBeat)
-            IniWrite, 1, %A_ScriptDir%\..\HeartBeat.ini, HeartBeat, Main
         Sleep, %Delay%
         FindImageAndClick(120, 500, 155, 530, , "Social", 143, 518, 1000, 120)
         FindImageAndClick(226, 100, 270, 135, , "Add", 38, 460, 500, 15)
@@ -204,6 +202,8 @@ Loop {
             } else if(FindOrLoseImage(225, 195, 250, 220, , "Pending", 0, failSafeTime)) {
                 adbClick(245, 210)
             } else if(FindOrLoseImage(186, 496, 206, 518, , "Accept", 0, failSafeTime)) {
+                if(heartBeat)
+                    IniWrite, 1, %A_ScriptDir%\..\HeartBeat.ini, HeartBeat, Main
                 break
             } else if(FindOrLoseImage(75, 340, 195, 530, 80, "Button", 0, failSafeTime)) {
                 Sleep, 1000
