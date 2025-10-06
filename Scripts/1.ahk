@@ -1081,38 +1081,28 @@ RemoveFriends() {
     FindImageAndClick(84, 463, 100, 475, 10, "Friends", 22, 464)
     startOfRemoving := A_TickCount
     friendsProcessed := 0
-    finished := false
-    accepted := false
+    failSafe := A_TickCount
+    failSafeTime := 0
     Loop {
-        failSafe := A_TickCount
-        failSafeTime := 0
-        Loop {
-            adbClick(58, 190)
-            Delay(1)
-            if(FindOrLoseImage(87, 401, 99, 412, , "Accepted2", 0, failSafeTime)){
-                accepted := true
-                break
-            }
-            else if(FindOrLoseImage(84, 463, 100, 475, 10, "Friends", 0, failSafeTime)) {
-                if(FindOrLoseImage(42, 163, 66, 185, 10, "empty", 0, failSafeTime)) {
-                    finished := true
-                    break
-                }
-            }
-            else if(FindOrLoseImage(70, 395, 100, 420, , "Send2", 0, failSafeTime))
-                break
-            failSafeTime := (A_TickCount - failSafe) // 1000
-            CreateStatusMessage("Waiting for Accepted2`n(" . failSafeTime . "/45 seconds)")
-        }
-        if(finished)
-            break
-        if(accepted){
-            accepted := false
+        adbClick(58, 190)
+        Delay(1)
+        if(FindOrLoseImage(87, 401, 99, 412, , "Accepted2", 0, failSafeTime)){
             FindImageAndClick(135, 355, 160, 385, , "Remove", 145, 407)
             FindImageAndClick(70, 395, 100, 420, , "Send2", 200, 372)
         }
-        FindImageAndClick(226, 100, 270, 135, , "Add", 143, 507)
-        friendsProcessed++
+        else if(FindOrLoseImage(84, 463, 100, 475, 10, "Friends", 0, failSafeTime)) {
+            if(FindOrLoseImage(42, 163, 66, 185, 10, "empty", 0, failSafeTime)) {
+                Break
+            }
+        }
+        if(FindOrLoseImage(70, 395, 100, 420, , "Send2", 0, failSafeTime)) {
+            adbClick(143, 507)
+            Delay(1)
+            friendsProcessed++
+            failSafe := A_TickCount
+        }
+        failSafeTime := (A_TickCount - failSafe) // 1000
+        CreateStatusMessage("Waiting for Accepted2`n(" . failSafeTime . "/45 seconds)")
     }
     endOfRemoving := A_TickCount
     ; Exit friend removal process
