@@ -170,7 +170,7 @@ Loop {
                 if (A_gptest)   ; triggered by auto GP Test
                     A_gptest := 0
                 else {
-                    sleep, 10000
+                    ;sleep, 10000
                     MsgBox,0x40040,,Ready to test.
                 }
             }
@@ -840,7 +840,6 @@ RemoveNonVipFriends() {
         CreateStatusMessage("In failsafe for Social. " . failSafeTime "/90 seconds")
     }
     FindImageAndClick(226, 100, 270, 135, , "Add", 38, 460, 500)
-    Delay(3)
 
     CreateStatusMessage("Downloading vip_ids.txt.",,,, false)
     if (vipIdsURL != "" && !DownloadFile(vipIdsURL, "vip_ids.txt")) {
@@ -916,7 +915,7 @@ RemoveNonVipFriends() {
                     CreateStatusMessage("Parsed friend: " . friendAccount.ToString() . "`nMatched VIP: " . matchedFriend.ToString() . "`nSkipping VIP...",,,, false)
                     scrolledWithoutFriend := 0
                 }
-                Sleep, 1500 ; Time to read
+                ;Sleep, 1500 ; Time to read
                 FindImageAndClick(226, 100, 270, 135, , "Add", 143, 507, 500)
                 Delay(2)
                 if (friendIndex < 2)
@@ -928,7 +927,7 @@ RemoveNonVipFriends() {
                     Y1 := 380
                     Y2 := 200
 
-                    Delay(10)
+                    Delay(1)
                     adbSwipe(X . " " . Y1 . " " . X . " " . Y2 . " " . 300)
                     Sleep, 1000
 
@@ -939,10 +938,9 @@ RemoveNonVipFriends() {
                 ; If NOT a VIP remove the friend
                 CreateStatusMessage("Parsed friend: " . friendAccount.ToString() . "`nNo VIP match found.`nRemoving friend...",,,, false)
                 LogToFile("Friend removed: " . friendAccount.ToString() . ". No VIP match found.", "GPTestLog.txt")
-                Sleep, 1500 ; Time to read
+                ;Sleep, 1500 ; Time to read
                 FindImageAndClick(135, 355, 160, 385, , "Remove", 145, 407, 500)
                 FindImageAndClick(70, 395, 100, 420, , "Send2", 200, 372, 500)
-                Delay(1)
                 FindImageAndClick(226, 100, 270, 135, , "Add", 143, 507, 500)
                 Delay(3)
                 scrolledWithoutFriend := 0
