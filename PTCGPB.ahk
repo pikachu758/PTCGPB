@@ -14,11 +14,11 @@ global STATIC_BRUSH := 0
 
 githubUser := "pikachu758"
 repoName := "PTCGPB"
-localVersion := "v6.8.4"
+localVersion := "v6.8.5"
 scriptFolder := A_ScriptDir
 zipPath := A_Temp . "\update.zip"
 extractPath := A_Temp . "\update"
-intro := "Deluxe Pack: ex"
+intro := "S4T for Parallel foils"
 
 ; GUI dimensions
 global GUI_WIDTH := 377 
@@ -4399,7 +4399,7 @@ StartBot:
             if(offlineAHK = "")
                 offlineAHK := "Offline: none"
             else
-                offlineAHK := "Offline: " . RTrim(offlineAHK, ", ")
+                offlineAHK := "Offline: " . RTrim(offlineAHK, ", ") . " <@" . discordUserId . ">"
             if(onlineAHK = "")
                 onlineAHK := "Online: none"
             else
@@ -4511,7 +4511,7 @@ StartBot:
                 if(offlineAHK = "")
                     offlineAHK := "Offline: none"
                 else
-                    offlineAHK := "Offline: " . RTrim(offlineAHK, ", ")
+                    offlineAHK := "Offline: " . RTrim(offlineAHK, ", ") . " <@" . discordUserId . ">"
                 if(onlineAHK = "")
                     onlineAHK := "Online: none"
                 else
