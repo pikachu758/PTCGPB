@@ -186,9 +186,9 @@ Loop {
         }
 
         Sleep, %Delay%
-        FindImageAndClick(120, 500, 155, 530, , "Social", 143, 518, 1000, 120)
-        FindImageAndClick(226, 100, 270, 135, , "Add", 38, 460, 500, 15)
-        FindImageAndClick(170, 450, 195, 480, , "Approve", 228, 464, ,15)
+        ;FindImageAndClick(120, 500, 155, 530, , "Social", 143, 518, 1000, 120)
+        ;FindImageAndClick(226, 100, 270, 135, , "Add", 38, 460, 500, 15)
+        ;FindImageAndClick(170, 450, 195, 480, , "Approve", 228, 464, ,15)
 
         failSafe := A_TickCount
         failSafeTime := 0
@@ -198,23 +198,32 @@ Loop {
                     A_gptest := 1
                     ToggleTestScript()
                 }
+                adbClick(143, 493)
                 break
             } else if(FindOrLoseImage(225, 195, 250, 220, , "Pending", 0, failSafeTime)) {
                 adbClick(245, 210)
             } else if(FindOrLoseImage(186, 496, 206, 518, , "Accept", 0, failSafeTime)) {
                 if(heartBeat)
                     IniWrite, 1, %A_ScriptDir%\..\HeartBeat.ini, HeartBeat, Main
+                adbClick(143, 493)
                 break
+            } else if(FindOrLoseImage(84, 463, 100, 475, 5, "Friends", 0, failSafeTime)) {
+                adbClick(228, 464)
+            } else if(FindOrLoseImage(120, 500, 155, 530, , "Social", 0, failSafeTime)) {
+                adbClick(38, 460)
+            } else if(FindOrLoseImage(133, 516, 150, 526, , "notInSocial", 0, failSafeTime)) {
+                adbClick(140, 517)
             } else if(FindOrLoseImage(75, 340, 195, 530, 80, "Button", 0, failSafeTime)) {
                 Sleep, 1000
                 if(FindImageAndClick(190, 195, 215, 220, , "DeleteFriend", 169, 365, 4000, 20)) {
                     Sleep, %Delay%
                     adbClick(210, 210)
                 }
-            } else if(FindOrLoseImage(170, 450, 195, 480, , "Approve", 1, failSafeTime)) {
-                adbClick(228, 464)
+            } else if(FindOrLoseImage(110, 275, 182, 302, , "Welcome", 0, failSafeTime)) {
+                adbClick(143, 493)
             }
             if (GPTest || AutoSolo)
+                adbClick(143, 493)
                 break
             failSafeTime := (A_TickCount - failSafe) // 1000
             CreateStatusMessage("Failsafe " . failSafeTime . "/180 seconds")
@@ -467,7 +476,7 @@ resetWindows(){
 
 restartGameInstance(reason, RL := true) {
     global Delay, scriptName, adbShell, adbPath, adbPort
-    ;Screenshot("restartGameInstance")
+    Screenshot("restartGameInstance")
     ; initializeAdbShell()
 
     if (Debug)
