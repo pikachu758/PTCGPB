@@ -25,7 +25,7 @@ global twoPlusOne, twoPlusDia
 global Mewtwo, Charizard, Pikachu, Mew, Dialga, Palkia, Arceus, Shining, Solgaleo, Lunala, Buzzwole, Eevee, HoOh, Lugia, Suicune, Deluxe
 global shinyPacks, minStars, minStarsShiny
 global DeadCheck
-global s4tEnabled, s4tSilent, s4t3Dmnd, s4t4Dmnd, s4t1Star, s4tGholdengo, s4tWP, s4tWPMinCards, s4tDiscordWebhookURL, s4tDiscordUserId, s4tSendAccountXml
+global s4tEnabled, s4tSilent, s4t3Dmnd, s4t4Dmnd, s4t1Star, s4tGholdengo, s4tFoil, s4tTrainer, s4tRainbow, s4tFullArt, s4tWP, s4tWPMinCards, s4tDiscordWebhookURL, s4tDiscordUserId, s4tSendAccountXml
 global avgtotalSeconds
 global verboseLogging := false
 global showcaseEnabled
@@ -140,7 +140,10 @@ IniRead, s4tSilent, %A_ScriptDir%\..\Settings.ini, UserSettings, s4tSilent, 1
 IniRead, s4t3Dmnd, %A_ScriptDir%\..\Settings.ini, UserSettings, s4t3Dmnd, 0
 IniRead, s4t4Dmnd, %A_ScriptDir%\..\Settings.ini, UserSettings, s4t4Dmnd, 0
 IniRead, s4t1Star, %A_ScriptDir%\..\Settings.ini, UserSettings, s4t1Star, 0
-IniRead, s4tGholdengo, %A_ScriptDir%\..\Settings.ini, UserSettings, s4tGholdengo, 0
+IniRead, s4tFoil, %A_ScriptDir%\..\Settings.ini, UserSettings, s4tFoil, 0
+IniRead, s4tTrainer, %A_ScriptDir%\..\Settings.ini, UserSettings, s4tTrainer, 0
+IniRead, s4tRainbow, %A_ScriptDir%\..\Settings.ini, UserSettings, s4tRainbow, 0
+IniRead, s4tFullArt, %A_ScriptDir%\..\Settings.ini, UserSettings, s4tFullArt, 0
 IniRead, s4tWP, %A_ScriptDir%\..\Settings.ini, UserSettings, s4tWP, 0
 IniRead, s4tWPMinCards, %A_ScriptDir%\..\Settings.ini, UserSettings, s4tWPMinCards, 1
 IniRead, s4tDiscordWebhookURL, %A_ScriptDir%\..\Settings.ini, UserSettings, s4tDiscordWebhookURL
@@ -1926,7 +1929,6 @@ menuDeleteStart() {
 }
 
 CheckPack() {
-
     currentPackIs6Card := false ; reset before each pack check
     ; Update pack count.
     accountOpenPacks += 1
@@ -2000,29 +2002,23 @@ CheckPack() {
 
     ; if not invalid and no GP, Check for 2-star cards.
     if (!CheckShinyPackOnly || shinyPacks.HasKey(openPack)) {
-        foundTrainer := false
-        foundRainbow := false
-        foundFullArt := false
-        2starCount := false
-
         if (PseudoGodPack && !foundLabel) {
-            foundTrainer := FindBorders("trainer")
-            foundRainbow := FindBorders("rainbow")
-            foundFullArt := FindBorders("fullart")
+            foundTrainer := (foundTrainer = "") ? FindBorders("trainer") : foundTrainer
+            foundRainbow := (foundRainbow = "") ? FindBorders("rainbow") : foundRainbow
+            foundFullArt := (foundFullArt = "") ? FindBorders("fullart") : foundFullArt
             2starCount := foundTrainer + foundRainbow + foundFullArt
             if (2starCount > 1)
                 foundLabel := "Double two star"
         }
         if ((twoPlusOne||twoPlusDia) && !foundLabel && packsInPool=1) {
-            if (!PseudoGodPack) {
-                foundTrainer := FindBorders("trainer")
-                foundRainbow := FindBorders("rainbow")
-                foundFullArt := FindBorders("fullart")
-                2starCount := foundTrainer + foundRainbow + foundFullArt
-            }
-            found3Dmnd := FindBorders("3diamond")
-            foundNormal := FindBorders("normal")
-            found1Star := FindBorders("1star")
+            foundTrainer := (foundTrainer = "") ? FindBorders("trainer") : foundTrainer
+            foundRainbow := (foundRainbow = "") ? FindBorders("rainbow") : foundRainbow
+            foundFullArt := (foundFullArt = "") ? FindBorders("fullart") : foundFullArt
+            2starCount := foundTrainer + foundRainbow + foundFullArt
+            
+            found3Dmnd := (foundTrainer = "") ? FindBorders("3diamond") : found3Dmnd
+            foundNormal := (foundRainbow = "") ? FindBorders("normal") : foundNormal
+            found1Star := (foundFullArt = "") ? FindBorders("1star") : found1Star
             found4Dmnd := totalCardsInPack - found3Dmnd - foundNormal - found1Star - 2starCount
             if (2starCount) {
                 if (twoPlusDia && found4Dmnd)
@@ -2032,20 +2028,17 @@ CheckPack() {
             }
         }
         if (TrainerCheck && !foundLabel) {
-            if(!PseudoGodPack)
-                foundTrainer := FindBorders("trainer")
+            foundTrainer := (foundTrainer = "") ? FindBorders("trainer") : foundTrainer
             if (foundTrainer)
                 foundLabel := "Trainer"
         }
         if (RainbowCheck && !foundLabel) {
-            if(!PseudoGodPack)
-                foundRainbow := FindBorders("rainbow")
+            foundRainbow := (foundRainbow = "") ? FindBorders("rainbow") : foundRainbow
             if (foundRainbow)
                 foundLabel := "Rainbow"
         }
         if (FullArtCheck && !foundLabel) {
-            if(!PseudoGodPack)
-                foundFullArt := FindBorders("fullart")
+            foundFullArt := (foundFullArt = "") ? FindBorders("fullart") : foundFullArt
             if (foundFullArt)
                 foundLabel := "Full Art"
         }
@@ -2064,74 +2057,70 @@ CheckPack() {
 
     ; Check for tradeable cards.
     if (s4tEnabled) {
+		foundCards := {}
         found3Dmnd := 0
         found4Dmnd := 0
         found1Star := 0
         foundGimmighoul := 0
 
         if (s4t3Dmnd) {
-            found3Dmnd += FindBorders("3diamond")
+            found3Dmnd := (found3Dmnd = "") ? FindBorders("3diamond") : found3Dmnd
+			foundCards["3diamond"] := found3Dmnd
         }
         if (s4t1Star) {
-            found1Star += FindBorders("1star")
+            found1Star := (found1Star = "") ? FindBorders("1star") : found1Star
+			foundCards["1star"] := found1Star
         }
 
         if (s4t4Dmnd) {
             ; Detecting a 4-diamond EX card isn't possible using a needle.
-            ; Start with total cards (5 or 6) and subtract other card types as efficiently as possible.
-            found4Dmnd := totalCardsInPack - FindBorders("normal")
-
-            if (found4Dmnd > 0) {
-                if (s4t3Dmnd)
-                    found4Dmnd -= found3Dmnd
-                else
-                    found4Dmnd -= FindBorders("3diamond")
-            }
-            if (found4Dmnd > 0) {
-                if (s4t1Star)
-                    found4Dmnd -= found1Star
-                else
-                    found4Dmnd -= FindBorders("1star")
-            }
-
-            if (found4Dmnd > 0 && PseudoGodPack) {
-                found4Dmnd -= 2starCount
-            } else {
-                if (found4Dmnd > 0) {
-                    if (TrainerCheck)
-                        found4Dmnd -= foundTrainer
-                    else
-                        found4Dmnd -= FindBorders("trainer")
-                }
-                if (found4Dmnd > 0) {
-                    if (RainbowCheck)
-                        found4Dmnd -= foundRainbow
-                    else
-                        found4Dmnd -= FindBorders("rainbow")
-                }
-                if (found4Dmnd > 0) {
-                    if (FullArtCheck)
-                        found4Dmnd -= foundFullArt
-                    else
-                        found4Dmnd -= FindBorders("fullart")
-                }
-            }
+			found3Dmnd := (found3Dmnd = "") ? FindBorders("3diamond") : found3Dmnd
+            found1Star := (found1Star = "") ? FindBorders("1star") : found1Star
+			foundTrainer := (foundTrainer = "") ? FindBorders("trainer") : foundTrainer
+            foundRainbow := (foundRainbow = "") ? FindBorders("rainbow") : foundRainbow
+            foundFullArt := (foundFullArt = "") ? FindBorders("fullart") : foundFullArt
+            2starCount := foundTrainer + foundRainbow + foundFullArt
+            found4Dmnd := totalCardsInPack - FindBorders("normal") - found3Dmnd - found1Star - 2starCount
+			foundCards["4diamond"] := found4Dmnd
         }
 
         if (s4tGholdengo && openPack = "Shining") {
-            foundGimmighoul += FindCard("gimmighoul")
+            foundGimmighoul := FindCard("gimmighoul")
         }
 
         foundTradeable := found3Dmnd + found4Dmnd + found1Star + foundGimmighoul
-
+		
+		if (s4tFoil) {
+			border_type := ["foilGrass", "foilFire", "foilWater", "foilLightning", "foilPsychic", "foilFighting", "foilDarkness", "foilMetal", "foilDragon", "foilColorless", "foilItem", "foilSupporter", "foilTool"]
+			for index, border in border_type {
+				foundCards[border] := FindBorders(border)
+			}
+		}
+		
+		if (s4tTrainer) {
+			foundTrainer := (foundTrainer = "") ? FindBorders("trainer") : foundTrainer
+			foundCards["trainer"] := foundTrainer
+		}
+		if (s4tRainbow) {
+            foundRainbow := (foundRainbow = "") ? FindBorders("rainbow") : foundRainbow
+			foundCards["rainbow"] := foundRainbow
+		}
+		if (s4tFullArt) {
+            foundFullArt := (foundFullArt = "") ? FindBorders("fullart") : foundFullArt
+			foundCards["fullart"] := foundFullArt
+		}
+		foundTradeable := 0
+		for key, value in foundCards {
+			foundTradeable += value
+		}
         if (foundTradeable > 0)
-            FoundTradeable(found3Dmnd, found4Dmnd, found1Star, foundGimmighoul)
+            FoundTradeable(foundCards)
     }
 }
 
-FoundTradeable(found3Dmnd := 0, found4Dmnd := 0, found1Star := 0, foundGimmighoul := 0) {
+FoundTradeable(foundCards) {
     ; Not dead.
-    IniWrite, 0, %A_ScriptDir%\%scriptName%.ini, UserSettings
+    IniWrite, 0, %A_ScriptDir%\%scriptName%.ini, UserSettings, DeadCheck
 
     ; Keep account.
     keepAccount := true
@@ -2141,22 +2130,12 @@ FoundTradeable(found3Dmnd := 0, found4Dmnd := 0, found1Star := 0, foundGimmighou
     packDetailsFile := ""
     packDetailsMessage := ""
 
-    if (found3Dmnd > 0) {
-        packDetailsFile .= "3DmndX" . found3Dmnd . "_"
-        packDetailsMessage .= "Three Diamond (x" . found3Dmnd . "), "
-    }
-    if (found4Dmnd > 0) {
-        packDetailsFile .= "4DmndX" . found4Dmnd . "_"
-        packDetailsMessage .= "Four Diamond EX (x" . found4Dmnd . "), "
-    }
-    if (found1Star > 0) {
-        packDetailsFile .= "1StarX" . found1Star . "_"
-        packDetailsMessage .= "One Star (x" . found1Star . "), "
-    }
-    if (foundGimmighoul > 0) {
-        packDetailsFile .= "GimmighoulX" . foundGimmighoul . "_"
-        packDetailsMessage .= "Gimmighoul (x" . foundGimmighoul . "), "
-    }
+	for border, value in foundCards {
+		if (value > 0) {
+			packDetailsFile .= border . "X" . value . "_"
+			packDetailsMessage .= border . " (x" . value . "), "
+		}
+	}
 
     packDetailsFile := RTrim(packDetailsFile, "_")
     packDetailsMessage := RTrim(packDetailsMessage, ", ")
@@ -2166,24 +2145,24 @@ FoundTradeable(found3Dmnd := 0, found4Dmnd := 0, found1Star := 0, foundGimmighou
     screenShot := Screenshot("Tradeable", "Trades", screenShotFileName)
 
     statusMessage := "Tradeable cards found"
-    if (username)
-        statusMessage .= " by " . username
-    if (friendCode)
-        statusMessage .= " (" . friendCode . ")"
+    ;if (username)
+    ;    statusMessage .= " by " . username
+    ;if (friendCode)
+    ;    statusMessage .= " (" . friendCode . ")"
 
-    if (!s4tWP || (s4tWP && foundTradeable < s4tWPMinCards)) {
-        CreateStatusMessage("Tradeable cards found! Continuing...",,,, false)
+    ;if (!s4tWP || (s4tWP && foundTradeable < s4tWPMinCards)) {
+    CreateStatusMessage("Tradeable cards found! Continuing...",,,, false)
 
-        logMessage := statusMessage . " in instance: " . scriptName . " (" . packsInPool . " packs, " . openPack . ") File name: " . accountFile . " Screenshot file: " . screenShotFileName . " Backing up to the Accounts\\Trades folder and continuing..."
-        LogToFile(logMessage, "S4T.txt")
+    logMessage := statusMessage . " in instance: " . scriptName . " (" . packsInPool . " packs, " . openPack . ") File name: " . accountFile . " Screenshot file: " . screenShotFileName . " Backing up to the Accounts\\Trades folder and continuing..."
+    LogToFile(logMessage, "S4T.txt")
 
-        if (!s4tSilent && s4tDiscordWebhookURL) {
-            discordMessage := statusMessage . " in instance: " . scriptName . " (" . packsInPool . " packs, " . openPack . ")\nFound: " . packDetailsMessage . "\nFile name: " . accountFile . "\nBacking up to the Accounts\\Trades folder and continuing..."
-            LogToDiscord(discordMessage, screenShot, true, (s4tSendAccountXml ? accountFullPath : ""),, s4tDiscordWebhookURL, s4tDiscordUserId)
-        }
-
-        return
+    if (!s4tSilent && s4tDiscordWebhookURL) {
+        discordMessage := statusMessage . " in instance: " . scriptName . " (" . packsInPool . " packs, " . openPack . ")\nFound: " . packDetailsMessage . "\nFile name: " . accountFile . "\nBacking up to the Accounts\\Trades folder and continuing..."
+        LogToDiscord(discordMessage, screenShot, true, (s4tSendAccountXml ? accountFullPath : ""),, s4tDiscordWebhookURL, s4tDiscordUserId)
     }
+
+    return
+    ;}
 
     ; WonderPick logic: foundTradeable >= s4tWPMinCards
     friendCode := getFriendCode()
@@ -2232,7 +2211,7 @@ FoundTradeable(found3Dmnd := 0, found4Dmnd := 0, found1Star := 0, foundGimmighou
         LogToDiscord(discordMessage, screenShot, true, (s4tSendAccountXml ? accountFullPath : ""), fcScreenshot, s4tDiscordWebhookURL, s4tDiscordUserId)
     }
 
-    restartGameInstance("Tradeable cards found. Continuing...", "GodPack")
+    ; restartGameInstance("Tradeable cards found. Continuing...", "GodPack")
 }
 
 DetectSixCardPack() {
@@ -2328,7 +2307,11 @@ FindBorders(prefix) {
     searchVariation6Card := 60 ; looser tolerance for 6-card positions while we test if top row needles can be re-used for bottom row in 6-card packs
     
     is6CardPack := currentPackIs6Card
-    if (openPack = "Deluxe") {
+    if (InStr(prefix, "foil")) {
+        borderCoords := [[60, 198, 62, 233]
+            ,[145, 198, 147, 233]
+            ,[60, 313, 62, 348]]
+    } else if (openPack = "Deluxe") {
         borderCoords := [[70, 284, 123, 286]
             ,[155, 284, 208, 286]
             ,[70, 399, 123, 401]
@@ -2349,35 +2332,15 @@ FindBorders(prefix) {
             ,[155, 399, 208, 401]]
     }
     
-    if (prefix = "shiny1star" || prefix = "shiny2star") {
-        if (openPack = "Deluxe") {
-            borderCoords := [[130, 261, 133, 283]
-                ,[215, 261, 218, 283]
-                ,[130, 376, 133, 398]
-                ,[215, 376, 218, 398]]
-        } else if (is6CardPack) {
-            borderCoords := [[90, 261, 93, 283]
-                ,[173, 261, 176, 283]
-                ,[255, 261, 258, 283]
-                ,[90, 376, 93, 398]
-                ,[173, 376, 176, 398]
-                ,[255, 376, 258, 398]]
-        } else {
-            borderCoords := [[90, 261, 93, 283]
-                ,[173, 261, 176, 283]
-                ,[255, 261, 258, 283]
-                ,[130, 376, 133, 398]
-                ,[215, 376, 218, 398]]
-        }
-    }
-
-    
     pBitmap := from_window(WinExist(winTitle))
     for index, value in borderCoords {
         coords := borderCoords[A_Index]
         imageName := "" ; prevents accidentally reusing previously loaded imageName if imageName is undefined in custom one-off needles
         currentSearchVariation := searchVariation
-        if (openPack = "Deluxe") {
+        if (InStr(prefix, "foil")) {
+            imageName := prefix . A_Index
+            currentSearchVariation := 20
+        } else if (openPack = "Deluxe") {
             imageIndex := (A_Index >= 3) ? (A_Index + 1) : (A_Index + 3)
             imageName := prefix . imageIndex
             currentSearchVariation := searchVariation
