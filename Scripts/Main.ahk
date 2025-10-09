@@ -213,13 +213,13 @@ Loop {
                 adbClick(38, 460)
             } else if(FindOrLoseImage(133, 516, 150, 526, , "notInSocial", 0, failSafeTime)) {
                 adbClick(140, 517)
-            } else if(FindOrLoseImage(75, 340, 195, 530, 80, "Button", 0, failSafeTime)) {
+            } else if(FindOrLoseImage(75, 340, 195, 530, 60, "Button1", 0, failSafeTime)) {
                 Sleep, 1000
                 if(FindImageAndClick(190, 195, 215, 220, , "DeleteFriend", 169, 365, 4000, 20)) {
                     Sleep, %Delay%
                     adbClick(210, 210)
                 }
-            } else if(FindOrLoseImage(110, 275, 182, 302, , "Welcome", 0, failSafeTime)) {
+            } else if(FindOrLoseImage(110, 275, 182, 302, 40, "Welcome", 0, failSafeTime)) {
                 adbClick(143, 493)
             }
             if (GPTest || AutoSolo)

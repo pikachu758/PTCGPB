@@ -14,7 +14,7 @@ global STATIC_BRUSH := 0
 
 githubUser := "pikachu758"
 repoName := "PTCGPB"
-localVersion := "v6.8.5"
+localVersion := "v6.8.6"
 scriptFolder := A_ScriptDir
 zipPath := A_Temp . "\update.zip"
 extractPath := A_Temp . "\update"
@@ -4468,7 +4468,7 @@ StartBot:
                 sumPPHFS := 0
                 Loop %Instances% {
                     IniRead, value, HeartBeat.ini, HeartBeat, Instance%A_Index%
-                    if(value)
+                    if(value || A_Index = 1)
                         Online.Push(1)
                     else
                         Online.Push(0)
