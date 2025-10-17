@@ -130,7 +130,6 @@ IniRead, injectSortMethod, %A_ScriptDir%\..\Settings.ini, UserSettings, injectSo
 IniRead, waitForEligibleAccounts, %A_ScriptDir%\..\Settings.ini, UserSettings, waitForEligibleAccounts, 1
 IniRead, maxWaitHours, %A_ScriptDir%\..\Settings.ini, UserSettings, maxWaitHours, 24
 IniRead, skipMissionsInjectMissions, %A_ScriptDir%\..\Settings.ini, UserSettings, skipMissionsInjectMissions, 0
-IniRead, claimBonusWeek, %A_ScriptDir%\..\Settings.ini, UserSettings, claimBonusWeek, 0
 IniRead, spendHourGlass, %A_ScriptDir%\..\Settings.ini, UserSettings, spendHourGlass, 1
 IniRead, openExtraPack, %A_ScriptDir%\..\Settings.ini, UserSettings, openExtraPack, 0
 IniRead, verboseLogging, %A_ScriptDir%\..\Settings.ini, UserSettings, debugMode, 0
@@ -787,6 +786,8 @@ Loop {
 			
 			; Bonus Week
             IniRead, claimBonusWeek, %A_ScriptDir%\..\Settings.ini, UserSettings, claimBonusWeek, 0
+            if (A_NowUTC > 20251019060000)
+                claimBonusWeek := 0
             if (claimBonusWeek = 1) {
 				if (!openExtraPack) {
 					GoToMain(true)
@@ -5018,31 +5019,19 @@ GetEventRewards(frommain := true){
     ; ADD LEVEL UP CHECK
     ; LevelUp()
 
-    if(setSpeed > 1) {
-        FindImageAndClick(38, 290, 65, 302, , "Platin", 18, 109, 2000) ; click mod settings
-        FindImageAndClick(9, 303, 25, 323, , "One", 26, 313) ; click mod settings
-        Delay(1)
-    }
     failSafe := A_TickCount
     failSafeTime := 0
     Loop{
         adbSwipe(adbSwipeParams2)
         Sleep, 10
         if (FindOrLoseImage(225, 444, 272, 470, , "Premium", 0, failSafeTime)){
-            if(setSpeed > 1) {
-                if(setSpeed = 3)
-                    FindImageAndClick(182, 303, 194, 323, , "Three", 187, 313) ; click mod settings
-                else
-                    FindImageAndClick(100, 303, 113, 323, , "Two", 107, 313) ; click mod settings
-            }
-            adbClick_wbb(41, 366)
             break
         }
         failSafeTime := (A_TickCount - failSafe) // 1000
         CreateStatusMessage("Waiting for Trace`n(" . failSafeTime . "/45 seconds)")
         Delay(1)
     }
-    adbClick_wbb(130, 465)
+    adbClick_wbb(40, 465)
 	sleep, 1000
     failSafe := A_TickCount
     failSafeTime := 0
