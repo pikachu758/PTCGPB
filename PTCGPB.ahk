@@ -14,7 +14,7 @@ global STATIC_BRUSH := 0
 
 githubUser := "pikachu758"
 repoName := "PTCGPB"
-localVersion := "v6.8.6"
+localVersion := "v6.8.7"
 scriptFolder := A_ScriptDir
 zipPath := A_Temp . "\update.zip"
 extractPath := A_Temp . "\update"
@@ -475,24 +475,6 @@ NextStep:
             mainIdsURL := ""
             FriendID := ""
         }
-        Palkia := 0
-        Dialga := 0
-        Arceus := 0
-        Shining := 0
-        Mew := 0
-        Pikachu := 0
-        Charizard := 0
-        Mewtwo := 0
-        Solgaleo := 0
-        Lunala := 0
-        Buzzwole := 0
-        Eevee := 0
-        HoOh := 0
-        Lugia := 0
-        Suicune := 0
-        Deluxe := 1
-        minStarsShiny := 0
-        openExtraPack := 1
         
         ; Save pack selections directly without resetting them
         IniWrite, %Palkia%, Settings.ini, UserSettings, Palkia
@@ -4436,9 +4418,6 @@ StartBot:
         if(Mod(A_Index, 10) = 0) {
             if(mainIdsURL != "") {
                 DownloadFile(mainIdsURL, "ids.txt")
-            } else {
-                if(FileExist("ids.txt"))
-                    FileDelete, ids.txt
             }
         }
         
@@ -4466,9 +4445,10 @@ StartBot:
                 offlineAHK := ""
                 Online := []
                 sumPPHFS := 0
+                firstHB := (A_Index = 1)
                 Loop %Instances% {
                     IniRead, value, HeartBeat.ini, HeartBeat, Instance%A_Index%
-                    if(value || A_Index = 1)
+                    if(value || firstHB)
                         Online.Push(1)
                     else
                         Online.Push(0)
