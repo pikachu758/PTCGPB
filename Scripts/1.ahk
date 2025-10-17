@@ -268,8 +268,6 @@ createAccountList(scriptName)
 rerolls_local := 0
 rerollStartTime_local := A_TickCount
 
-clearMissionCache()
-
 pToken := Gdip_Startup()
 packsInPool := 0
 packsThisRun := 0
@@ -306,7 +304,6 @@ Loop {
             continue
         } else {
             ; in injection mode, we dont need to reload
-            clearMissionCache()
             Randmax := packArray.Length()
             Random, rand, 1, Randmax
             openPack := packArray[rand]
@@ -1112,6 +1109,8 @@ RemoveFriends() {
     CreateStatusMessage("Friend removal completed. Processed " . friendsProcessed . " friends. Returning to main...",,,, false)
     friended := false
     CreateStatusMessage("Friends removed successfully!",,,, false)
+    DeadCheck := 0
+    IniWrite, 0, %A_ScriptDir%\%scriptName%.ini, UserSettings, DeadCheck
 }
 
 TradeTutorial() {
@@ -1758,8 +1757,6 @@ restartGameInstance(reason, RL := true) {
         CreateStatusMessage("Restarting game...",,,, false)
     LogToFile("Restarted game for instance " . scriptName . ". Reason: " reason, "Restart.txt")
     
-    ;adbShell.StdIn.WriteLine("rm /data/data/jp.pokemon.pokemontcgp/files/UserPreferences/v1/PackUserPrefs")
-    ;waitadb()
 
     if (RL = "GodPack") {
         AppendToJsonFile(packsThisRun)
@@ -1785,6 +1782,8 @@ restartGameInstance(reason, RL := true) {
         else {
             AppendToJsonFile(packsThisRun)
             adbShell.StdIn.WriteLine("am force-stop jp.pokemon.pokemontcgp")
+            waitadb()
+            clearMissionCache()
             waitadb()
             adbShell.StdIn.WriteLine("am start -n jp.pokemon.pokemontcgp/com.unity3d.player.UnityPlayerActivity -f 0x10018000")
             waitadb()
@@ -2584,9 +2583,9 @@ loadAccount() {
     adbShell.StdIn.WriteLine("am force-stop jp.pokemon.pokemontcgp")
     waitadb()
     RunWait, % adbPath . " -s 127.0.0.1:" . adbPort . " push " . loadFile . " /sdcard/deviceAccount.xml",, Hide
-    ;adbShell.StdIn.WriteLine("rm /data/data/jp.pokemon.pokemontcgp/files/UserPreferences/v1/PackUserPrefs")
-    ;waitadb()
     adbShell.StdIn.WriteLine("cp /sdcard/deviceAccount.xml /data/data/jp.pokemon.pokemontcgp/shared_prefs/deviceAccount:.xml")
+    waitadb()
+    clearMissionCache()
     waitadb()
     adbShell.StdIn.WriteLine("rm /sdcard/deviceAccount.xml")
     waitadb()
@@ -4085,8 +4084,6 @@ PackOpening() {
             restartGameInstance("Stuck at Pack")
         }
     }
-    ;adbShell.StdIn.WriteLine("rm /data/data/jp.pokemon.pokemontcgp/files/UserPreferences/v1/PackUserPrefs")
-    ;waitadb()
 
     if(setSpeed > 1) {
         FindImageAndClick(38, 290, 65, 302, , "Platin", 18, 109, 2000) ; click mod settings
