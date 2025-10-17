@@ -25,7 +25,7 @@ global twoPlusOne, twoPlusDia
 global Mewtwo, Charizard, Pikachu, Mew, Dialga, Palkia, Arceus, Shining, Solgaleo, Lunala, Buzzwole, Eevee, HoOh, Lugia, Suicune, Deluxe
 global shinyPacks, minStars, minStarsShiny
 global DeadCheck
-global s4tEnabled, s4tSilent, s4t3Dmnd, s4t4Dmnd, s4t1Star, s4tGholdengo, s4tFoil, s4tTrainer, s4tRainbow, s4tFullArt, s4tWP, s4tWPMinCards, s4tDiscordWebhookURL, s4tDiscordUserId, s4tSendAccountXml
+global s4tEnabled, s4tSilent, s4t3Dmnd, s4t4Dmnd, s4t1Star, s4tGholdengo, s4tFoil, s4tTrainer, s4tRainbow, s4tFullArt, s4tShiny, s4tDiscordWebhookURL, s4tDiscordUserId, s4tSendAccountXml
 global avgtotalSeconds
 global verboseLogging := false
 global showcaseEnabled
@@ -144,8 +144,7 @@ IniRead, s4tFoil, %A_ScriptDir%\..\Settings.ini, UserSettings, s4tFoil, 0
 IniRead, s4tTrainer, %A_ScriptDir%\..\Settings.ini, UserSettings, s4tTrainer, 0
 IniRead, s4tRainbow, %A_ScriptDir%\..\Settings.ini, UserSettings, s4tRainbow, 0
 IniRead, s4tFullArt, %A_ScriptDir%\..\Settings.ini, UserSettings, s4tFullArt, 0
-IniRead, s4tWP, %A_ScriptDir%\..\Settings.ini, UserSettings, s4tWP, 0
-IniRead, s4tWPMinCards, %A_ScriptDir%\..\Settings.ini, UserSettings, s4tWPMinCards, 1
+IniRead, s4tShiny, %A_ScriptDir%\..\Settings.ini, UserSettings, s4tShiny, 0
 IniRead, s4tDiscordWebhookURL, %A_ScriptDir%\..\Settings.ini, UserSettings, s4tDiscordWebhookURL
 IniRead, s4tDiscordUserId, %A_ScriptDir%\..\Settings.ini, UserSettings, s4tDiscordUserId
 IniRead, s4tSendAccountXml, %A_ScriptDir%\..\Settings.ini, UserSettings, s4tSendAccountXml, 1
@@ -1953,12 +1952,75 @@ CheckPack() {
     totalCardsInPack := currentPackIs6Card ? 6 : 5
     totalCardsInPack := (openPack = "Deluxe") ? 4 : totalCardsInPack
 
+; Check for tradeable cards.
+    if (s4tEnabled) {
+		foundCards := {}
+
+        if (s4t3Dmnd) {
+            found3Dmnd := (found3Dmnd = "") ? FindBorders("3diamond") : found3Dmnd
+			foundCards["3diamond"] := found3Dmnd
+        }
+        if (s4t1Star) {
+            found1Star := (found1Star = "") ? FindBorders("1star") : found1Star
+			foundCards["1star"] := found1Star
+        }
+
+        if (s4t4Dmnd) {
+            ; Detecting a 4-diamond EX card isn't possible using a needle.
+			found3Dmnd := (found3Dmnd = "") ? FindBorders("3diamond") : found3Dmnd
+            found1Star := (found1Star = "") ? FindBorders("1star") : found1Star
+			foundTrainer := (foundTrainer = "") ? FindBorders("trainer") : foundTrainer
+            foundRainbow := (foundRainbow = "") ? FindBorders("rainbow") : foundRainbow
+            foundFullArt := (foundFullArt = "") ? FindBorders("fullart") : foundFullArt
+            2starCount := foundTrainer + foundRainbow + foundFullArt
+            foundShiny := (foundShiny = "") ? FindBorders("shiny") : foundShiny
+            foundCrown := (foundCrown = "") ? FindBorders("crown") : foundCrown
+            foundImmersive := (foundImmersive = "") ? FindBorders("immersive") : foundImmersive
+            found4Dmnd := totalCardsInPack - FindBorders("normal") - found3Dmnd - found1Star - 2starCount - foundShiny - foundCrown - foundImmersive
+			foundCards["4diamond"] := found4Dmnd
+        }
+
+        if (s4tGholdengo && openPack = "Shining") {
+            foundGimmighoul := FindCard("gimmighoul")
+        }
+
+		if (s4tFoil) {
+			border_type := ["foilGrass", "foilFire", "foilWater", "foilLightning", "foilPsychic", "foilFighting", "foilDarkness", "foilMetal", "foilDragon", "foilColorless", "foilItem", "foilSupporter", "foilTool"]
+			for index, border in border_type {
+				foundCards[border] := FindBorders(border)
+			}
+		}
+		
+		if (s4tTrainer) {
+			foundTrainer := (foundTrainer = "") ? FindBorders("trainer") : foundTrainer
+			foundCards["trainer"] := foundTrainer
+		}
+		if (s4tRainbow) {
+            foundRainbow := (foundRainbow = "") ? FindBorders("rainbow") : foundRainbow
+			foundCards["rainbow"] := foundRainbow
+		}
+		if (s4tFullArt) {
+            foundFullArt := (foundFullArt = "") ? FindBorders("fullart") : foundFullArt
+			foundCards["fullart"] := foundFullArt
+		}
+		if (s4tShiny) {
+            foundShiny := (foundShiny = "") ? FindBorders("shiny") : foundShiny
+			foundCards["shiny"] := foundShiny
+		}
+		foundTradeable := 0
+		for key, value in foundCards {
+			foundTradeable += value
+		}
+        if (foundTradeable > 0)
+            FoundTradeable(foundCards)
+    }
+
     foundLabel := false
 
     ; Before doing anything else, check if the current pack is valid.
-    foundShiny := FindBorders("shiny")
-    foundCrown := FindBorders("crown")
-    foundImmersive := FindBorders("immersive")
+    foundShiny := (foundShiny = "") ? FindBorders("shiny") : foundShiny
+    foundCrown := (foundCrown = "") ? FindBorders("crown") : foundCrown
+    foundImmersive := (foundImmersive = "") ? FindBorders("immersive") : foundImmersive
     foundInvalid := foundShiny + foundCrown + foundImmersive
 
     if (foundInvalid) {
@@ -2054,79 +2116,9 @@ CheckPack() {
             restartGameInstance(foundLabel . " found. Continuing...", "GodPack")
         }
     }
-
-    ; Check for tradeable cards.
-    if (s4tEnabled) {
-		foundCards := {}
-        found3Dmnd := 0
-        found4Dmnd := 0
-        found1Star := 0
-        foundGimmighoul := 0
-
-        if (s4t3Dmnd) {
-            found3Dmnd := (found3Dmnd = "") ? FindBorders("3diamond") : found3Dmnd
-			foundCards["3diamond"] := found3Dmnd
-        }
-        if (s4t1Star) {
-            found1Star := (found1Star = "") ? FindBorders("1star") : found1Star
-			foundCards["1star"] := found1Star
-        }
-
-        if (s4t4Dmnd) {
-            ; Detecting a 4-diamond EX card isn't possible using a needle.
-			found3Dmnd := (found3Dmnd = "") ? FindBorders("3diamond") : found3Dmnd
-            found1Star := (found1Star = "") ? FindBorders("1star") : found1Star
-			foundTrainer := (foundTrainer = "") ? FindBorders("trainer") : foundTrainer
-            foundRainbow := (foundRainbow = "") ? FindBorders("rainbow") : foundRainbow
-            foundFullArt := (foundFullArt = "") ? FindBorders("fullart") : foundFullArt
-            2starCount := foundTrainer + foundRainbow + foundFullArt
-            found4Dmnd := totalCardsInPack - FindBorders("normal") - found3Dmnd - found1Star - 2starCount
-			foundCards["4diamond"] := found4Dmnd
-        }
-
-        if (s4tGholdengo && openPack = "Shining") {
-            foundGimmighoul := FindCard("gimmighoul")
-        }
-
-        foundTradeable := found3Dmnd + found4Dmnd + found1Star + foundGimmighoul
-		
-		if (s4tFoil) {
-			border_type := ["foilGrass", "foilFire", "foilWater", "foilLightning", "foilPsychic", "foilFighting", "foilDarkness", "foilMetal", "foilDragon", "foilColorless", "foilItem", "foilSupporter", "foilTool"]
-			for index, border in border_type {
-				foundCards[border] := FindBorders(border)
-			}
-		}
-		
-		if (s4tTrainer) {
-			foundTrainer := (foundTrainer = "") ? FindBorders("trainer") : foundTrainer
-			foundCards["trainer"] := foundTrainer
-		}
-		if (s4tRainbow) {
-            foundRainbow := (foundRainbow = "") ? FindBorders("rainbow") : foundRainbow
-			foundCards["rainbow"] := foundRainbow
-		}
-		if (s4tFullArt) {
-            foundFullArt := (foundFullArt = "") ? FindBorders("fullart") : foundFullArt
-			foundCards["fullart"] := foundFullArt
-		}
-		foundTradeable := 0
-		for key, value in foundCards {
-			foundTradeable += value
-		}
-        if (foundTradeable > 0)
-            FoundTradeable(foundCards)
-    }
 }
 
 FoundTradeable(foundCards) {
-    ; Not dead.
-    IniWrite, 0, %A_ScriptDir%\%scriptName%.ini, UserSettings, DeadCheck
-
-    ; Keep account.
-    keepAccount := true
-
-    foundTradeable := found3Dmnd + found4Dmnd + found1Star + foundGimmighoul
-
     packDetailsFile := ""
     packDetailsMessage := ""
 
@@ -2150,7 +2142,6 @@ FoundTradeable(foundCards) {
     ;if (friendCode)
     ;    statusMessage .= " (" . friendCode . ")"
 
-    ;if (!s4tWP || (s4tWP && foundTradeable < s4tWPMinCards)) {
     CreateStatusMessage("Tradeable cards found! Continuing...",,,, false)
 
     logMessage := statusMessage . " in instance: " . scriptName . " (" . packsInPool . " packs, " . openPack . ") File name: " . accountFile . " Screenshot file: " . screenShotFileName . " Backing up to the Accounts\\Trades folder and continuing..."
@@ -2162,7 +2153,6 @@ FoundTradeable(foundCards) {
     }
 
     return
-    ;}
 
     ; WonderPick logic: foundTradeable >= s4tWPMinCards
     friendCode := getFriendCode()
