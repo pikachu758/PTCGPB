@@ -4770,7 +4770,7 @@ DoWonderPickOnly() {
     failSafe := A_TickCount
     failSafeTime := 0
     Loop {
-        adbClick_wbb(80, 460)
+        adbClick_wbb(170, 448)
         if(FindOrLoseImage(240, 80, 265, 100, , "WonderPick", 1, failSafeTime)) {
             clickButton := FindOrLoseImage(100, 367, 190, 480, 100, "Button", 0, failSafeTime)
             if(clickButton) {
@@ -4990,6 +4990,7 @@ setMetaData() {
     accountFile := saveDir . "\" . accountFileName
     accountNewFile := saveDir . "\" . AccountNewName
     FileMove, %accountFile% , %accountNewFile%
+    FileSetTime,, %accountNewFile%
     accountFileName := AccountNewName
 }
 
@@ -5536,6 +5537,8 @@ wonderPickEvent() {
         Return
     if (wonderPickEventDone)
         Return
+    wonderPickEventDone := 1
+	setMetaData()
     FindImageAndClick(191, 393, 211, 411, , "Shop", 40, 515) ;click until at main menu
     FindImageAndClick(240, 80, 265, 100, , "WonderPick", 59, 429) ;click until in wonderpick Screen
 
@@ -5556,7 +5559,5 @@ wonderPickEvent() {
 	sleep, 500
 	FindImageAndClick(244, 66, 272, 94, , "ShopInfo", 170, 379, ,2)
     FindImageAndClick(191, 393, 211, 411, , "Shop", 140, 495)
-    wonderPickEventDone := 1
-	setMetaData()
 }
 
