@@ -48,7 +48,7 @@ maxAccountPackNum := 40
 aminutes := 0
 aseconds := 0
 
-global beginnerMissionsDone, soloBattleMissionDone, intermediateMissionsDone, specialMissionsDone, resetSpecialMissionsDone, accountHasPackInTesting, redeemTokensDone, currentLoadedAccountIndex
+global beginnerMissionsDone, soloBattleMissionDone, intermediateMissionsDone, specialMissionsDone, resetSpecialMissionsDone, accountHasPackInTesting, redeemTokensDone, wonderPickEventDone, currentLoadedAccountIndex
 
 beginnerMissionsDone := 0
 soloBattleMissionDone := 0
@@ -57,6 +57,7 @@ specialMissionsDone := 0
 resetSpecialMissionsDone := 0
 accountHasPackInTesting := 0
 redeemTokensDone := 0
+wonderPickEventDone := 0
 
 global dbg_bbox, dbg_bboxNpause, dbg_bbox_click
 
@@ -613,6 +614,7 @@ Loop {
             if(deleteMethod = "5 Pack" || deleteMethod = "5 Pack (Fast)" || deleteMethod = "13 Pack")
                 wonderPicked := DoWonderPick()
 
+            wonderPickEvent()
             friendsAdded := AddFriends()
 
             SelectPack("First")
@@ -886,6 +888,7 @@ Loop {
                     specialMissionsDone := 0
                     accountHasPackInTesting := 0
 					redeemTokensDone := 0
+                    wonderPickEventDone := 0
                 }
                 restartGameInstance("New Run", false)
             }
@@ -2496,6 +2499,7 @@ loadAccount() {
     accountHasPackInTesting := 0
     resetSpecialMissionsDone := 0
 	redeemTokensDone := 0
+    wonderPickEventDone := 0
 
     if (stopToggle) {
         CreateStatusMessage("Stopping...",,,, false)
@@ -2660,6 +2664,8 @@ saveAccount(file := "Valid", ByRef filePath := "", packDetails := "") {
             metadata .= "T"
 		if(redeemTokensDone)
 			metadata .= "R"
+        if(wonderPickEventDone)
+            metadata .= "W"
 
         saveDir := A_ScriptDir "\..\Accounts\Saved\" . winTitle
         filePath := saveDir . "\" . accountOpenPacks . "P_" . A_Now . "_" . winTitle . "(" . metadata . ").xml"
@@ -4885,6 +4891,7 @@ getMetaData() {
     specialMissionsDone := 0
     accountHasPackInTesting := 0
 	redeemTokensDone := 0
+    wonderPickEventDone := 0
 
     ; check if account file has metadata information
     if(InStr(accountFileName, "(")) {
@@ -4903,6 +4910,8 @@ getMetaData() {
                 specialMissionsDone := 1
             if(InStr(metadata, "R"))
                 redeemTokensDone := 1
+            if(Instr(metadata, "W"))
+                wonderPickEventDone := 1
             if(InStr(metadata, "T")) {
                 saveDir := A_ScriptDir "\..\Accounts\Saved\" . winTitle
                 accountFile := saveDir . "\" . accountFileName
@@ -4955,6 +4964,8 @@ setMetaData() {
         metadata .= "T"
 	if(redeemTokensDone)
 		metadata .= "R"
+    if(wonderPickEventDone)
+        metadata .= "W"
 
     ; Remove parentheses if no flags remain, helpful if there is only a T flag or manual removal of X flag
     if(hasMetaData) {
@@ -5028,7 +5039,7 @@ GetEventRewards(frommain := true){
         CreateStatusMessage("Waiting for Trace`n(" . failSafeTime . "/45 seconds)")
         Delay(1)
     }
-    adbClick_wbb(40, 465)
+    adbClick_wbb(130, 465)
 	sleep, 1000
     failSafe := A_TickCount
     failSafeTime := 0
@@ -5515,3 +5526,37 @@ GetTempDirectory() {
         FileCreateDir, %tempDir%
     return tempDir
 }
+
+wonderPickEvent() {
+    global wonderPickEventDone
+    IniRead, claimWonderPickEvent, %A_ScriptDir%\..\Settings.ini, UserSettings, claimWonderPickEvent, 0
+    if (!claimWonderPickEvent)
+        Return
+    if (A_NowUTC > 20251023060000)
+        Return
+    if (wonderPickEventDone)
+        Return
+    FindImageAndClick(191, 393, 211, 411, , "Shop", 40, 515) ;click until at main menu
+    FindImageAndClick(240, 80, 265, 100, , "WonderPick", 59, 429) ;click until in wonderpick Screen
+
+    DoWonderPickOnly()
+    GetEventRewards(True)
+    Sleep, 1000
+    adbClick(260, 207)
+    adbClick(260, 207)
+    FindImageAndClick(244, 66, 272, 94, , "ShopInfo")
+    sleep, 500
+    adbSwipe("537 500 537 50 300")
+    adbSwipe("537 500 537 50 300")
+    sleep, 500
+	FindImageAndClick(202, 317, 226, 341, , "Max", 130, 300, ,2)
+	FindImageAndClick(203, 313, 230, 339, , "Max2", 216, 326, ,2)
+
+	FindImageAndClick(244, 66, 272, 94, , "ShopInfo", 170, 379, ,5)
+	sleep, 500
+	FindImageAndClick(244, 66, 272, 94, , "ShopInfo", 170, 379, ,2)
+    FindImageAndClick(191, 393, 211, 411, , "Shop", 140, 495)
+    wonderPickEventDone := 1
+	setMetaData()
+}
+
