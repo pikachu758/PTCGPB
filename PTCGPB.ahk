@@ -14,7 +14,7 @@ global STATIC_BRUSH := 0
 
 githubUser := "pikachu758"
 repoName := "PTCGPB"
-localVersion := "v6.8.9"
+localVersion := "v6.8.10"
 scriptFolder := A_ScriptDir
 zipPath := A_Temp . "\update.zip"
 extractPath := A_Temp . "\update"
@@ -2264,12 +2264,13 @@ NextStep:
                 } else {
                     instanceIndex := Title
                 }
-                
-                rowHeight := 533 ; Adjust the height of each row
+                scaleParam := 283
+                borderWidth := 4
+                rowHeight := (defaultLanguage = "Scale125") ? 538 : 529 ; Adjust the height of each row
                 currentRow := Floor((instanceIndex - 1) / Columns)
-                y := currentRow * rowHeight + (currentRow * rowGap) ; Use the configurable gap
-                x := Mod((instanceIndex - 1), Columns) * scaleParam
-                WinMove, %Title%, , % (MonitorLeft + x), % (MonitorTop + y), scaleParam, 537
+                y := MonitorTop + currentRow * rowHeight + (currentRow * rowGap) ; Use the configurable gap
+                x := MonitorLeft + Mod((instanceIndex - 1), Columns) * (scaleParam - borderWidth * 2) - borderWidth
+                WinMove, %Title%, , %x%, %y%, %scaleParam%, 500
                 break
             }
             catch {
@@ -2669,13 +2670,11 @@ NextStep:
     Gui, Add, Text, x45 y175 backgroundtrans Hidden vTxt_Scale, % currentDictionary.Txt_Scale
     if (defaultLanguage = "Scale125") {
         defaultLang := 1
-        scaleParam := 277
     } else if (defaultLanguage = "Scale100") {
         defaultLang := 2
-        scaleParam := 287
     }
     
-    Gui, Add, DropDownList, x190 y173 w80 vdefaultLanguage gdefaultLangSetting choose%defaultLang% -E0x200 Center backgroundtrans Hidden, Scale125
+    Gui, Add, DropDownList, x190 y173 w80 vdefaultLanguage gdefaultLangSetting choose%defaultLang% -E0x200 Center backgroundtrans Hidden, Scale125|Scale100
     
     Gui, Add, Text, x45 y200 backgroundtrans Hidden vTxt_RowGap, % currentDictionary.Txt_RowGap
     Gui, Add, Edit, vRowGap cFDFDFD w80 x190 y198 h20 -E0x200 Center backgroundtrans Hidden, %RowGap%
@@ -3586,13 +3585,6 @@ deleteSettings:
         GuiControl, Hide, SortByDropdown
     }
     
-    ; Ensure scaleParam value is preserved based on the currentLanguage
-    if (defaultLanguage = "Scale125") {
-        scaleParam := 277
-    } else if (defaultLanguage = "Scale100") {
-        scaleParam := 287
-    }
-    
     ; Only show a message if debugging is needed
     if (debugMode && scaleParam != currentScaleParam) {
         MsgBox, Scale parameter updated: %scaleParam% (Was: %currentScaleParam%)
@@ -3632,11 +3624,9 @@ defaultLangSetting:
     global scaleParam
     GuiControlGet, defaultLanguage,, defaultLanguage
     if (defaultLanguage = "Scale125") {
-        scaleParam := 277
-        MsgBox, Scale set to 125`% with scaleParam = %scaleParam%
+        MsgBox, Scale set to 125`%
     } else if (defaultLanguage = "Scale100") {
-        scaleParam := 287
-        MsgBox, Scale set to 100`% with scaleParam = %scaleParam%
+        MsgBox, Scale set to 100`%
     }
     
     ; Save settings after changing language
@@ -3653,14 +3643,11 @@ ArrangeWindows:
     IniRead, runMain, Settings.ini, UserSettings, runMain
     
     ; Re-validate scaleParam based on current language
-    if (defaultLanguage = "Scale125") {
-        scaleParam := 277
-    } else if (defaultLanguage = "Scale100") {
-        scaleParam := 287
-    }
     
     windowsPositioned := 0
-    
+    scaleParam := 283
+    borderWidth := 4 - 1
+    rowHeight := (defaultLanguage = "Scale125") ? 538 : 529 ; Adjust the height of each row
     if (runMain && Mains > 0) {
         Loop %Mains% {
             mainInstanceName := "Main" . (A_Index > 1 ? A_Index : "")
@@ -3675,13 +3662,12 @@ ArrangeWindows:
                 SysGet, Monitor, Monitor, %SelectedMonitorIndex%
                 
                 instanceIndex := A_Index
-                rowHeight := 533
                 currentRow := Floor((instanceIndex - 1) / Columns)
                 y := MonitorTop + (currentRow * rowHeight) + (currentRow * rowGap)
-                x := MonitorLeft + (Mod((instanceIndex - 1), Columns) * scaleParam)
+                x := MonitorLeft + Mod((instanceIndex - 1), Columns) * (scaleParam - borderWidth * 2) - borderWidth
                 
                 ; Move window
-                WinMove, %mainInstanceName%,, %x%, %y%, %scaleParam%, 537
+                WinMove, %mainInstanceName%,, %x%, %y%, %scaleParam%, %rowHeight%
                 WinSet, Redraw, , %mainInstanceName%
                 
                 windowsPositioned++
@@ -3710,13 +3696,12 @@ ArrangeWindows:
                     instanceIndex := A_Index
                 }
                 
-                rowHeight := 533
                 currentRow := Floor((instanceIndex - 1) / Columns)
                 y := MonitorTop + (currentRow * rowHeight) + (currentRow * rowGap)
-                x := MonitorLeft + (Mod((instanceIndex - 1), Columns) * scaleParam)
+                x := MonitorLeft + Mod((instanceIndex - 1), Columns) * (scaleParam - borderWidth * 2) - borderWidth
                 
                 ; Move window
-                WinMove, %windowTitle%,, %x%, %y%, %scaleParam%, 537
+                WinMove, %windowTitle%,, %x%, %y%, %scaleParam%, %rowHeight%
                 WinSet, Redraw, , %windowTitle%
                 
                 windowsPositioned++
@@ -4140,11 +4125,6 @@ StartBot:
     SaveAllSettings()
     
     ; Re-validate scaleParam based on current language
-    if (defaultLanguage = "Scale125") {
-        scaleParam := 277
-    } else if (defaultLanguage = "Scale100") {
-        scaleParam := 287
-    }
     
     ; Handle deprecated FriendID field
     if (inStr(FriendID, "http")) {

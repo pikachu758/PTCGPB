@@ -68,12 +68,6 @@ Sleep, %instanceSleep%
 ; Attempt to connect to ADB
 ConnectAdb(folderPath)
 
-if (InStr(defaultLanguage, "100")) {
-    scaleParam := 287
-} else {
-    scaleParam := 277
-}
-
 resetWindows()
 MaxRetries := 10
 RetryCount := 0
@@ -83,11 +77,9 @@ Loop {
         sleep, 2000
         ;Winset, Alwaysontop, On, %winTitle%
         OwnerWND := WinExist(winTitle)
-        x4 := x + 5
-        y4 := y + 535
+        x4 := x + 4
+        y4 := y + Height - 4 + 2
         buttonWidth := 45
-        if (scaleParam = 287)
-            buttonWidth := buttonWidth + 5
 
         Gui, ToolBar:New, +Owner%OwnerWND% -AlwaysOnTop +ToolWindow -Caption +LastFound -DPIScale
         Gui, ToolBar:Default
@@ -142,17 +134,6 @@ global 99Configs := {}
 99Configs["jp"] := {leftx: 84, rightx: 127}
 99Configs["ko"] := {leftx: 65, rightx: 100}
 99Configs["cn"] := {leftx: 63, rightx: 102}
-if (scaleParam = 287) {
-    99Configs["en"] := {leftx: 123, rightx: 162}
-    99Configs["es"] := {leftx: 73, rightx: 105}
-    99Configs["fr"] := {leftx: 61, rightx: 93}
-    99Configs["de"] := {leftx: 77, rightx: 108}
-    99Configs["it"] := {leftx: 66, rightx: 97}
-    99Configs["pt"] := {leftx: 133, rightx: 165}
-    99Configs["jp"] := {leftx: 88, rightx: 122}
-    99Configs["ko"] := {leftx: 69, rightx: 105}
-    99Configs["cn"] := {leftx: 63, rightx: 102}
-}
 
 99Path := "99" . clientLanguage
 99Leftx := 99Configs[clientLanguage].leftx
@@ -251,7 +232,7 @@ FindOrLoseImage(X1, Y1, X2, Y2, searchVariation := "", imageName := "DEFAULT", E
     global winTitle, Variation, failSafe
     if(searchVariation = "")
         searchVariation := Variation
-    imagePath := A_ScriptDir . "\" . defaultLanguage . "\"
+    imagePath := A_ScriptDir . "\Scale125\"
     confirmed := false
 
     CreateStatusMessage("Finding " . imageName . "...")
@@ -260,21 +241,9 @@ FindOrLoseImage(X1, Y1, X2, Y2, searchVariation := "", imageName := "DEFAULT", E
     pNeedle := GetNeedle(Path)
 
     ; 100% scale changes
-    if (scaleParam = 287) {
-        Y1 -= 8 ; offset, should be 44-36 i think?
-        Y2 -= 8
-        if (Y1 < 0) {
-            Y1 := 0
-        }
-        if (imageName = "Bulba") { ; too much to the left? idk how that happens
-            X1 := 200
-            Y1 := 220
-            X2 := 230
-            Y2 := 260
-        }else if (imageName = 99Path) { ; 100% full of friend list
-            Y1 := 103
-            Y2 := 118
-        }
+    if(defaultLanguage = "Scale100") {
+        Y1 -= 9
+        Y2 -= 9
     }
     ;bboxAndPause(X1, Y1, X2, Y2)
 
@@ -294,7 +263,7 @@ FindOrLoseImage(X1, Y1, X2, Y2, searchVariation := "", imageName := "DEFAULT", E
     Path = %imagePath%Error.png
     pNeedle := GetNeedle(Path)
     ; ImageSearch within the region
-    vRet := Gdip_ImageSearch(pBitmap, pNeedle, vPosXY, 120, 187, 155, 210, searchVariation)
+    vRet := Gdip_ImageSearch(pBitmap, pNeedle, vPosXY, 120, 178, 155, 210, searchVariation)
     Gdip_DisposeImage(pBitmap)
     if (vRet = 1) {
         CreateStatusMessage("Error message in " . scriptName . ". Clicking retry...")
@@ -306,7 +275,7 @@ FindOrLoseImage(X1, Y1, X2, Y2, searchVariation := "", imageName := "DEFAULT", E
     Path = %imagePath%App.png
     pNeedle := GetNeedle(Path)
     ; ImageSearch within the region
-    vRet := Gdip_ImageSearch(pBitmap, pNeedle, vPosXY, 15, 155, 270, 420, searchVariation)
+    vRet := Gdip_ImageSearch(pBitmap, pNeedle, vPosXY, 15, 146, 270, 420, searchVariation)
     Gdip_DisposeImage(pBitmap)
     if (vRet = 1) {
         restartGameInstance("*Stuck at " . imageName . "...")
@@ -335,7 +304,7 @@ FindImageAndClick(X1, Y1, X2, Y2, searchVariation := "", imageName := "DEFAULT",
         global Delay
         sleepTime := Delay
     }
-    imagePath := A_ScriptDir . "\" defaultLanguage "\"
+    imagePath := A_ScriptDir . "\Scale125\"
     click := false
     if(clickx > 0 and clicky > 0)
         click := true
@@ -346,22 +315,9 @@ FindImageAndClick(X1, Y1, X2, Y2, searchVariation := "", imageName := "DEFAULT",
     confirmed := false
 
     ; 100% scale changes
-    if (scaleParam = 287) {
-        Y1 -= 8 ; offset, should be 44-36 i think?
-        Y2 -= 8
-        if (Y1 < 0) {
-            Y1 := 0
-        }
-
-        if (imageName = "Platin") { ; can't do text so purple box
-            X1 := 141
-            Y1 := 189
-            X2 := 208
-            Y2 := 224
-        } else if (imageName = "Opening") { ; Opening click (to skip cards) can't click on the immersive skip with 239, 497
-            clickx := 250
-            clicky := 505
-        }
+    if(defaultLanguage = "Scale100") {
+        Y1 -= 9
+        Y2 -= 9
     }
 
     if(click) {
@@ -406,7 +362,7 @@ FindImageAndClick(X1, Y1, X2, Y2, searchVariation := "", imageName := "DEFAULT",
         Path = %imagePath%Error.png
         pNeedle := GetNeedle(Path)
         ; ImageSearch within the region
-        vRet := Gdip_ImageSearch(pBitmap, pNeedle, vPosXY, 120, 187, 155, 210, searchVariation)
+        vRet := Gdip_ImageSearch(pBitmap, pNeedle, vPosXY, 120, 178, 155, 210, searchVariation)
         Gdip_DisposeImage(pBitmap)
         if (vRet = 1) {
             CreateStatusMessage("Error message in " . scriptName . ". Clicking retry...")
@@ -418,7 +374,7 @@ FindImageAndClick(X1, Y1, X2, Y2, searchVariation := "", imageName := "DEFAULT",
         Path = %imagePath%App.png
         pNeedle := GetNeedle(Path)
         ; ImageSearch within the region
-        vRet := Gdip_ImageSearch(pBitmap, pNeedle, vPosXY, 15, 155, 270, 420, searchVariation)
+        vRet := Gdip_ImageSearch(pBitmap, pNeedle, vPosXY, 15, 146, 270, 420, searchVariation)
         Gdip_DisposeImage(pBitmap)
         if (vRet = 1) {
             restartGameInstance("*Stuck at " . imageName . "...")
@@ -457,11 +413,13 @@ resetWindows(){
             if (instanceIndex = "")
                 instanceIndex := 1
 
-            rowHeight := 533  ; Adjust the height of each row
+            scaleParam := 283
+            borderWidth := 4-1
+            rowHeight :=  (defaultLanguage = "Scale125") ? 538 : 529  ; Adjust the height of each row
             currentRow := Floor((instanceIndex - 1) / Columns)
-            y := currentRow * rowHeight
-            x := Mod((instanceIndex - 1), Columns) * scaleParam
-            WinMove, %Title%, , % (MonitorLeft + x), % (MonitorTop + y), scaleParam, 537
+            y := MonitorTop + currentRow * rowHeight
+            x := MonitorLeft + Mod((instanceIndex - 1), Columns) * (scaleParam - borderWidth * 2) - borderWidth
+            WinMove, %Title%, , %x%, %y%, %scaleParam%, %rowHeight%
             break
         }
         catch {
