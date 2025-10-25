@@ -62,6 +62,10 @@ ConnectAdb(folderPath := "C:\Program Files\Netease") {
 
     if !FileExist(adbPath) ;if international mumu file path isn't found look for chinese domestic path
         adbPath := folderPath . "\MuMu Player 12\shell\adb.exe"
+    if !FileExist(adbPath) ;MuMu Player 12 v5 supported
+        adbPath := folderPath . "\MuMuPlayerGlobal-12.0\nx_main\adb.exe"
+    if !FileExist(adbPath) ;MuMu Player 12 v5 supported
+        adbPath := folderPath . "\MuMu Player 12\nx_main\adb.exe"
 
     if !FileExist(adbPath)
         MsgBox Double check your folder path! It should be the one that contains the MuMuPlayer 12 folder! `nDefault is just C:\Program Files\Netease
@@ -75,7 +79,7 @@ ConnectAdb(folderPath := "C:\Program Files\Netease") {
     RetryCount := 0
     connected := false
 
-    CreateStatusMessage("Connecting to ADB...",,,, false)
+    ;CreateStatusMessage("Connecting to ADB...",,,, false)
 
     Loop %MaxRetries% {
         adbPort := findAdbPorts(folderPath)
@@ -87,7 +91,7 @@ ConnectAdb(folderPath := "C:\Program Files\Netease") {
         ; Check for successful connection in the output
         if InStr(connectionResult, "connected to " . ip) {
             connected := true
-            CreateStatusMessage("ADB connected successfully.",,,, false)
+            ;CreateStatusMessage("ADB connected successfully.",,,, false)
             return true
         } else {
             RetryCount++

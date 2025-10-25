@@ -20,7 +20,7 @@ DllCall("AllocConsole")
 WinHide % "ahk_id " DllCall("GetConsoleWindow", "ptr")
 
 global RESTART_LOOP_EXCEPTION := { message: "Restarting main loop" }
-global winTitle, changeDate, failSafe, openPack, Delay, failSafeTime, StartSkipTime, Columns, failSafe, scriptName, GPTest, StatusText, defaultLanguage, setSpeed, jsonFileName, pauseToggle, SelectedMonitorIndex, swipeSpeed, godPack, scaleParam, deleteMethod, packs, FriendID, friendIDs, Instances, username, friendCode, stopToggle, friended, runMain, Mains, showStatus, injectMethod, packMethod, loadDir, loadedAccount, nukeAccount, CheckShinyPackOnly, TrainerCheck, FullArtCheck, RainbowCheck, ShinyCheck, dateChange, foundGP, friendsAdded, PseudoGodPack, packArray, CrownCheck, ImmersiveCheck, InvalidCheck, slowMotion, screenShot, accountFile, invalid, starCount, keepAccount
+global winTitle, changeDate, failSafe, openPack, Delay, failSafeTime, StartSkipTime, Columns, failSafe, scriptName, GPTest, StatusText, setSpeed, jsonFileName, pauseToggle, SelectedMonitorIndex, swipeSpeed, godPack, scaleParam, deleteMethod, packs, FriendID, friendIDs, Instances, username, friendCode, stopToggle, friended, runMain, Mains, showStatus, injectMethod, packMethod, loadDir, loadedAccount, nukeAccount, CheckShinyPackOnly, TrainerCheck, FullArtCheck, RainbowCheck, ShinyCheck, dateChange, foundGP, friendsAdded, PseudoGodPack, packArray, CrownCheck, ImmersiveCheck, InvalidCheck, slowMotion, screenShot, accountFile, invalid, starCount, keepAccount
 global twoPlusOne, twoPlusDia
 global Mewtwo, Charizard, Pikachu, Mew, Dialga, Palkia, Arceus, Shining, Solgaleo, Lunala, Buzzwole, Eevee, HoOh, Lugia, Suicune, Deluxe
 global shinyPacks, minStars, minStarsShiny
@@ -38,6 +38,7 @@ global waitForEligibleAccounts := 1  ; Enable/disable waiting (1 = wait, 0 = sto
 global maxWaitHours := 24             ; Maximum hours to wait before giving up (0 = wait forever)
 global DelayOfExtraPack
 global startOfRun, startOfAdding, endOfAdding, startOfRemoving, endOfRemoving, timeTotal := 0, timeOccupied := 0, occupancy, packsTotal := 0
+global titleHeight, MuMuv5, folderPath
 
 avgtotalSeconds := 0
 
@@ -83,7 +84,6 @@ IniRead, folderPath, %A_ScriptDir%\..\Settings.ini, UserSettings, folderPath, C:
 IniRead, Columns, %A_ScriptDir%\..\Settings.ini, UserSettings, Columns, 5
 IniRead, godPack, %A_ScriptDir%\..\Settings.ini, UserSettings, godPack, Continue
 IniRead, Instances, %A_ScriptDir%\..\Settings.ini, UserSettings, Instances, 1
-IniRead, defaultLanguage, %A_ScriptDir%\..\Settings.ini, UserSettings, defaultLanguage, Scale125
 IniRead, rowGap, %A_ScriptDir%\..\Settings.ini, UserSettings, rowGap, 100
 IniRead, SelectedMonitorIndex, %A_ScriptDir%\..\Settings.ini, UserSettings, SelectedMonitorIndex, 1
 IniRead, swipeSpeed, %A_ScriptDir%\..\Settings.ini, UserSettings, swipeSpeed, 300
@@ -161,6 +161,7 @@ IniRead, renameXMLwithFC, %A_ScriptDir%\..\Settings.ini, UserSettings, renameXML
 IniRead, DelayOfExtraPack, %A_ScriptDir%\..\Settings.ini, UserSettings, DelayOfExtraPack%scriptName%, 4000
 IniRead, tesseractPath, %A_ScriptDir%\..\Settings.ini, UserSettings, tesseractPath, C:\Program Files\Tesseract-OCR\tesseract.exe
 
+MuMuv5 := isMuMuv5()
 pokemonList := ["Mewtwo", "Charizard", "Pikachu", "Mew", "Dialga", "Palkia", "Arceus", "Shining", "Solgaleo", "Lunala", "Buzzwole", "Eevee", "HoOh", "Lugia", "Suicune", "Deluxe"]
 shinyPacks := {"Shining": 1, "Solgaleo": 1, "Lunala": 1, "Buzzwole": 1, "Eevee": 1, "HoOh": 1, "Lugia": 1, "Suicune": 1, "Deluxe": 1}
 
@@ -448,7 +449,7 @@ Loop {
                         clickButton := FindOrLoseImage(75, 340, 195, 530, 80, "Button", 0)
                         if(clickButton) {
                             StringSplit, pos, clickButton, `,  ; Split at ", "
-                            adbClick(pos1, pos2)
+                            adbClick(pos1, pos2+45-titleHeight)
                         }
                     }
                     levelUp()
@@ -1041,7 +1042,7 @@ RemoveFriends() {
             clickButton := FindOrLoseImage(152, 359, 195, 375, 80, "Button", 0)
             if(clickButton) {
                 StringSplit, pos, clickButton, `,  ; Split at ", "
-                adbClick_wbb(pos1, pos2)
+                adbClick_wbb(pos1, pos2+45-titleHeight)
             }
         }
 
@@ -1137,7 +1138,7 @@ AddFriends(renew := false, getFC := false) {
             clickButton := FindOrLoseImage(75, 360, 195, 410, 75, "Button", 0)
             if(clickButton) {
                 StringSplit, pos, clickButton, `,  ; Split at ", "
-                adbClick_wbb(pos1, pos2)
+                adbClick_wbb(pos1, pos2+45-titleHeight)
             }
         }
         else if(FindOrLoseImage(175, 165, 255, 235, , "Hourglass3", 0)) {
@@ -1317,12 +1318,6 @@ FindOrLoseImage(X1, Y1, X2, Y2, searchVariation := "", imageName := "DEFAULT", E
     Path = %imagePath%%imageName%.png
     pNeedle := GetNeedle(Path)
 
-    ; 100% scale changes
-    if(defaultLanguage = "Scale100") {
-        Y1 -= 9
-        Y2 -= 9
-    }
-
     ; ImageSearch within the region
     vRet := Gdip_ImageSearch_wbb(pBitmap, pNeedle, vPosXY, X1, Y1, X2, Y2, searchVariation)
     if(EL = 0)
@@ -1333,6 +1328,16 @@ FindOrLoseImage(X1, Y1, X2, Y2, searchVariation := "", imageName := "DEFAULT", E
         confirmed := vPosXY
     } else if(!confirmed && vRet = GDEL && GDEL = 0) {
         confirmed := true
+    }
+    Path = %imagePath%App.png
+    if (MuMuv5)
+        Path = %imagePath%App2.png
+    pNeedle := GetNeedle(Path)
+    ; ImageSearch within the region
+    vRet := Gdip_ImageSearch_wbb(pBitmap, pNeedle, vPosXY, 15, 140, 242, 314, searchVariation)
+    if (vRet = 1) {
+        Gdip_DisposeImage(pBitmap)
+        restartGameInstance("*Stuck at " . imageName . "...")
     }
     Path = %imagePath%Error.png ; Search for communication error
     pNeedle := GetNeedle(Path)
@@ -1351,14 +1356,6 @@ FindOrLoseImage(X1, Y1, X2, Y2, searchVariation := "", imageName := "DEFAULT", E
         CreateStatusMessage("No response in " . scriptName . ". Clicking retry...",,,, false)
         adbClick_wbb(46, 299)
         Sleep, 1000
-    }
-    Path = %imagePath%App.png
-    pNeedle := GetNeedle(Path)
-    ; ImageSearch within the region
-    vRet := Gdip_ImageSearch_wbb(pBitmap, pNeedle, vPosXY, 225, 291, 242, 314, searchVariation)
-    if (vRet = 1) {
-        Gdip_DisposeImage(pBitmap)
-        restartGameInstance("*Stuck at " . imageName . "...")
     }
     if(imageName = "Social" || imageName = "Add" || imageName = "Add2") {
         TradeTutorial()
@@ -1420,11 +1417,6 @@ FindImageAndClick(X1, Y1, X2, Y2, searchVariation := "", imageName := "DEFAULT",
     StartSkipTime := A_TickCount
 
     confirmed := false
-    ; 100% scale changes
-    if(defaultLanguage = "Scale100") {
-        Y1 -= 9
-        Y2 -= 9
-    }
 
     if(click) {
         adbClick_wbb(clickx, clicky)
@@ -1476,6 +1468,16 @@ FindImageAndClick(X1, Y1, X2, Y2, searchVariation := "", imageName := "DEFAULT",
                 restartGameInstance("Stuck at " . imageName . "...") ; change to reset the instance and delete data then reload script
             }
         }
+        Path = %imagePath%App.png
+        if (MuMuv5)
+            Path = %imagePath%App2.png
+        pNeedle := GetNeedle(Path)
+        ; ImageSearch within the region
+        vRet := Gdip_ImageSearch_wbb(pBitmap, pNeedle, vPosXY, 15, 100, 242, 314, searchVariation)
+        if (vRet = 1) {
+            Gdip_DisposeImage(pBitmap)
+            restartGameInstance("*Stuck at " . imageName . "...")
+        }
         Path = %imagePath%Error.png ; Search for communication error
         pNeedle := GetNeedle(Path)
         ; ImageSearch within the region
@@ -1484,14 +1486,6 @@ FindImageAndClick(X1, Y1, X2, Y2, searchVariation := "", imageName := "DEFAULT",
             CreateStatusMessage("Error message in " . scriptName . ". Clicking retry...",,,, false)
             adbClick_wbb(139, 386)
             Sleep, 1000
-        }
-        Path = %imagePath%App.png
-        pNeedle := GetNeedle(Path)
-        ; ImageSearch within the region
-        vRet := Gdip_ImageSearch_wbb(pBitmap, pNeedle, vPosXY, 225, 291, 242, 314, searchVariation)
-        if (vRet = 1) {
-            Gdip_DisposeImage(pBitmap)
-            restartGameInstance("*Stuck at " . imageName . "...")
         }
         if(imageName = "Social" || imageName = "Country" || imageName = "Account2" || imageName = "Account") { ;only look for deleted account on start up.
             Path = %imagePath%NoSave.png ; look for No Save Data error message > if loaded account > delete xml > reload
@@ -1592,13 +1586,13 @@ LevelUp() {
     if(Leveled) {
         clickButton := FindOrLoseImage(75, 340, 195, 530, 80, "Button", 0, failSafeTime)
         StringSplit, pos, clickButton, `,  ; Split at ", "
-        adbClick_wbb(pos1, pos2)
+        adbClick_wbb(pos1, pos2+45-titleHeight)
     }
     Delay(1)
 }
 
 resetWindows() {
-    global Columns, runMain, Mains, scaleParam, winTitle, SelectedMonitorIndex, rowGap
+    global Columns, runMain, Mains, scaleParam, winTitle, SelectedMonitorIndex, rowGap, titleHeight
     ; Make sure rowGap is defined
     if (!rowGap)
         rowGap := 100
@@ -1616,9 +1610,12 @@ resetWindows() {
         instanceIndex := Title
     }
 
-    scaleParam := 283
-    rowHeight :=  (defaultLanguage = "Scale125") ? 538 : 529
-    borderWidth := 4-1
+    WinGetPos, winX, winY, winW, winH, %winTitle%
+    ControlGetPos, cx, cy, cw, ch, , %winTitle%
+    titleHeight := cy - winY
+    borderWidth := 4 - 1
+    scaleParam := 275 + 4 * 2
+    rowHeight :=  titleHeight + 489 + 4  ; Adjust the height of each row
     currentRow := Floor((instanceIndex - 1) / Columns)
 
     ; Calculate absolute coordinates with MonitorTop/Left
@@ -1719,7 +1716,7 @@ menuDelete() {
                 clickImage := FindOrLoseImage(200, 340, 250, 530, 60, "DeleteAll", 0, failSafeTime)
                 if(clickImage) {
                     StringSplit, pos, clickImage, `,  ; Split at ", "
-                    adbClick_wbb(pos1, pos2)
+                    adbClick_wbb(pos1, pos2+45-titleHeight)
                 }
                 else {
                     adbClick_wbb(230, 506)
@@ -1779,7 +1776,7 @@ menuDeleteStart() {
                     clickImage := FindOrLoseImage(200, 340, 250, 530, 60, "DeleteAll", 0, failSafeTime)
                     if(clickImage) {
                         StringSplit, pos, clickImage, `,  ; Split at ", "
-                        adbClick_wbb(pos1, pos2)
+                        adbClick_wbb(pos1, pos2+45-titleHeight)
                     }
                     else {
                         adbClick_wbb(230, 506)
@@ -2227,10 +2224,7 @@ FindBorders(prefix) {
         Path := A_ScriptDir . "\Scale125\" . imageName . ".png"
         if (FileExist(Path)) {
             pNeedle := GetNeedle(Path)
-            if(defaultLanguage = "Scale125")
-                vRet := Gdip_ImageSearch_wbb(pBitmap, pNeedle, vPosXY, coords[1], coords[2], coords[3], coords[4], currentSearchVariation)
-            else
-                vRet := Gdip_ImageSearch_wbb(pBitmap, pNeedle, vPosXY, coords[1], coords[2]-9, coords[3], coords[4]-9, currentSearchVariation)
+            vRet := Gdip_ImageSearch_wbb(pBitmap, pNeedle, vPosXY, coords[1], coords[2], coords[3], coords[4], currentSearchVariation)
             if (vRet = 1) {
                 count += 1
             }
@@ -2249,15 +2243,13 @@ FindCard(prefix) {
         ,[63, 306, 116, 308]
         ,[146, 306, 199, 308]]
     pBitmap := from_window(WinExist(winTitle))
+    yBias := titleHeight - 45
     for index, value in borderCoords {
         coords := borderCoords[A_Index]
         Path = %A_ScriptDir%\Scale125\%prefix%%A_Index%.png
         if (FileExist(Path)) {
             pNeedle := GetNeedle(Path)
-            if(defaultLanguage = "Scale125")
-                vRet := Gdip_ImageSearch_wbb(pBitmap, pNeedle, vPosXY, coords[1], coords[2], coords[3], coords[4], searchVariation)
-            else
-                vRet := Gdip_ImageSearch_wbb(pBitmap, pNeedle, vPosXY, coords[1], coords[2]-9, coords[3], coords[4]-9, searchVariation)
+            vRet := Gdip_ImageSearch_wbb(pBitmap, pNeedle, vPosXY, coords[1], coords[2], coords[3], coords[4], searchVariation)
             if (vRet = 1) {
                 count += 1
             }
@@ -2787,6 +2779,7 @@ Screenshot_dev(fileType := "Dev",subDir := "") {
     try {
         OwnerWND := WinExist(winTitle)
         buttonWidth := 40
+        yBias := titleHeight - 45
 
         Gui, DevMode_ss%winTitle%:New, +LastFound -DPIScale
         Gui, DevMode_ss%winTitle%:Add, Picture, x0 y0 w275 h534, %filePath%
@@ -2798,13 +2791,13 @@ Screenshot_dev(fileType := "Dev",subDir := "") {
         KeyWait, LButton, D
         MouseGetPos , X1, Y1, OutputVarWin, OutputVarControl
         KeyWait, LButton, U
-        Y1 -= 31
+        Y1 -= 31 + yBias
         ;MsgBox, The cursor is at X%X1% Y%Y1%.
 
         KeyWait, LButton, D
         MouseGetPos , X2, Y2, OutputVarWin, OutputVarControl
         KeyWait, LButton, U
-        Y2 -= 31
+        Y2 -= 31 + yBias
         ;MsgBox, The cursor is at X%X2% Y%Y2%.
 
         W:=X2-X1
@@ -2823,7 +2816,7 @@ Screenshot_dev(fileType := "Dev",subDir := "") {
         KeyWait, LButton, D
         MouseGetPos , X3, Y3, OutputVarWin, OutputVarControl
         KeyWait, LButton, U
-        Y3 -= 31
+        Y3 -= 31 + yBias
 
         MsgBox,
         (LTrim
@@ -2863,9 +2856,9 @@ Screenshot(fileType := "Valid", subDir := "", ByRef fileName := "") {
     if (filename = "PACKSTATS")
         fileName := "packstats_temp.png"
     filePath := fileDir "\" . fileName
-
+    yBias := titleHeight - 45
     pBitmapW := from_window(WinExist(winTitle))
-    pBitmap := Gdip_CloneBitmapArea(pBitmapW, 18, 175, 240, 227)
+    pBitmap := Gdip_CloneBitmapArea(pBitmapW, 18, 175+yBias, 240, 227)
     Gdip_DisposeImage(pBitmapW)
     Gdip_SaveBitmapToFile(pBitmap, filePath)
 
@@ -3214,10 +3207,10 @@ bboxAndPause_immage(X1, Y1, X2, Y2, pNeedleObj, vret := False, doPause := False)
 Gdip_ImageSearch_wbb(pBitmapHaystack,pNeedle,ByRef OutputList=""
     ,OuterX1=0,OuterY1=0,OuterX2=0,OuterY2=0,Variation=0,Trans=""
     ,SearchDirection=1,Instances=1,LineDelim="`n",CoordDelim=",") {
-
-    vret := Gdip_ImageSearch(pBitmapHaystack,pNeedle.needle,OutputList,OuterX1,OuterY1,OuterX2,OuterY2,Variation,Trans,SearchDirection,Instances,LineDelim,CoordDelim)
+    yBias := titleHeight - 45
+    vret := Gdip_ImageSearch(pBitmapHaystack,pNeedle.needle,OutputList,OuterX1,OuterY1+yBias,OuterX2,OuterY2+yBias,Variation,Trans,SearchDirection,Instances,LineDelim,CoordDelim)
     if(dbg_bbox)
-        bboxAndPause_immage(OuterX1, OuterY1, OuterX2, OuterY2, pNeedle, vret, dbg_bboxNpause)
+        bboxAndPause_immage(OuterX1, OuterY1+yBias, OuterX2, OuterY2+yBias, pNeedle, vret, dbg_bboxNpause)
     return vret
 }
 
@@ -3492,7 +3485,7 @@ DoTutorial() {
     if(setSpeed > 1) {
         FindImageAndClick(38, 290, 65, 302, , "Platin", 18, 109, 2000) ; click mod settings
         FindImageAndClick(9, 303, 25, 323, , "One", 26, 313) ; click mod settings
-        Delay(1)
+        Delay(2)
     }
     failSafe := A_TickCount
     failSafeTime := 0
@@ -3588,7 +3581,7 @@ DoTutorial() {
         FindImageAndClick(38, 290, 65, 302, , "Platin", 18, 109, 2000) ; click mod settings
         FindImageAndClick(9, 303, 25, 323, , "One", 26, 313) ; click mod settings
         adbClick_wbb(41, 366)
-        Delay(1)
+        Delay(2)
     }
     failSafe := A_TickCount
     failSafeTime := 0
@@ -3965,7 +3958,7 @@ PackOpening() {
         FindImageAndClick(38, 290, 65, 302, , "Platin", 18, 109, 2000) ; click mod settings
         FindImageAndClick(9, 303, 25, 323, , "One", 26, 313) ; click mod settings
         adbClick_wbb(41, 366)
-        Delay(1)
+        Delay(2)
     }
     failSafe := A_TickCount
     failSafeTime := 0
@@ -4108,7 +4101,7 @@ HourglassOpening(HG := false, NEIRestart := true) {
         clickButton := FindOrLoseImage(145, 440, 258, 480, 80, "Button", 0, failSafeTime)
         if(clickButton) {
             StringSplit, pos, clickButton, `,  ; Split at ", "
-            adbClick_wbb(pos1, pos2)
+            adbClick_wbb(pos1, pos2+45-titleHeight)
         }
         failSafeTime := (A_TickCount - failSafe) // 1000
         CreateStatusMessage("Waiting for Pack`n(" . failSafeTime . "/45 seconds)")
@@ -4120,7 +4113,7 @@ HourglassOpening(HG := false, NEIRestart := true) {
         FindImageAndClick(38, 290, 65, 302, , "Platin", 18, 109, 2000) ; click mod settings
         FindImageAndClick(9, 303, 25, 323, , "One", 26, 313) ; click mod settings
         adbClick_wbb(41, 366)
-        Delay(1)
+        Delay(2)
     }
     failSafe := A_TickCount
     failSafeTime := 0
@@ -4642,7 +4635,7 @@ DoWonderPickOnly() {
             clickButton := FindOrLoseImage(100, 367, 190, 480, 100, "Button", 0, failSafeTime)
             if(clickButton) {
                 StringSplit, pos, clickButton, `,  ; Split at ", "
-                adbClick_wbb(pos1, pos2)
+                adbClick_wbb(pos1, pos2+45-titleHeight)
                 Delay(3)
             }
             if(FindOrLoseImage(160, 330, 200, 370, , "Card", 0, failSafeTime))
@@ -5033,7 +5026,7 @@ FindPackStats() {
             clickButton := FindOrLoseImage(75, 340, 195, 530, 80, "Button", 0)
             if(clickButton) {
                 StringSplit, pos, clickButton, `,  ; Split at ", "
-                adbClick(pos1, pos2)
+                adbClick(pos1, pos2+45-titleHeight)
             }
         }
         levelUp()
@@ -5421,3 +5414,12 @@ wonderPickEvent() {
     FindImageAndClick(191, 393, 211, 411, , "Shop", 140, 495)
 }
 
+isMuMuv5(){
+    global folderPath
+    mumuFolder := folderPath . "\MuMuPlayerGlobal-12.0"
+    if !FileExist(mumuFolder)
+        mumuFolder := folderPath . "\MuMu Player 12"
+    if FileExist(mumuFolder . "\nx_main")
+        return true
+    return false
+}

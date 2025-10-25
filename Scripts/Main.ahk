@@ -22,9 +22,9 @@ DllCall("AllocConsole")
 WinHide % "ahk_id " DllCall("GetConsoleWindow", "ptr")
 
 global RESTART_LOOP_EXCEPTION := { message: "Restarting main loop" }
-global winTitle, changeDate, failSafe, openPack, Delay, failSafeTime, StartSkipTime, Columns, failSafe, scriptName, GPTest, StatusText, defaultLanguage, setSpeed, jsonFileName, pauseToggle, SelectedMonitorIndex, swipeSpeed, godPack, scaleParam, skipInvalidGP, deleteXML, packs, FriendID, AddFriend, Instances, showStatus, AutoSolo
+global winTitle, changeDate, failSafe, openPack, Delay, failSafeTime, StartSkipTime, Columns, failSafe, scriptName, GPTest, StatusText, setSpeed, jsonFileName, pauseToggle, SelectedMonitorIndex, swipeSpeed, godPack, scaleParam, skipInvalidGP, deleteXML, packs, FriendID, AddFriend, Instances, showStatus, AutoSolo
 global triggerTestNeeded, testStartTime, firstRun, minStars, minStarsA2b, vipIdsURL
-global autoUseGPTest, autotest, autotest_time, A_gptest, TestTime, captureWebhookURL, tesseractPath
+global autoUseGPTest, autotest, autotest_time, A_gptest, TestTime, captureWebhookURL, tesseractPath, titleHeight
 
 deleteAccount := false
 scriptName := StrReplace(A_ScriptName, ".ahk")
@@ -41,7 +41,6 @@ IniRead, Variation, %A_ScriptDir%\..\Settings.ini, UserSettings, Variation, 20
 IniRead, Columns, %A_ScriptDir%\..\Settings.ini, UserSettings, Columns, 5
 IniRead, openPack, %A_ScriptDir%\..\Settings.ini, UserSettings, openPack, 1
 IniRead, setSpeed, %A_ScriptDir%\..\Settings.ini, UserSettings, setSpeed, 2x
-IniRead, defaultLanguage, %A_ScriptDir%\..\Settings.ini, UserSettings, defaultLanguage, Scale125
 IniRead, SelectedMonitorIndex, %A_ScriptDir%\..\Settings.ini, UserSettings, SelectedMonitorIndex, 1:
 IniRead, swipeSpeed, %A_ScriptDir%\..\Settings.ini, UserSettings, swipeSpeed, 350
 IniRead, skipInvalidGP, %A_ScriptDir%\..\Settings.ini, UserSettings, skipInvalidGP, No
@@ -61,6 +60,8 @@ IniRead, tesseractPath, %A_ScriptDir%\..\Settings.ini, UserSettings, tesseractPa
 IniRead, autoUseGPTest, %A_ScriptDir%\..\Settings.ini, UserSettings, autoUseGPTest, 0
 IniRead, TestTime, %A_ScriptDir%\..\Settings.ini, UserSettings, TestTime, 3600
 IniRead, captureWebhookURL, %A_ScriptDir%\..\Settings.ini, UserSettings, captureWebhookURL, ""
+global MuMuv5
+MuMuv5 := isMuMuv5()
 ; connect adb
 instanceSleep := scriptName * 1000
 Sleep, %instanceSleep%
@@ -240,15 +241,10 @@ FindOrLoseImage(X1, Y1, X2, Y2, searchVariation := "", imageName := "DEFAULT", E
     Path = %imagePath%%imageName%.png
     pNeedle := GetNeedle(Path)
 
-    ; 100% scale changes
-    if(defaultLanguage = "Scale100") {
-        Y1 -= 9
-        Y2 -= 9
-    }
-    ;bboxAndPause(X1, Y1, X2, Y2)
+    yBias := titleHeight - 45
 
     ; ImageSearch within the region
-    vRet := Gdip_ImageSearch(pBitmap, pNeedle, vPosXY, X1, Y1, X2, Y2, searchVariation)
+    vRet := Gdip_ImageSearch(pBitmap, pNeedle, vPosXY, X1, Y1+yBias, X2, Y2+yBias, searchVariation)
     Gdip_DisposeImage(pBitmap)
     if(EL = 0)
         GDEL := 1
@@ -260,25 +256,27 @@ FindOrLoseImage(X1, Y1, X2, Y2, searchVariation := "", imageName := "DEFAULT", E
         confirmed := true
     }
     pBitmap := from_window(WinExist(winTitle))
+    Path = %imagePath%App.png
+    if (MuMuv5)
+        Path = %imagePath%App2.png
+    pNeedle := GetNeedle(Path)
+    ; ImageSearch within the region
+    vRet := Gdip_ImageSearch(pBitmap, pNeedle, vPosXY, 15, 140, 270, 429, searchVariation)
+    Gdip_DisposeImage(pBitmap)
+    if (vRet = 1) {
+        restartGameInstance("*Stuck at " . imageName . "...")
+    }
+    pBitmap := from_window(WinExist(winTitle))
     Path = %imagePath%Error.png
     pNeedle := GetNeedle(Path)
     ; ImageSearch within the region
-    vRet := Gdip_ImageSearch(pBitmap, pNeedle, vPosXY, 120, 178, 155, 210, searchVariation)
+    vRet := Gdip_ImageSearch(pBitmap, pNeedle, vPosXY, 120, 187+yBias, 155, 219+yBias, searchVariation)
     Gdip_DisposeImage(pBitmap)
     if (vRet = 1) {
         CreateStatusMessage("Error message in " . scriptName . ". Clicking retry...")
         LogToFile("Error message in " . scriptName . ". Clicking retry...")
         adbClick(139, 386)
         Sleep, 1000
-    }
-    pBitmap := from_window(WinExist(winTitle))
-    Path = %imagePath%App.png
-    pNeedle := GetNeedle(Path)
-    ; ImageSearch within the region
-    vRet := Gdip_ImageSearch(pBitmap, pNeedle, vPosXY, 15, 146, 270, 420, searchVariation)
-    Gdip_DisposeImage(pBitmap)
-    if (vRet = 1) {
-        restartGameInstance("*Stuck at " . imageName . "...")
     }
     if(imageName = "Country" || imageName = "Social")
         FSTime := 90
@@ -314,11 +312,7 @@ FindImageAndClick(X1, Y1, X2, Y2, searchVariation := "", imageName := "DEFAULT",
 
     confirmed := false
 
-    ; 100% scale changes
-    if(defaultLanguage = "Scale100") {
-        Y1 -= 9
-        Y2 -= 9
-    }
+    yBias := titleHeight - 45
 
     if(click) {
         adbClick(clickx, clicky)
@@ -341,7 +335,7 @@ FindImageAndClick(X1, Y1, X2, Y2, searchVariation := "", imageName := "DEFAULT",
         pNeedle := GetNeedle(Path)
         ;bboxAndPause(X1, Y1, X2, Y2)
         ; ImageSearch within the region
-        vRet := Gdip_ImageSearch(pBitmap, pNeedle, vPosXY, X1, Y1, X2, Y2, searchVariation)
+        vRet := Gdip_ImageSearch(pBitmap, pNeedle, vPosXY, X1, Y1+yBias, X2, Y2+yBias, searchVariation)
         Gdip_DisposeImage(pBitmap)
         if (!confirmed && vRet = 1) {
             confirmed := vPosXY
@@ -359,25 +353,27 @@ FindImageAndClick(X1, Y1, X2, Y2, searchVariation := "", imageName := "DEFAULT",
         }
 
         pBitmap := from_window(WinExist(winTitle))
+        Path = %imagePath%App.png
+        if (MuMuv5)
+            Path = %imagePath%App2.png
+        pNeedle := GetNeedle(Path)
+        ; ImageSearch within the region
+        vRet := Gdip_ImageSearch(pBitmap, pNeedle, vPosXY, 15, 140, 270, 429, searchVariation)
+        Gdip_DisposeImage(pBitmap)
+        if (vRet = 1) {
+            restartGameInstance("*Stuck at " . imageName . "...")
+        }
+        pBitmap := from_window(WinExist(winTitle))
         Path = %imagePath%Error.png
         pNeedle := GetNeedle(Path)
         ; ImageSearch within the region
-        vRet := Gdip_ImageSearch(pBitmap, pNeedle, vPosXY, 120, 178, 155, 210, searchVariation)
+        vRet := Gdip_ImageSearch(pBitmap, pNeedle, vPosXY, 120, 187+yBias, 155, 219+yBias, searchVariation)
         Gdip_DisposeImage(pBitmap)
         if (vRet = 1) {
             CreateStatusMessage("Error message in " . scriptName . ". Clicking retry...")
             LogToFile("Error message in " . scriptName . ". Clicking retry...")
             adbClick(139, 386)
             Sleep, 1000
-        }
-        pBitmap := from_window(WinExist(winTitle))
-        Path = %imagePath%App.png
-        pNeedle := GetNeedle(Path)
-        ; ImageSearch within the region
-        vRet := Gdip_ImageSearch(pBitmap, pNeedle, vPosXY, 15, 146, 270, 420, searchVariation)
-        Gdip_DisposeImage(pBitmap)
-        if (vRet = 1) {
-            restartGameInstance("*Stuck at " . imageName . "...")
         }
 
         if(skip) {
@@ -397,8 +393,8 @@ FindImageAndClick(X1, Y1, X2, Y2, searchVariation := "", imageName := "DEFAULT",
 }
 
 resetWindows(){
-    global Columns, winTitle, SelectedMonitorIndex, scaleParam
-    CreateStatusMessage("Arranging window positions and sizes")
+    global Columns, winTitle, SelectedMonitorIndex, scaleParam, titleHeight
+    ; CreateStatusMessage("Arranging window positions and sizes")
     RetryCount := 0
     MaxRetries := 10
     Loop
@@ -412,10 +408,12 @@ resetWindows(){
             instanceIndex := StrReplace(Title, "Main", "")
             if (instanceIndex = "")
                 instanceIndex := 1
-
-            scaleParam := 283
-            borderWidth := 4-1
-            rowHeight :=  (defaultLanguage = "Scale125") ? 538 : 529  ; Adjust the height of each row
+            WinGetPos, winX, winY, winW, winH, %winTitle%
+            ControlGetPos, cx, cy, cw, ch, , %winTitle%
+            titleHeight := cy - winY
+            borderWidth := 4 - 1
+            scaleParam := 275 + 4 * 2
+            rowHeight :=  titleHeight + 489 + 4  ; Adjust the height of each row
             currentRow := Floor((instanceIndex - 1) / Columns)
             y := MonitorTop + currentRow * rowHeight
             x := MonitorLeft + Mod((instanceIndex - 1), Columns) * (scaleParam - borderWidth * 2) - borderWidth
@@ -1370,3 +1368,14 @@ SoloBattle() {
 
     AutoSolo := False
 }
+
+isMuMuv5(){
+    global folderPath
+    mumuFolder := folderPath . "\MuMuPlayerGlobal-12.0"
+    if !FileExist(mumuFolder)
+        mumuFolder := folderPath . "\MuMu Player 12"
+    if FileExist(mumuFolder . "\nx_main")
+        return true
+    return false
+}
+

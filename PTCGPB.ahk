@@ -14,7 +14,7 @@ global STATIC_BRUSH := 0
 
 githubUser := "pikachu758"
 repoName := "PTCGPB"
-localVersion := "v6.8.10"
+localVersion := "v6.8.11"
 scriptFolder := A_ScriptDir
 zipPath := A_Temp . "\update.zip"
 extractPath := A_Temp . "\update"
@@ -30,8 +30,8 @@ global UI_ELEMENT_SCALE := 0.85
 
 ; Added new global variable for background image toggle
 global useBackgroundImage := true
-
-global scriptName, winTitle, FriendID, Instances, instanceStartDelay, jsonFileName, PacksText, runMain, Mains, AccountName, scaleParam
+global scaleParam := 283
+global scriptName, winTitle, FriendID, Instances, instanceStartDelay, jsonFileName, PacksText, runMain, Mains, AccountName
 global autoUseGPTest, TestTime
 global CurrentVisibleSection
 global FriendID_Divider, Instance_Divider3
@@ -2237,55 +2237,6 @@ NextStep:
         return false
     }
     
-    resetWindows(Title, SelectedMonitorIndex, silent := true) {
-        global Columns, runMain, Mains, scaleParam, debugMode, rowGap
-        RetryCount := 0
-        MaxRetries := 10
-        
-        ; Use the configurable rowGap with fallback default of 100
-        if (!rowGap)
-            rowGap := 100
-        
-        Loop
-        {
-            try {
-                ; Get monitor origin from index
-                SelectedMonitorIndex := RegExReplace(SelectedMonitorIndex, ":.*$")
-                SysGet, Monitor, Monitor, %SelectedMonitorIndex%
-                
-                if (runMain) {
-                    if (InStr(Title, "Main") = 1) {
-                        instanceIndex := StrReplace(Title, "Main", "")
-                        if (instanceIndex = "")
-                            instanceIndex := 1
-                    } else {
-                        instanceIndex := (Mains - 1) + Title + 1
-                    }
-                } else {
-                    instanceIndex := Title
-                }
-                scaleParam := 283
-                borderWidth := 4
-                rowHeight := (defaultLanguage = "Scale125") ? 538 : 529 ; Adjust the height of each row
-                currentRow := Floor((instanceIndex - 1) / Columns)
-                y := MonitorTop + currentRow * rowHeight + (currentRow * rowGap) ; Use the configurable gap
-                x := MonitorLeft + Mod((instanceIndex - 1), Columns) * (scaleParam - borderWidth * 2) - borderWidth
-                WinMove, %Title%, , %x%, %y%, %scaleParam%, 500
-                break
-            }
-            catch {
-                RetryCount++
-                if (RetryCount > MaxRetries) {
-                    if (!silent && debugMode)
-                        MsgBox, Failed to position window %Title% after %MaxRetries% attempts
-                    return false
-                }
-            }
-            Sleep, 1000
-        }
-        return true
-    }
-    
     ; ====== For picture button======
     BuildfirstImagePath()
     {
@@ -3643,11 +3594,12 @@ ArrangeWindows:
     IniRead, runMain, Settings.ini, UserSettings, runMain
     
     ; Re-validate scaleParam based on current language
-    
+    WinGetPos, winX, winY, winW, winH, 1
+    ControlGetPos, cx, cy, cw, ch, , 1
+    titleHeight := cy - winY
     windowsPositioned := 0
-    scaleParam := 283
     borderWidth := 4 - 1
-    rowHeight := (defaultLanguage = "Scale125") ? 538 : 529 ; Adjust the height of each row
+    rowHeight := titleHeight + 489 + 4 ; Adjust the height of each row
     if (runMain && Mains > 0) {
         Loop %Mains% {
             mainInstanceName := "Main" . (A_Index > 1 ? A_Index : "")
@@ -4410,7 +4362,7 @@ StartBot:
         packStatus .= " | Avg: " . Round(total / mminutes, 2) . " packs/min"
         
         ; Display pack status at the bottom of the first reroll instance
-        DisplayPackStatus(packStatus, ((runMain ? Mains * scaleParam : 0) + 5), 625)
+        DisplayPackStatus(packStatus, ((runMain ? Mains * (scaleParam-6) : 0) + 3), 625)
         
         ; FIXED HEARTBEAT CODE
         if(heartBeat) {
@@ -4519,7 +4471,7 @@ SendAllInstancesOfflineStatus() {
     global typeMsg, selectMsg, rerollTime, scaleParam, pphfsMsg, detectionMsg
     
     ; Display visual feedback that the hotkey was triggered
-    DisplayPackStatus("Shift+F7 pressed - Sending offline heartbeat to Discord...", ((runMain ? Mains * scaleParam : 0) + 5), 625)
+    DisplayPackStatus("Shift+F7 pressed - Sending offline heartbeat to Discord...", ((runMain ? Mains * (scaleParam-6) : 0) + 3), 625)
     
     ; Create message showing all instances as offline
     offlineInstances := ""
@@ -4562,7 +4514,7 @@ SendAllInstancesOfflineStatus() {
     LogToDiscord(discMessage,, false,,, heartBeatWebhookURL)
     
     ; Display confirmation in the status bar
-    DisplayPackStatus("Discord notification sent: All instances marked as OFFLINE", ((runMain ? Mains * scaleParam : 0) + 5), 625)
+    DisplayPackStatus("Discord notification sent: All instances marked as OFFLINE", ((runMain ? Mains * (scaleParam-6) : 0) + 3), 625)
 }
 
 ; Improved status display function

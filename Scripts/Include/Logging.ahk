@@ -17,7 +17,7 @@ ResetStatusMessage() {
     CreateStatusMessage(DEFAULT_STATUS_MESSAGE,,,, false, true)
 }
 
-CreateStatusMessage(Message, GuiName := "StatusMessage", X := 0, Y := 565, debugOnly := true, Persist := false) {
+CreateStatusMessage(Message, GuiName := "StatusMessage", X := 0, Y := 0, debugOnly := true, Persist := false) {
     static hwnds := {}
     static resetStatusFunc := Func("ResetStatusMessage")
 
@@ -35,11 +35,14 @@ CreateStatusMessage(Message, GuiName := "StatusMessage", X := 0, Y := 565, debug
     try {
         ; Check if GUI with this name already exists.
         GuiName := GuiName . scriptName
-		
+        toolbarHeight := 30
+		borderWidth := 4
         if !hwnds.HasKey(GuiName) {
             WinGetPos, xpos, ypos, Width, Height, %winTitle%
-            X := X + xpos + 5
-            Y := Y + ypos
+            X := xpos + borderWidth
+            Y := ypos + Height - borderWidth + 2 + toolbarHeight
+            if (Instr(GuiName, "AvgRuns") || Instr(GuiName, "AutoGPTest"))
+                Y := Y + 40
             if (!X)
                 X := 0
             if (!Y)

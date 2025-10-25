@@ -98,6 +98,10 @@ if(!WinExist(winTitle)) {
 
 if !FileExist(adbPath) ;if international mumu file path isn't found look for chinese domestic path
     adbPath := folderPath . "\MuMu Player 12\shell\adb.exe"
+if !FileExist(adbPath) ;MuMu Player 12 v5 supported
+    adbPath := folderPath . "\MuMuPlayerGlobal-12.0\nx_main\adb.exe"
+if !FileExist(adbPath) ;MuMu Player 12 v5 supported
+    adbPath := folderPath . "\MuMu Player 12\nx_main\adb.exe"
 
 if !FileExist(adbPath) {
     MsgBox, 16, , Double check your folder path! It should be the one that contains the MuMuPlayer 12 folder! `nDefault is just C:\Program Files\Netease
@@ -354,6 +358,8 @@ RunInstance:
     }
     if (instanceNum != "") {
         mumuExe := mumuFolder . "\shell\MuMuPlayer.exe"
+        if !FileExist(mumuExe)
+            mumuExe := mumuFolder . "\nx_main\MuMuNxMain.exe"
         if FileExist(mumuExe) {
             Run, "%mumuExe%" -v "%instanceNum%"
         } else {
