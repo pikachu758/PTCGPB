@@ -1670,22 +1670,22 @@ restartGameInstance(reason, RL := true) {
                 CreateStatusMessage("Stopping...",,,, false)
                 ExitApp
             }
-            adbShell.StdIn.WriteLine("am force-stop jp.pokemon.pokemontcgp")
-            waitadb()
+            ;adbShell.StdIn.WriteLine("am force-stop jp.pokemon.pokemontcgp")
+            ;waitadb()
             clearMissionCache()
             adbShell.StdIn.WriteLine("rm /data/data/jp.pokemon.pokemontcgp/shared_prefs/deviceAccount:.xml") ; delete account data
             waitadb()
-            adbShell.StdIn.WriteLine("am start -n jp.pokemon.pokemontcgp/com.unity3d.player.UnityPlayerActivity -f 0x10018000")
+            adbShell.StdIn.WriteLine("am start -S -n jp.pokemon.pokemontcgp/com.unity3d.player.UnityPlayerActivity -f 0x10018000")
             waitadb()
             Sleep, 3000
         }
         else {
             AppendToJsonFile(packsThisRun)
-            adbShell.StdIn.WriteLine("am force-stop jp.pokemon.pokemontcgp")
-            waitadb()
+            ;adbShell.StdIn.WriteLine("am force-stop jp.pokemon.pokemontcgp")
+            ;waitadb()
             clearMissionCache()
             waitadb()
-            adbShell.StdIn.WriteLine("am start -n jp.pokemon.pokemontcgp/com.unity3d.player.UnityPlayerActivity -f 0x10018000")
+            adbShell.StdIn.WriteLine("am start -S -n jp.pokemon.pokemontcgp/com.unity3d.player.UnityPlayerActivity -f 0x10018000")
             waitadb()
             sleep, 3000
             throw RESTART_LOOP_EXCEPTION
@@ -2462,8 +2462,8 @@ loadAccount() {
         return false
     }
 
-    adbShell.StdIn.WriteLine("am force-stop jp.pokemon.pokemontcgp")
-    waitadb()
+    ;adbShell.StdIn.WriteLine("am force-stop jp.pokemon.pokemontcgp")
+    ;waitadb()
     RunWait, % adbPath . " -s 127.0.0.1:" . adbPort . " push " . loadFile . " /sdcard/deviceAccount.xml",, Hide
     adbShell.StdIn.WriteLine("cp /sdcard/deviceAccount.xml /data/data/jp.pokemon.pokemontcgp/shared_prefs/deviceAccount:.xml")
     waitadb()
@@ -2472,7 +2472,7 @@ loadAccount() {
     adbShell.StdIn.WriteLine("rm /sdcard/deviceAccount.xml")
     waitadb()
     ; Reliably restart the app: Wait for launch, and start in a clean, new task without animation.
-    adbShell.StdIn.WriteLine("am start -n jp.pokemon.pokemontcgp/com.unity3d.player.UnityPlayerActivity -f 0x10018000")
+    adbShell.StdIn.WriteLine("am start -S -n jp.pokemon.pokemontcgp/com.unity3d.player.UnityPlayerActivity -f 0x10018000")
     waitadb()
     Sleep, 3000   ; Reduced from 1000
     ; Parse account filename for pack info (unchanged)
