@@ -394,6 +394,7 @@ FindImageAndClick(X1, Y1, X2, Y2, searchVariation := "", imageName := "DEFAULT",
 
 resetWindows(){
     global Columns, winTitle, SelectedMonitorIndex, scaleParam, titleHeight
+    IniRead, defaultLanguage, Settings.ini, UserSettings, defaultLanguage, Scale125
     ; CreateStatusMessage("Arranging window positions and sizes")
     RetryCount := 0
     MaxRetries := 10
@@ -408,9 +409,20 @@ resetWindows(){
             instanceIndex := StrReplace(Title, "Main", "")
             if (instanceIndex = "")
                 instanceIndex := 1
-            WinGetPos, winX, winY, winW, winH, %winTitle%
-            ControlGetPos, cx, cy, cw, ch, , %winTitle%
-            titleHeight := cy - winY
+            ; WinGetPos, winX, winY, winW, winH, %winTitle%
+            ; ControlGetPos, cx, cy, cw, ch, , %winTitle%
+            ; titleHeight := cy - winY
+            if (MuMuv5) {
+                if (defaultLanguage = "Scale125")
+                    titleHeight := 50
+                else if (defaultLanguage = "Scale100")
+                    titleHeight := 40
+            } else {
+                if (defaultLanguage = "Scale125")
+                    titleHeight := 45
+                else if (defaultLanguage = "Scale100")
+                    titleHeight := 36
+            }
             borderWidth := 4 - 1
             scaleParam := 275 + 4 * 2
             rowHeight :=  titleHeight + 489 + 4  ; Adjust the height of each row

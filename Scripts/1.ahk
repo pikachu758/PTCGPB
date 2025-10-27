@@ -1593,6 +1593,7 @@ LevelUp() {
 
 resetWindows() {
     global Columns, runMain, Mains, scaleParam, winTitle, SelectedMonitorIndex, rowGap, titleHeight
+    IniRead, defaultLanguage, Settings.ini, UserSettings, defaultLanguage, Scale125
     ; Make sure rowGap is defined
     if (!rowGap)
         rowGap := 100
@@ -1610,9 +1611,20 @@ resetWindows() {
         instanceIndex := Title
     }
 
-    WinGetPos, winX, winY, winW, winH, %winTitle%
-    ControlGetPos, cx, cy, cw, ch, , %winTitle%
-    titleHeight := cy - winY
+    ; WinGetPos, winX, winY, winW, winH, %winTitle%
+    ; ControlGetPos, cx, cy, cw, ch, , %winTitle%
+    ; titleHeight := cy - winY
+    if (MuMuv5) {
+        if (defaultLanguage = "Scale125")
+            titleHeight := 50
+        else if (defaultLanguage = "Scale100")
+            titleHeight := 40
+    } else {
+        if (defaultLanguage = "Scale125")
+            titleHeight := 45
+        else if (defaultLanguage = "Scale100")
+            titleHeight := 36
+    }
     borderWidth := 4 - 1
     scaleParam := 275 + 4 * 2
     rowHeight :=  titleHeight + 489 + 4  ; Adjust the height of each row

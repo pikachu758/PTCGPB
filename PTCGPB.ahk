@@ -3594,9 +3594,30 @@ ArrangeWindows:
     IniRead, runMain, Settings.ini, UserSettings, runMain
     
     ; Re-validate scaleParam based on current language
-    WinGetPos, winX, winY, winW, winH, 1
-    ControlGetPos, cx, cy, cw, ch, , 1
-    titleHeight := cy - winY
+    ;title := 1
+    ;if (WinExist("Main"))
+    ;    title := "Main"
+    ;WinGetPos, winX, winY, winW, winH, %title%
+    ;ControlGetPos, cx, cy, cw, ch, , %title%
+    ;titleHeight := cy - winY
+    mumuFolder = %folderPath%\MuMuPlayerGlobal-12.0
+    if !FileExist(mumuFolder)
+        mumuFolder = %folderPath%\MuMu Player 12
+    if !FileExist(mumuFolder){
+        MsgBox, 16, , Double check your folder path! It should be the one that contains the MuMuPlayer 12 folder! `nDefault is just C:\Program Files\Netease
+        ExitApp
+    }
+    if FileExist(mumuFolder . "\nx_main") {
+        if (defaultLanguage = "Scale125")
+            titleHeight := 50
+        else if (defaultLanguage = "Scale100")
+            titleHeight := 40
+    } else {
+        if (defaultLanguage = "Scale125")
+            titleHeight := 45
+        else if (defaultLanguage = "Scale100")
+            titleHeight := 36
+    }
     windowsPositioned := 0
     borderWidth := 4 - 1
     rowHeight := titleHeight + 489 + 4 ; Adjust the height of each row
@@ -3607,7 +3628,6 @@ ArrangeWindows:
             SetTitleMatchMode, 3 ; Exact match
             if (WinExist(mainInstanceName)) {
                 WinActivate, %mainInstanceName%
-                WinGetPos, curX, curY, curW, curH, %mainInstanceName%
                 
                 ; Calculate position
                 SelectedMonitorIndex := RegExReplace(SelectedMonitorIndex, ":.*$")
@@ -3636,7 +3656,6 @@ ArrangeWindows:
             
             if (WinExist(windowTitle)) {
                 WinActivate, %windowTitle%
-                WinGetPos, curX, curY, curW, curH, %windowTitle%
                 
                 ; Calculate position
                 SelectedMonitorIndex := RegExReplace(SelectedMonitorIndex, ":.*$")
