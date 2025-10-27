@@ -374,6 +374,8 @@ Loop {
 
                 ; If we reach here, we have a valid loaded account for injection
                 LogToFile("Successfully loaded account for injection: " . accountFileName)
+            } else {
+                restartGameInstance("New Run", false)
             }
 
             FindImageAndClick(38, 290, 65, 302, , "Platin", 18, 109, 2000) ; click mod settings
@@ -3497,6 +3499,7 @@ DoTutorial() {
     if(setSpeed > 1) {
         FindImageAndClick(38, 290, 65, 302, , "Platin", 18, 109, 2000) ; click mod settings
         FindImageAndClick(9, 303, 25, 323, , "One", 26, 313) ; click mod settings
+        adbClick_wbb(41, 366)
         Delay(2)
     }
     failSafe := A_TickCount
@@ -3506,6 +3509,7 @@ DoTutorial() {
         Sleep, 10
         if (FindOrLoseImage(225, 273, 235, 290, , "Pack", 1, failSafeTime)){
             if(setSpeed > 1) {
+                FindImageAndClick(38, 290, 65, 302, , "Platin", 18, 109, 2000) ; click mod settings
                 if(setSpeed = 3)
                     FindImageAndClick(182, 303, 194, 323, , "Three", 187, 313) ; click 3x
                 else
