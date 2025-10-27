@@ -1593,7 +1593,7 @@ LevelUp() {
 
 resetWindows() {
     global Columns, runMain, Mains, scaleParam, winTitle, SelectedMonitorIndex, rowGap, titleHeight
-    IniRead, defaultLanguage, Settings.ini, UserSettings, defaultLanguage, Scale125
+    IniRead, defaultLanguage, %A_ScriptDir%\..\Settings.ini, UserSettings, defaultLanguage, Scale125
     ; Make sure rowGap is defined
     if (!rowGap)
         rowGap := 100

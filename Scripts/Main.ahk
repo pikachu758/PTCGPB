@@ -394,7 +394,7 @@ FindImageAndClick(X1, Y1, X2, Y2, searchVariation := "", imageName := "DEFAULT",
 
 resetWindows(){
     global Columns, winTitle, SelectedMonitorIndex, scaleParam, titleHeight
-    IniRead, defaultLanguage, Settings.ini, UserSettings, defaultLanguage, Scale125
+    IniRead, defaultLanguage, %A_ScriptDir%\..\Settings.ini, UserSettings, defaultLanguage, Scale125
     ; CreateStatusMessage("Arranging window positions and sizes")
     RetryCount := 0
     MaxRetries := 10
