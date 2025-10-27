@@ -147,8 +147,11 @@ launchInstance(instanceNum := "")
     if(instanceNum != "") {
         mumuNum := getMumuInstanceNumFromPlayerName(instanceNum)
         if(mumuNum != "") {
+            mumuExe := mumuFolder . "\shell\MuMuPlayer.exe"
+            if !FileExist(mumuExe)
+            mumuExe := mumuFolder . "\nx_main\MuMuNxMain.exe"
             ; Run, %mumuFolder%\shell\MuMuPlayer.exe -v %mumuNum%
-            Run_(mumuFolder . "\shell\MuMuPlayer.exe", "-v " . mumuNum)
+            Run_(mumuExe, "-v " . mumuNum)
         }
     }
 }
