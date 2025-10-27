@@ -4934,13 +4934,15 @@ GetEventRewards(frommain := true){
 }
 
 GetAllRewards(tomain := true, dailies := false) {
-    FindImageAndClick(2, 85, 34, 120, , "Missions", 261, 478, 500)
+    ;FindImageAndClick(2, 85, 34, 120, , "Missions", 261, 478, 500)
+    FindImageAndClick(175, 490, 198, 515, , "Missions2", 261, 478, 500)
     FindImageAndClick(244, 406, 273, 449, , "GotAllMissions", 172, 427, 500)
     failSafe := A_TickCount
     failSafeTime := 0
     GotRewards := true
     if(dailies){
-        FindImageAndClick(37, 130, 64, 156, , "DailyMissions", 165, 465, 500)
+        if (FindOrLoseImage(37, 130, 64, 156, , "DailyMissions", 1)) ; not in daily page, beginner missions not completed
+            FindImageAndClick(37, 130, 64, 156, , "DailyMissions", 165, 465, 500)
     }
     Loop {
         Delay(1)
