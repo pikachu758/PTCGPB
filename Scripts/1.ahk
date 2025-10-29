@@ -4953,24 +4953,8 @@ GetAllRewards(tomain := true, dailies := false) {
         if (FindOrLoseImage(37, 130, 64, 156, , "DailyMissions", 1)) ; not in daily page, beginner missions not completed
             FindImageAndClick(37, 130, 64, 156, , "DailyMissions", 165, 465, 500)
     }
-    Loop {
-        Delay(1)
-        adbClick(172, 427)
-
-        if(dailies) {
-            FindImageAndClick(73, 151, 210, 173, , "CollectDailies", 250, 135, 500)
-        }
-
-        if(FindOrLoseImage(244, 406, 273, 449, , "GotAllMissions", 0, 0)) {
-            adbClick(172, 427)
-            break
-        }
-        else if (failSafeTime > 20) {
-            GotRewards := false
-            break
-        }
-        failSafeTime := (A_TickCount - failSafe) // 1000
-    }
+    FindImageAndClick(244, 406, 273, 449, , "GotAllMissions", 172, 427, 500)
+    FindImageAndClick(73, 151, 210, 173, , "CollectDailies", 250, 135, 500)
     if (tomain) {
         GoToMain()
     }
