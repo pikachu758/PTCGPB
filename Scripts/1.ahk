@@ -1350,15 +1350,6 @@ FindOrLoseImage(X1, Y1, X2, Y2, searchVariation := "", imageName := "DEFAULT", E
         adbClick_wbb(139, 386)
         Sleep, 1000
     }
-    Path = %imagePath%NoResponse.png ; Search for communication error
-    pNeedle := GetNeedle(Path)
-    ; ImageSearch within the region
-    vRet := Gdip_ImageSearch_wbb(pBitmap, pNeedle, vPosXY, 38, 281, 57, 308, searchVariation)
-    if (vRet = 1) {
-        CreateStatusMessage("No response in " . scriptName . ". Clicking retry...",,,, false)
-        adbClick_wbb(46, 299)
-        Sleep, 1000
-    }
     if(imageName = "Social" || imageName = "Add" || imageName = "Add2") {
         TradeTutorial()
     }
@@ -1487,6 +1478,24 @@ FindImageAndClick(X1, Y1, X2, Y2, searchVariation := "", imageName := "DEFAULT",
         if (vRet = 1) {
             CreateStatusMessage("Error message in " . scriptName . ". Clicking retry...",,,, false)
             adbClick_wbb(139, 386)
+            Sleep, 1000
+        }
+        Path = %imagePath%NoResponse.png
+        pNeedle := GetNeedle(Path)
+        ; ImageSearch within the region
+        vRet := Gdip_ImageSearch_wbb(pBitmap, pNeedle, vPosXY, 38, 281, 57, 308, searchVariation)
+        if (vRet = 1) {
+            CreateStatusMessage("No response in " . scriptName . ". Clicking retry...",,,, false)
+            adbClick_wbb(46, 299)
+            Sleep, 1000
+        }
+        Path = %imagePath%NoResponseDark.png
+        pNeedle := GetNeedle(Path)
+        ; ImageSearch within the region
+        vRet := Gdip_ImageSearch_wbb(pBitmap, pNeedle, vPosXY, 38, 281, 57, 308, searchVariation)
+        if (vRet = 1) {
+            CreateStatusMessage("No response in " . scriptName . ". Clicking retry...",,,, false)
+            adbClick_wbb(46, 299)
             Sleep, 1000
         }
         if(imageName = "Social" || imageName = "Country" || imageName = "Account2" || imageName = "Account") { ;only look for deleted account on start up.
