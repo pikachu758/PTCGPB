@@ -1556,7 +1556,7 @@ FindImageAndClick(X1, Y1, X2, Y2, searchVariation := "", imageName := "DEFAULT",
         if(imageName = "WonderPick") {
             Path = %imagePath%Update.png
             pNeedle := GetNeedle(Path)
-            vRet := Gdip_ImageSearch_wbb(pBitmap, pNeedle, vPosXY, 20, 182, 36, 211, searchVariation)
+            vRet := Gdip_ImageSearch_wbb(pBitmap, pNeedle, vPosXY, 20, 191, 36, 211, searchVariation)
             if (vRet = 1) {
                 CreateStatusMessage("Update popup found! Clicking to dismiss...")
                 adbClick_wbb(137, 485)
