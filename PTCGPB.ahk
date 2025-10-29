@@ -14,11 +14,11 @@ global STATIC_BRUSH := 0
 
 githubUser := "pikachu758"
 repoName := "PTCGPB"
-localVersion := "v6.8.12"
+localVersion := "v7.0.0"
 scriptFolder := A_ScriptDir
 zipPath := A_Temp . "\update.zip"
 extractPath := A_Temp . "\update"
-intro := "Two-star Trading is coming soon"
+intro := "MEGA RISING"
 
 ; GUI dimensions
 global GUI_WIDTH := 377 
