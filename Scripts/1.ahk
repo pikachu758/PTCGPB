@@ -1375,6 +1375,15 @@ FindOrLoseImage(X1, Y1, X2, Y2, searchVariation := "", imageName := "DEFAULT", E
     if(imageName = "Points" || imageName = "Home") { ;look for level up ok "button"
         LevelUp()
     }
+    if (imageName = "Social") {
+        Path = %imagePath%Tutorial.png
+        pNeedle := GetNeedle(Path)
+        vRet := Gdip_ImageSearch_wbb(pBitmap, pNeedle, vPosXY, 111, 115, 167, 121, searchVariation)
+        if (vRet = 1) {
+            adbClick_wbb(145, 451)
+        }
+    
+    }
     ;country for new accounts, social for inject with friend id, points for inject without friend id
     if(imageName = "Country" || imageName = "Social" || imageName = "Points")
         FSTime := 90
@@ -1561,6 +1570,15 @@ FindImageAndClick(X1, Y1, X2, Y2, searchVariation := "", imageName := "DEFAULT",
                 CreateStatusMessage("Update popup found! Clicking to dismiss...")
                 adbClick_wbb(137, 485)
                 Sleep, 1000
+            }
+        }
+
+        if(imageName = "CommunityShowcase" || imageName = "Add" || imageName = "Search") {
+            Path = %imagePath%Tutorial.png
+            pNeedle := GetNeedle(Path)
+            vRet := Gdip_ImageSearch_wbb(pBitmap, pNeedle, vPosXY, 111, 115, 167, 121, searchVariation)
+            if (vRet = 1) {
+                adbClick_wbb(145, 451)
             }
         }
 
