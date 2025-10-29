@@ -1263,7 +1263,7 @@ AddFriends(renew := false, getFC := false) {
 
 showcaseLikes() {
     ; Liking showcase script
-    FindImageAndClick(174, 464, 189, 479, , "CommunityShowcase", 75, 410, 200)
+    FindImageAndClick(174, 464, 189, 479, , "CommunityShowcase", 139, 335, 200)
     Loop, Read, %A_ScriptDir%\..\showcase_ids.txt
     {
         showcaseID := Trim(A_LoopReadLine)
