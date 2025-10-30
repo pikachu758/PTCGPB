@@ -1106,6 +1106,8 @@ RemoveFriends() {
 }
 
 TradeTutorial() {
+    if (deleteMethod = "Inject for Reroll")
+        return
     if(FindOrLoseImage(100, 120, 175, 145, , "Trade", 0)) {
         Loop{
             adbClick_wbb(167,437)
