@@ -3967,8 +3967,9 @@ SelectPack(HG := false) {
         }
         if(cantOpenMorePacks)
             return
-        Delay(1)
         adbClick_wbb(200, 451) ;for hourglass???
+        Delay(1)
+        adbClick_wbb(135, 280)
         failSafeTime := (A_TickCount - failSafe) // 1000
         CreateStatusMessage("Waiting for Skip2`n(" . failSafeTime . "/45 seconds)")
     }
