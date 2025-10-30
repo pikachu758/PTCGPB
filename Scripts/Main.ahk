@@ -193,7 +193,7 @@ Loop {
                 adbClick(228, 464)
             } else if(FindOrLoseImage(120, 500, 155, 530, , "Social", 0, failSafeTime)) {
                 adbClick(38, 460)
-            } else if(FindOrLoseImage(133, 516, 150, 526, , "notInSocial", 0, failSafeTime)) {
+            } else if(FindOrLoseImage(131, 514, 152, 528, 60, "notInSocial", 0, failSafeTime)) {
                 adbClick(140, 517)
             } else if(FindOrLoseImage(75, 340, 195, 530, 60, "Button1", 0, failSafeTime)) {
                 Sleep, 1000
