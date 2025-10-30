@@ -86,6 +86,9 @@
         Lang["Txt_claimSpecialMissions"] := "Claim Special Missions"
         Lang["SortByText"] := "Sort By:"
 
+        Lang["Txt_MegaBlaziken"] := "MegaBlaziken"
+        Lang["Txt_MegaGyarados"] := "MegaGyarados"
+        Lang["Txt_MegaAltaria"] := "MegaAltaria"
         Lang["Txt_Deluxe"] := "Deluxe Pack"
         Lang["Txt_Suicune"] := "Suicune"
         Lang["Txt_HoOh"] := "Ho-Oh"
@@ -215,6 +218,9 @@
         Lang["Txt_claimSpecialMissions"] := "領取特殊任務"
         Lang["SortByText"] := "注入排序："
 
+        Lang["Txt_MegaBlaziken"] := "超級火焰雞"
+        Lang["Txt_MegaGyarados"] := "超級暴鯉龍"
+        Lang["Txt_MegaAltaria"] := "超級七夕青鳥"
         Lang["Txt_Deluxe"] := "高級擴充包"
         Lang["Txt_Suicune"] := "水君"
         Lang["Txt_HoOh"] := "鳳王"
@@ -344,6 +350,9 @@
         Lang["Txt_claimSpecialMissions"] := "イベント"
         Lang["SortByText"] := "注入序列："
 
+        Lang["Txt_MegaBlaziken"] := "メガバシャーモ"
+        Lang["Txt_MegaGyarados"] := "メガギャラドス"
+        Lang["Txt_MegaAltaria"] := "メガチルタリス"
         Lang["Txt_Deluxe"] := "ハイクラスパック"
         Lang["Txt_Suicune"] := "スイクン"
         Lang["Txt_HoOh"] := "ホウオウ"
@@ -476,6 +485,9 @@
         Lang["Txt_claimSpecialMissions"] := "Spezialmissionen"
         Lang["SortByText"] := "Sortieren nach:"
 
+        Lang["Txt_MegaBlaziken"] := "MegaLohgock"
+        Lang["Txt_MegaGyarados"] := "MegaGarados"
+        Lang["Txt_MegaAltaria"] := "MegaAltaria"
         Lang["Txt_Deluxe"] := "Deluxe Pack"
         Lang["Txt_Suicune"] := "Suicune"
         Lang["Txt_Ho-Oh"] := "Ho-Oh"

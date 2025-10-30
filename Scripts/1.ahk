@@ -22,7 +22,7 @@ WinHide % "ahk_id " DllCall("GetConsoleWindow", "ptr")
 global RESTART_LOOP_EXCEPTION := { message: "Restarting main loop" }
 global winTitle, changeDate, failSafe, openPack, Delay, failSafeTime, StartSkipTime, Columns, failSafe, scriptName, GPTest, StatusText, setSpeed, jsonFileName, pauseToggle, SelectedMonitorIndex, swipeSpeed, godPack, scaleParam, deleteMethod, packs, FriendID, friendIDs, Instances, username, friendCode, stopToggle, friended, runMain, Mains, showStatus, injectMethod, packMethod, loadDir, loadedAccount, nukeAccount, CheckShinyPackOnly, TrainerCheck, FullArtCheck, RainbowCheck, ShinyCheck, dateChange, foundGP, friendsAdded, PseudoGodPack, packArray, CrownCheck, ImmersiveCheck, InvalidCheck, slowMotion, screenShot, accountFile, invalid, starCount, keepAccount
 global twoPlusOne, twoPlusDia
-global Mewtwo, Charizard, Pikachu, Mew, Dialga, Palkia, Arceus, Shining, Solgaleo, Lunala, Buzzwole, Eevee, HoOh, Lugia, Suicune, Deluxe
+global Mewtwo, Charizard, Pikachu, Mew, Dialga, Palkia, Arceus, Shining, Solgaleo, Lunala, Buzzwole, Eevee, HoOh, Lugia, Suicune, Deluxe, MegaBlaziken, MegaGyarados, MegaAltaria
 global shinyPacks, minStars, minStarsShiny
 global DeadCheck
 global s4tEnabled, s4tSilent, s4t3Dmnd, s4t4Dmnd, s4t1Star, s4tGholdengo, s4tFoil, s4tTrainer, s4tRainbow, s4tFullArt, s4tShiny, s4tDiscordWebhookURL, s4tDiscordUserId, s4tSendAccountXml
@@ -107,7 +107,10 @@ IniRead, minStarsShiny, %A_ScriptDir%\..\Settings.ini, UserSettings, minStarsShi
 IniRead, twoPlusOne, %A_ScriptDir%\..\Settings.ini, UserSettings, twoPlusOne, 0
 IniRead, twoPlusDia, %A_ScriptDir%\..\Settings.ini, UserSettings, twoPlusDia, 0
 
-IniRead, Deluxe, %A_ScriptDir%\..\Settings.ini, UserSettings, Deluxe, 1
+IniRead, MegaBlaziken, %A_ScriptDir%\..\Settings.ini, UserSettings, MegaBlaziken, 1
+IniRead, MegaGyarados, %A_ScriptDir%\..\Settings.ini, UserSettings, MegaGyarados, 1
+IniRead, MegaAltaria, %A_ScriptDir%\..\Settings.ini, UserSettings, MegaAltaria, 1
+IniRead, Deluxe, %A_ScriptDir%\..\Settings.ini, UserSettings, Deluxe, 0
 IniRead, Suicune, %A_ScriptDir%\..\Settings.ini, UserSettings, Suicune, 0
 IniRead, HoOh, %A_ScriptDir%\..\Settings.ini, UserSettings, HoOh, 0
 IniRead, Lugia, %A_ScriptDir%\..\Settings.ini, UserSettings, Lugia, 0
@@ -162,8 +165,8 @@ IniRead, DelayOfExtraPack, %A_ScriptDir%\..\Settings.ini, UserSettings, DelayOfE
 IniRead, tesseractPath, %A_ScriptDir%\..\Settings.ini, UserSettings, tesseractPath, C:\Program Files\Tesseract-OCR\tesseract.exe
 
 MuMuv5 := isMuMuv5()
-pokemonList := ["Mewtwo", "Charizard", "Pikachu", "Mew", "Dialga", "Palkia", "Arceus", "Shining", "Solgaleo", "Lunala", "Buzzwole", "Eevee", "HoOh", "Lugia", "Suicune", "Deluxe"]
-shinyPacks := {"Shining": 1, "Solgaleo": 1, "Lunala": 1, "Buzzwole": 1, "Eevee": 1, "HoOh": 1, "Lugia": 1, "Suicune": 1, "Deluxe": 1}
+pokemonList := ["Mewtwo", "Charizard", "Pikachu", "Mew", "Dialga", "Palkia", "Arceus", "Shining", "Solgaleo", "Lunala", "Buzzwole", "Eevee", "HoOh", "Lugia", "Suicune", "Deluxe", "MegaBlaziken", "MegaGyarados", "MegaAltaria"]
+shinyPacks := {"Shining": 1, "Solgaleo": 1, "Lunala": 1, "Buzzwole": 1, "Eevee": 1, "HoOh": 1, "Lugia": 1, "Suicune": 1, "Deluxe": 1, "MegaBlaziken": 1, "MegaGyarados": 1, "MegaAltaria": 1}
 
 packArray := []  ; Initialize an empty array
 
@@ -3526,8 +3529,8 @@ DoTutorial() {
     if(setSpeed > 1) {
         FindImageAndClick(38, 290, 65, 302, , "Platin", 18, 109, 2000) ; click mod settings
         FindImageAndClick(9, 303, 25, 323, , "One", 26, 313) ; click mod settings
-        adbClick_wbb(41, 366)
-        Delay(2)
+        ;adbClick_wbb(41, 366)
+        ;Delay(2)
     }
     failSafe := A_TickCount
     failSafeTime := 0
@@ -3536,7 +3539,7 @@ DoTutorial() {
         Sleep, 10
         if (FindOrLoseImage(225, 273, 235, 290, , "Pack", 1, failSafeTime)){
             if(setSpeed > 1) {
-                FindImageAndClick(38, 290, 65, 302, , "Platin", 18, 109, 2000) ; click mod settings
+                ;FindImageAndClick(38, 290, 65, 302, , "Platin", 18, 109, 2000) ; click mod settings
                 if(setSpeed = 3)
                     FindImageAndClick(182, 303, 194, 323, , "Three", 187, 313) ; click 3x
                 else
@@ -3623,8 +3626,8 @@ DoTutorial() {
     if(setSpeed > 1) {
         FindImageAndClick(38, 290, 65, 302, , "Platin", 18, 109, 2000) ; click mod settings
         FindImageAndClick(9, 303, 25, 323, , "One", 26, 313) ; click mod settings
-        adbClick_wbb(41, 366)
-        Delay(2)
+        ;adbClick_wbb(41, 366)
+        ;Delay(2)
     }
     failSafe := A_TickCount
     failSafeTime := 0
@@ -3633,7 +3636,7 @@ DoTutorial() {
         Sleep, 10
         if (FindOrLoseImage(225, 273, 235, 290, , "Pack", 1, failSafeTime)){
             if(setSpeed > 1) {
-                FindImageAndClick(38, 290, 65, 302, , "Platin", 18, 109, 2000) ; click mod settings
+                ;FindImageAndClick(38, 290, 65, 302, , "Platin", 18, 109, 2000) ; click mod settings
                 if(setSpeed = 3)
                     FindImageAndClick(182, 303, 194, 323, , "Three", 187, 313) ; click mod settings
                 else
@@ -3738,11 +3741,11 @@ SelectPack(HG := false) {
 
     PackScreenAllPackY := 320
 
-    SelectExpansionTopRowY := 170
+    SelectExpansionTopRowY := 121
     SelectExpansionFirstRowY := 275
-    SelectExpansionSecondRowY := 410
+    SelectExpansionSecondRowY := 431
 
-    SelectExpansionRightCollumnMiddleX := 210
+    SelectExpansionRightCollumnMiddleX := 203
     SelectExpansionLeftCollumnMiddleX := 73
     3PackExpansionLeft := -40
     3PackExpansionRight := 40
@@ -3752,25 +3755,26 @@ SelectPack(HG := false) {
     inselectexpansionscreen := 0
 
     packy := HomeScreenAllPackY
-    if (openPack == "HoOh") {
+    if (openPack == "MegaGyarados") {
         packx := LeftPackX
-    } else if (openPack == "Suicune") {
+    } else if (openPack == "MegaAltaria") {
         packx := RightPackX
     } else {
         packx := MiddlePackX
     }
 
-    if(openPack == "Suicune" || openPack == "HoOh" || openPack == "Deluxe") {
+    if(openPack == "MegaBlaziken" || openPack == "MegaGyarados" || openPack == "MegaAltaria") {
         PackIsInHomeScreen := 1
     } else {
         PackIsInHomeScreen := 0
     }
 
-    if(openPack == "Deluxe") {
+    if(openPack == "MegaBlaziken") {
         PackIsLatest := 1
     } else {
         PackIsLatest := 0
     }
+
 
     if(HG = "First" && injectMethod && loadedAccount ){
         ; when First and injection, if there are free packs, we don't land/start in home screen,
@@ -3846,70 +3850,65 @@ SelectPack(HG := false) {
     }
 
     if(inselectexpansionscreen) {
-        if (openPack == "Deluxe" || openPack == "Suicune" || openPack == "HoOh" || openPack == "Lugia" || openPack == "Eevee") {
+        adbClick(61, 472)
+        Delay(1)
+        if (openPack == "Suicune" || openPack == "HoOh" || openPack == "Lugia" || openPack == "Eevee" || openPack = "Buzzwole") {
             ; No swipe, top row
-            if (openPack == "Deluxe") {
+            if (openPack == "Suicune") {
                 packy := SelectExpansionFirstRowY
                 packx := SelectExpansionLeftCollumnMiddleX
-            } else if (openPack == "Suicune") {
-                packy := SelectExpansionFirstRowY
-                packx := SelectExpansionRightCollumnMiddleX
             } else if (openPack == "HoOh") {
-                packy := SelectExpansionSecondRowY
-                packx := SelectExpansionLeftCollumnMiddleX + 2PackExpansionLeft
+                packy := SelectExpansionFirstRowY
+                packx := SelectExpansionRightCollumnMiddleX + 2PackExpansionLeft
             } else if (openPack == "Lugia") {
-                packy := SelectExpansionSecondRowY
-                packx := SelectExpansionLeftCollumnMiddleX + 2PackExpansionRight
+                packy := SelectExpansionFirstRowY
+                packx := SelectExpansionRightCollumnMiddleX + 2PackExpansionRight
             } else if (openPack == "Eevee") {
                 packy := SelectExpansionSecondRowY
-                packx := SelectExpansionRightCollumnMiddleX
-            }
-        } else if (openPack = "Buzzwole" || openPack = "Solgaleo" || openPack = "Lunala") {
-            ; One swipe
-            adbSwipe("266 770 266 50 500")
-            ;Sleep, 250
-
-            packy := 433
-
-            if (openPack = "Buzzwole") {
                 packx := SelectExpansionLeftCollumnMiddleX
-            } else if (openPack = "Solgaleo") {
-                packx := SelectExpansionRightCollumnMiddleX + 2PackExpansionLeft
-            } else if (openPack = "Lunala") {
-                packx := SelectExpansionRightCollumnMiddleX + 2PackExpansionRight
-            }
+            } else if (openPack = "Buzzwole") {
+                packy := SelectExpansionSecondRowY
+                packx := SelectExpansionRightCollumnMiddleX
+            } 
         } else {
             ; Two swipes
             adbSwipe("266 770 266 50 500")
             ;Sleep, 250
             adbSwipe("266 785 266 -50 500")
+            adbSwipe("266 785 266 -50 500")
+            adbSwipe("266 785 266 -50 500")
             Sleep, 250
 
-            if (openPack = "Shining") {
+            if (openPack = "Solgaleo") {
                 packy := SelectExpansionTopRowY
-                packx := SelectExpansionLeftCollumnMiddleX
-            }
-            else if (openPack = "Arceus") {
+                packx := SelectExpansionLeftCollumnMiddleX + 2PackExpansionLeft
+            } else if (openPack = "Lunala") {
+                packy := SelectExpansionTopRowY
+                packx := SelectExpansionLeftCollumnMiddleX + 2PackExpansionRight
+            } else if (openPack = "Shining") {
                 packy := SelectExpansionTopRowY
                 packx := SelectExpansionRightCollumnMiddleX
+            } else if (openPack = "Arceus") {
+                packy := SelectExpansionFirstRowY
+                packx := SelectExpansionLeftCollumnMiddleX
             } else if (openPack = "Dialga") {
                 packy := SelectExpansionFirstRowY
-                packx := SelectExpansionLeftCollumnMiddleX + 2PackExpansionLeft
+                packx := SelectExpansionRightCollumnMiddleX + 2PackExpansionLeft
             } else if (openPack = "Palkia") {
                 packy := SelectExpansionFirstRowY
-                packx := SelectExpansionLeftCollumnMiddleX + 2PackExpansionRight
+                packx := SelectExpansionRightCollumnMiddleX + 2PackExpansionRight
             } else if (openPack = "Mew") {
-                packy := SelectExpansionFirstRowY
-                packx := SelectExpansionRightCollumnMiddleX
-            } else if (openPack = "Charizard") {
-                packy := SelectExpansionSecondRowY
-                packx := SelectExpansionLeftCollumnMiddleX + 3PackExpansionLeft
-            } else if (openPack = "Mewtwo") {
                 packy := SelectExpansionSecondRowY
                 packx := SelectExpansionLeftCollumnMiddleX
-            } else if (openPack = "Pikachu") {
+            } else if (openPack = "Charizard") {
                 packy := SelectExpansionSecondRowY
-                packx := SelectExpansionLeftCollumnMiddleX + 3PackExpansionRight
+                packx := SelectExpansionRightCollumnMiddleX + 3PackExpansionLeft
+            } else if (openPack = "Mewtwo") {
+                packy := SelectExpansionSecondRowY
+                packx := SelectExpansionRightCollumnMiddleX
+            } else if (openPack = "Pikachu") {
+                packy := 378
+                packx := SelectExpansionRightCollumnMiddleX + 3PackExpansionRight
             }
         }
 
@@ -4000,8 +3999,8 @@ PackOpening() {
     if(setSpeed > 1) {
         FindImageAndClick(38, 290, 65, 302, , "Platin", 18, 109, 2000) ; click mod settings
         FindImageAndClick(9, 303, 25, 323, , "One", 26, 313) ; click mod settings
-        adbClick_wbb(41, 366)
-        Delay(2)
+        ;adbClick_wbb(41, 366)
+        ;Delay(2)
     }
     failSafe := A_TickCount
     failSafeTime := 0
@@ -4009,7 +4008,7 @@ PackOpening() {
         adbSwipe_wbb(adbSwipeParams)
         Sleep, 10
         if (FindOrLoseImage(225, 273, 235, 290, , "Pack", 1, failSafeTime)){
-            FindImageAndClick(38, 290, 65, 302, , "Platin", 18, 109, 2000) ; click mod settings
+            ;FindImageAndClick(38, 290, 65, 302, , "Platin", 18, 109, 2000) ; click mod settings
             if(setSpeed > 1) {
                 if(setSpeed = 3)
                     FindImageAndClick(182, 303, 194, 323, , "Three", 187, 313) ; click mod settings
@@ -4155,8 +4154,8 @@ HourglassOpening(HG := false, NEIRestart := true) {
     if(setSpeed > 1) {
         FindImageAndClick(38, 290, 65, 302, , "Platin", 18, 109, 2000) ; click mod settings
         FindImageAndClick(9, 303, 25, 323, , "One", 26, 313) ; click mod settings
-        adbClick_wbb(41, 366)
-        Delay(2)
+        ;adbClick_wbb(41, 366)
+        ;Delay(2)
     }
     failSafe := A_TickCount
     failSafeTime := 0
@@ -4165,7 +4164,7 @@ HourglassOpening(HG := false, NEIRestart := true) {
         Sleep, 10
         if (FindOrLoseImage(225, 273, 235, 290, , "Pack", 1, failSafeTime)){
             if(setSpeed > 1) {
-                FindImageAndClick(38, 290, 65, 302, , "Platin", 18, 109, 2000) ; click mod settings
+                ;FindImageAndClick(38, 290, 65, 302, , "Platin", 18, 109, 2000) ; click mod settings
                 if(setSpeed = 3)
                     FindImageAndClick(182, 303, 194, 323, , "Three", 187, 313) ; click mod settings
                 else
@@ -4971,8 +4970,7 @@ GetAllRewards(tomain := true, dailies := false) {
         if (FindOrLoseImage(37, 130, 64, 156, , "DailyMissions", 1)) ; not in daily page, beginner missions not completed
             FindImageAndClick(37, 130, 64, 156, , "DailyMissions", 165, 465, 500)
     }
-    FindImageAndClick(244, 406, 273, 449, , "GotAllMissions", 172, 427, 500)
-    FindImageAndClick(73, 151, 210, 173, , "CollectDailies", 250, 135, 500)
+    FindImageAndClick(73, 151, 210, 173, , "CollectDailies", 172, 427, 500)
     if (tomain) {
         GoToMain()
     }
