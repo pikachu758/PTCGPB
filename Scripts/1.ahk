@@ -1578,7 +1578,7 @@ FindImageAndClick(X1, Y1, X2, Y2, searchVariation := "", imageName := "DEFAULT",
             }
         }
 
-        if(imageName = "CommunityShowcase" || imageName = "Add" || imageName = "Search") {
+        if(imageName = "CommunityShowcase" || imageName = "Add" || imageName = "Search" || imageName = "request") {
             Path = %imagePath%Tutorial.png
             pNeedle := GetNeedle(Path)
             vRet := Gdip_ImageSearch_wbb(pBitmap, pNeedle, vPosXY, 111, 115, 167, 121, searchVariation)
