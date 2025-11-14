@@ -883,7 +883,7 @@ Loop {
 			
 			; Bonus Week
             IniRead, claimBonusWeek, %A_ScriptDir%\..\Settings.ini, UserSettings, claimBonusWeek, 0
-            if (A_NowUTC > 20251019060000)
+            if (A_NowUTC > 20251116060000)
                 claimBonusWeek := 0
             if (claimBonusWeek = 1) {
 				if (!openExtraPack) {
@@ -5070,7 +5070,9 @@ GetEventRewards(frommain := true){
         CreateStatusMessage("Waiting for Trace`n(" . failSafeTime . "/45 seconds)")
         Delay(1)
     }
-    adbClick_wbb(130, 465)
+    adbClick_wbb(10, 465)
+	sleep, 1000
+    adbClick_wbb(10, 465)
 	sleep, 1000
     failSafe := A_TickCount
     failSafeTime := 0
